@@ -16,7 +16,7 @@ def datasource_name():
 def init(**kwargs):
     global source_data_path
 
-    source_data_path = path.join(sources_data_path, datasource_name())
+    source_data_path = path.join(SOURCES_DATA_PATH, datasource_name())
 
 
 #def get_tick_file_name(symbol, date):

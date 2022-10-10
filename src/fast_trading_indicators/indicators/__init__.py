@@ -1,48 +1,27 @@
-import os.path
-import numpy as np
-import datetime as dt
 import importlib
-from abc import ABC, abstractmethod
 from common import *
 
-import datasources
-from datasources import TimeframeData
-
-
-class IndicatorException(Exception):
-
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
-
-    def __str__(self):
-        if self.message:
-            return f'{self.__class__.__name__}: {self.message}'
-        else:
-            return self.__class__.__name__
+from src.fast_trading_indicators import datasources
 
 
 class IndicatorProxy:
 
-    def __init__(self, indicator_name, indicators, *args, **kwargs):
+    def __init__(self, indicator_name, indicators):
         self.indicator_name = indicator_name
         self.indicator_module = importlib.import_module(f'indicators.{indicator_name}')
         self.indicators = indicators
 
-    def __call__(self, *args, __full_data__=False, **kwargs):
+    def __call__(self, *args, inp_date_begin=None, inp_date_end=None, **kwargs):
+
+        date_begin, date_end = self.indicators.set_date_interval(inp_date_begin, inp_date_end)
 
         out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
 
         if out is None:
-            out = self.indicator_module.make_out(self.indicators, *args, **kwargs)
+            out = self.indicator_module.get_indicator_out(self.indicators, *args, **kwargs)
             self.indicators.put_out_to_cache(self.indicator_name, args, kwargs, out)
 
-        if __full_data__:
-            return out
-
-        return out[:, : self.indicators.i_point]
+        return out[date_begin : date_end]
 
     def __del__(self):
         self.indicator_module = None
@@ -51,19 +30,39 @@ class IndicatorProxy:
 
 class Indicators:
 
-    def __init__(self, datasource_name, **kwargs):
+    def __init__(self, datasource_name, date_begin=None, date_end=None, **kwargs):
 
         datasource = importlib.import_module(datasource_name)
         datasource.init()
         self.timeframe_data_cash = datasources.TimeframeData(datasource, **kwargs)
 
+        self.date_begin = None
+        self.date_end = None
+
         self.indicators = {}
         self.reset()
 
-    def __getattr__(self, item):
-        return self.get(item)
+        self.set_date_interval(date_begin, date_end)
 
-    def get(self, indicator_name):
+    def set_date_interval(self, inp_date_begin, inp_date_end):
+
+        date_begin = date_from_arg(inp_date_begin)
+        date_end = date_from_arg(inp_date_end)
+
+        if date_begin is not None:
+            if self.date_begin is None or date_begin < self.date_begin:
+                self.date_begin = date_begin
+
+        if date_end is not None:
+            if self.date_end is None or date_end > self.date_end:
+                self.date_end = date_end
+
+        return date_begin, date_end
+
+    def __getattr__(self, item):
+        return self.get_indicator(item)
+
+    def get_indicator(self, indicator_name):
 
         indicator_proxy = self.indicators.get(indicator_name)
         if indicator_proxy is None:
