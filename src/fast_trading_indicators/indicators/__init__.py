@@ -1,14 +1,13 @@
 import importlib
-from common import *
-
-from src.fast_trading_indicators import datasources
+from ..common import *
+from .. import datasources
 
 
 class IndicatorProxy:
 
     def __init__(self, indicator_name, indicators):
         self.indicator_name = indicator_name
-        self.indicator_module = importlib.import_module(f'indicators.{indicator_name}')
+        self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
         self.indicators = indicators
 
     def __call__(self, *args, inp_date_begin=None, inp_date_end=None, **kwargs):
@@ -30,16 +29,24 @@ class IndicatorProxy:
 
 class Indicators:
 
-    def __init__(self, datasource_name, date_begin=None, date_end=None, **kwargs):
+    def __init__(self, datasource, date_begin=None, date_end=None, common_data_path=None):
 
-        datasource = importlib.import_module(datasource_name)
-        datasource.init()
-        self.timeframe_data_cash = datasources.TimeframeData(datasource, **kwargs)
+        self.indicators = {}
+
+        datasource_type = type(datasource)
+        if datasource_type == str:
+            datasource_module = importlib.import_module(f'..datasources.{datasource}', __package__)
+        elif datasource_type.__name__ == 'module':
+            datasource_module = datasource
+        else:
+            raise TypeError('Bad type of datasource')
+
+        datasource_module.init(common_data_path)
+        self.timeframe_data_cash = datasources.TimeframeData(datasource_module, common_data_path=common_data_path)
 
         self.date_begin = None
         self.date_end = None
 
-        self.indicators = {}
         self.reset()
 
         self.set_date_interval(date_begin, date_end)

@@ -1,18 +1,23 @@
+import datetime
 import os.path as path
 import numpy as np
-from common import *
+from ..common import *
 
 
 class TimeframeData:
 
-    def __init__(self, datasource_module, **kwargs):
+    def __init__(self, datasource_module, common_data_path=None):
 
-        cash_folder = kwargs.get('timeframe_data_path')
-        if cash_folder is None:
-            self.cash_folder = path.join(TIMEFRAME_DATA_PATH, datasource_module.datasource_name())
+        self.cash_folder = path.join(DEFAULT_DATA_PATH if common_data_path is None else common_data_path,
+                                                                'timeframe_data', datasource_module.datasource_name())
 
-        datasource_module.init()
+        datasource_module.init(common_data_path)
         self.datasource_module = datasource_module
+
+    def filename_day_data(self, symbol, timeframe, day_date):
+        symbol_parts = symbol.split('/')
+        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date.date()}.ftid'
+        return path.join(self.cash_folder, *symbol_parts[:-1], filename)
 
     def get_timeframe_day_data(self, symbol, timeframe, day_date):
 
@@ -27,6 +32,12 @@ class TimeframeData:
         return day_data
 
     def check_day_data(self, day_data, symbol, timeframe, day_date):
+        pass
+
+    def save_to_cash(self, filename, day_data):
+        pass
+
+    def load_from_cash(self, filename):
         pass
 
     def get_timeframe_data(self, symbol, timeframe, date_begin, date_end):

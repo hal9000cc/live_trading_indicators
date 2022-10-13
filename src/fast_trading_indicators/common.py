@@ -1,13 +1,12 @@
 import datetime
 import os.path as path
+from pathlib import Path
 from enum import IntEnum
 
 __all__ = [
 
     'PRICE_TYPE',
-    'MAIN_DATA_PATH',
-    'TIMEFRAME_DATA_PATH',
-    'SOURCES_DATA_PATH',
+    'DEFAULT_DATA_PATH',
 
     'Timeframe',
     'FTIException',
@@ -18,9 +17,9 @@ __all__ = [
 ]
 
 PRICE_TYPE = float
-MAIN_DATA_PATH = path.join('~', '.fti')
-TIMEFRAME_DATA_PATH = path.join(MAIN_DATA_PATH, 'timeframe_data')
-SOURCES_DATA_PATH = path.join(MAIN_DATA_PATH, 'source_data')
+DEFAULT_DATA_PATH = path.join(Path.home(), '.fti')
+# TIMEFRAME_DATA_PATH = path.join(MAIN_DATA_PATH, 'timeframe_data')
+# SOURCES_DATA_PATH = path.join(MAIN_DATA_PATH, 'source_data')
 
 
 class Timeframe(IntEnum):
@@ -40,14 +39,13 @@ class Timeframe(IntEnum):
     t4d = 60 * 60 * 24 * 4
     t1w = 60 * 60 * 24 * 7
 
+    def __str__(self):
+        return self.name[1:]
 
 class FTIException(Exception):
 
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
+    def __init__(self, message=None):
+        self.message = message
 
     def __str__(self):
         if self.message:

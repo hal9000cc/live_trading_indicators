@@ -1,8 +1,2 @@
-from common import *
-from indicators import Indicators
-
-
-if __name__ == '__main__':
-
-    import tests_old
-    tests_basic.run()
+from .common import Timeframe, FTIException, IndicatorData, DEFAULT_DATA_PATH
+from .indicators import Indicators

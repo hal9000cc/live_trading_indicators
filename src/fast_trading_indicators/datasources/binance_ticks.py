@@ -1,99 +1,123 @@
+import os
 import os.path as path
 import urllib
-from common import *
+import urllib.request
+import json
+import numpy as np
+import pandas as pd
+import logging
+from ..common import *
 
-__all__ = ['datasource_name', 'init', 'BASE_URL', 'timeframe_day_data']
+__all__ = ['datasource_name', 'init', 'DATA_URL', 'timeframe_day_data']
 
-BASE_URL = 'https://data.binance.vision/'
+DATA_URL = 'https://data.binance.vision/'
+SPOT_API_URL = 'https://api.binance.com/api/v3/'
+UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
+CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
 source_data_path = None
-
+symbol_set = None
 
 def datasource_name():
     return 'binance_ticks'
 
 
-def init(**kwargs):
+def init(common_data_path=None):
     global source_data_path
 
-    source_data_path = path.join(SOURCES_DATA_PATH, datasource_name())
+    source_data_path = path.join(DEFAULT_DATA_PATH if common_data_path is None else common_data_path,
+                                                                            'source_data', datasource_name())
 
 
-#def get_tick_file_name(symbol, date):
-#    return f'{symbol}-{date.year:04d}-{date.month:02d}-{symbol.day:02d}.{ext}'
+def get_url_tick_day(symbol, date):
+
+    symbol_parts = symbol.split('/')
+    if len(symbol_parts) > 1:
+        file_name = day_file_name_basic(symbol_parts[1], date, 'zip')
+        url = f'data/futures/{symbol_parts[0]}/daily/trades/{symbol_parts[1].upper()}/{file_name}'
+    else:
+        file_name = day_file_name_basic(symbol, date, 'zip')
+        url = f'data/spot/daily/trades/{symbol.upper()}/{file_name}'
+
+    return urllib.parse.urljoin(DATA_URL, url)
 
 
-# def download_file(base_path, file_name, date_range=None, folder=None):
-#
-#     download_path = "{}{}".format(base_path, file_name)
-#     if folder:
-#         base_path = os.path.join(folder, base_path)
-#     if date_range:
-#         date_range = date_range.replace(" ","_")
-#         base_path = os.path.join(base_path, date_range)
-#     save_path = get_destination_dir(os.path.join(base_path, file_name), folder)
-#
-#
-#     if os.path.exists(save_path):
-#         print("\nfile already exists! {}".format(save_path))
-#         return save_path
-#
-#     # make the directory
-#     if not os.path.exists(base_path):
-#         Path(get_destination_dir(base_path)).mkdir(parents=True, exist_ok=True)
-#
-#     try:
-#         download_url = get_download_url(download_path)
-#         dl_file = urllib.request.urlopen(download_url)
-#         length = dl_file.getheader('content-length')
-#         if length:
-#             length = int(length)
-#             blocksize = max(4096,length//100)
-#
-#         with open(save_path, 'wb') as out_file:
-#             dl_progress = 0
-#             print("\nFile Download: {}".format(save_path))
-#             while True:
-#                 buf = dl_file.read(blocksize)
-#                 if not buf:
-#                     break
-#                 dl_progress += len(buf)
-#                 out_file.write(buf)
-#                 done = int(50 * dl_progress / length)
-#                 sys.stdout.write("\r[%s%s]" % ('#' * done, '.' * (50-done)) )
-#                 sys.stdout.flush()
-#
-#         return save_path
+def symbols():
+    global symbol_set
 
-def download_tick_day_file(tick_day_file_name):
+    if symbol_set is None:
 
-    download_url = urllib.parse.urljoin(BASE_URL, tick_day_file_name)
+        symbols_list = []
+        for part, api_url in (('', SPOT_API_URL), ('um', UM_API_URL), ('cm', CM_API_URL)):
 
-    dl_file = urllib.request.urlopen(download_url)
+            url_info = urllib.parse.urljoin(api_url, 'exchangeInfo')
+            response = urllib.request.urlopen(url_info).read()
+            symbols_part = list(map(lambda symbol: symbol['symbol'], json.loads(response)['symbols']))
+
+            if len(part) > 0:
+                symbols_list += map(lambda symbol: f'{part}/{symbol}'.lower(), symbols_part)
+
+        symbol_set = set(symbols_list)
+
+    return symbol_set
+
+
+def download_tick_day_file(symbol, date, tick_day_file_name):
+
+    logging.info(f'Download tick data for {symbol} for {date.date()}...')
+
+    download_url = get_url_tick_day(symbol, date)
+
+    try:
+        dl_file = urllib.request.urlopen(download_url)
+    except urllib.error.HTTPError as error:
+        if error.code != 404:
+            raise error
+        if symbol.lower() in symbols():
+            raise FTIException(f'Ticks not found! Symbol {symbol}, date {date.date()}.')
+        else:
+            raise FTIException(f'Symbol {symbol} not found in source {datasource_name()}.')
+
     length = dl_file.getheader('content-length')
-    if length:
-        length = int(length)
-        blocksize = max(4096, length//100)
+    buf = dl_file.read()
+
+    file_folder = path.split(tick_day_file_name)[0]
+    if not path.isdir(file_folder):
+        os.makedirs(file_folder)
+
+    with open(tick_day_file_name, 'wb') as file:
+        file.write(buf)
 
 
+def day_file_name_basic(symbol, date, ext):
+    return f'{symbol.upper()}-trades-{date.date()}.{ext}'
 
-    pass
 
+def day_file_name_parts(symbol, date, ext):
 
-def remote_day_file_name(symbol, date):
-    return f'{symbol.upper()}-trades-{date}.zip'
+    symbol_parts = symbol.split('/')
+
+    if len(symbol_parts) > 1:
+        return symbol_parts[:-1] + [day_file_name_basic(symbol_parts[-1], date, ext)]
+
+    return [day_file_name_basic(symbol, date, ext)]
 
 
 def timeframe_day_data_from_file(file_name):
+
+    trade_data = pd.read_csv(file_name, header=None)
+    if trade_data[0].dtype != np.int64:
+        trade_data = pd.read_csv(file_name, skiprows=1, header=None)
+
     pass
 
 
 def timeframe_day_data(symbol, timeframe, date):
 
-    tick_day_file_name = remote_day_file_name(symbol, date)
-    tick_day_file_name_in_source = path.join(source_data_path, tick_day_file_name)
+    tick_day_file_name_parts = day_file_name_parts(symbol, date, 'zip')
+    tick_day_file_name = path.join(source_data_path, *tick_day_file_name_parts)
 
-    if not path.isfile(tick_day_file_name_in_source):
-        download_tick_day_file(tick_day_file_name)
+    if not path.isfile(tick_day_file_name):
+        download_tick_day_file(symbol, date, tick_day_file_name)
 
-    return timeframe_day_data_from_file(tick_day_file_name_in_source)
+    return timeframe_day_data_from_file(tick_day_file_name)
