@@ -203,8 +203,6 @@ class TimeframeData:
 
         return IndicatorData({  'symbol': symbol,
                                 'timeframe': timeframe,
-                                'date_begin': date_begin,
-                                'date_end': td_time[-1][-1].astype(dt.datetime),
                                 'time': np.hstack(td_time),
                                 'open': np.hstack(td_open),
                                 'high': np.hstack(td_high),

@@ -131,14 +131,15 @@ class Indicators:
             raise FTIExceptionTooManyEmptyBars(self.datasource_name,
                                                bar_data.symbol,
                                                bar_data.timeframe,
-                                               bar_data.date_begin,
-                                               bar_data.date_end,
+                                               bar_data.first_bar_time,
+                                               bar_data.end_bar_time,
                                                empty_bars_fraction,
                                                empty_bars_consecutive)
 
         return empty_bars_fraction, empty_bars_consecutive
 
-    def restore_bar_data(self, bar_data):
+    @staticmethod
+    def restore_bar_data(bar_data):
 
         n_bars = len(bar_data.time)
         bx_empty_bars = bar_data.volume == 0

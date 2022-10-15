@@ -74,18 +74,18 @@ class FTIExceptionBadSourceData(FTIException):
 
 class FTIExceptionTooManyEmptyBars(FTIException):
 
-    def __init__(self, source_name, symbol, timeframe, date_begin, date_end, fraction, consecutive):
+    def __init__(self, source_name, symbol, timeframe, first_bar_time, end_bar_time, fraction, consecutive):
         self.source_name = source_name
         self.symbol = symbol
         self.timeframe = timeframe
-        self.date_begin = date_begin
-        self.date_end = date_end
+        self.first_bar_time = first_bar_time
+        self.end_bar_time = end_bar_time
         self.fraction = fraction
         self.consecutive = consecutive
 
         super().__init__(
             f'Too many empty bars: fraction {fraction}, consecutive {consecutive}. '
-            f'Source {source_name}, symbol {symbol}, timeframe {timeframe}, date {date_begin.date} - {date_end}.')
+            f'Source {source_name}, symbol {symbol}, timeframe {timeframe}, date {first_bar_time} - {end_bar_time}.')
 
 
 class IndicatorData:
@@ -94,6 +94,11 @@ class IndicatorData:
         assert 'time' in data_dict.keys()
         self.data = data_dict
         self.__read_only = False
+        assert 'date_begin' not in data_dict.keys()
+        assert 'date_end' not in data_dict.keys()
+
+        self.data['first_bar_time'] = self.data['time'][0].astype(dt.datetime)
+        self.data['end_bar_time'] = self.data['time'][-1].astype(dt.datetime)
 
     def __len__(self):
         return len(self.data.time)
@@ -136,7 +141,7 @@ class IndicatorData:
 
     def index_from_time(self, time):
         if time is None: return None
-        return int((time - self.date_begin).total_seconds() / self.timeframe.value)
+        return int((time - self.first_bar_time).total_seconds() / self.timeframe.value)
 
     def slice(self, time_start, time_stop):
 
@@ -154,8 +159,6 @@ class IndicatorData:
             else:
                 new_data[key] = value
 
-        new_data['date_begin'] = self.time[i_start]
-        new_data['date_end'] = self.time[i_stop - 1 if i_stop else -1]
         new_indicator_data = IndicatorData(new_data)
         if self.read_only:
             new_indicator_data.read_only = True
