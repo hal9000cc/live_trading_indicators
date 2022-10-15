@@ -4,6 +4,7 @@ import shutil
 
 SOURCE = 'binance_ticks'
 SYMBOL = 'um/ethusdt'
+TIMEFRAME = fti.Timeframe.t1h
 
 
 @pytest.fixture
@@ -14,6 +15,11 @@ def default_source():
 @pytest.fixture
 def default_symbol():
     return SYMBOL
+
+
+@pytest.fixture
+def default_timeframe():
+    return TIMEFRAME
 
 
 @pytest.fixture

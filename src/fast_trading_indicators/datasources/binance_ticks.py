@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import logging
 from ..common import *
+from ..datasources import ticks_2_timeframe_data
 
 __all__ = ['datasource_name', 'init', 'DATA_URL', 'timeframe_day_data']
 
@@ -17,6 +18,7 @@ CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
 source_data_path = None
 symbol_set = None
+
 
 def datasource_name():
     return 'binance_ticks'
@@ -103,13 +105,18 @@ def day_file_name_parts(symbol, date, ext):
     return [day_file_name_basic(symbol, date, ext)]
 
 
-def timeframe_day_data_from_file(file_name):
+def timeframe_day_data_from_file(file_name, timeframe, date):
 
     trade_data = pd.read_csv(file_name, header=None)
     if trade_data[0].dtype != np.int64:
         trade_data = pd.read_csv(file_name, skiprows=1, header=None)
 
-    pass
+    time = trade_data[4].to_numpy().astype('datetime64[ms]')
+    price = trade_data[1].to_numpy().astype(PRICE_TYPE)
+    volume = trade_data[2].to_numpy().astype(VOLUME_TYPE)
+    tick_data = IndicatorData({'time': time, 'price': price, 'volume': volume})
+
+    return ticks_2_timeframe_data(tick_data, timeframe, date)
 
 
 def timeframe_day_data(symbol, timeframe, date):
@@ -120,4 +127,4 @@ def timeframe_day_data(symbol, timeframe, date):
     if not path.isfile(tick_day_file_name):
         download_tick_day_file(symbol, date, tick_day_file_name)
 
-    return timeframe_day_data_from_file(tick_day_file_name)
+    return timeframe_day_data_from_file(tick_day_file_name, timeframe, date)
