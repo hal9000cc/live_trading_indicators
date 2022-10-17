@@ -4,8 +4,10 @@ import os.path as path
 import numpy as np
 import construct as cs
 import zlib
+from multiprocessing import Pool
 import logging
 from ..common import *
+
 
 CASH_FILE_SIGNATURE = b'FTI'
 CASH_FILE_VERSION = 1
@@ -13,12 +15,10 @@ CASH_FILE_VERSION = 1
 
 class TimeframeData:
 
-    def __init__(self, datasource_module, common_data_path=None):
+    def __init__(self, datasource_module):
 
-        self.cash_folder = path.join(DEFAULT_DATA_PATH if common_data_path is None else common_data_path,
-                                                                'timeframe_data', datasource_module.datasource_name())
+        self.cash_folder = path.join(config['cash_folder'], datasource_module.datasource_name())
 
-        datasource_module.init(common_data_path)
         self.datasource_module = datasource_module
 
     def filename_day_data(self, symbol, timeframe, day_date):
@@ -32,7 +32,7 @@ class TimeframeData:
         if path.isfile(filename):
             day_data = self.load_from_cash(filename)
         else:
-            day_data = self.datasource_module.timeframe_day_data(symbol, timeframe, day_date)
+            day_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
             self.check_day_data(day_data, symbol, timeframe, day_date)
             self.save_to_cash(filename, day_data)
 
@@ -153,10 +153,12 @@ class TimeframeData:
         if not path.isdir(file_folder):
             os.makedirs(file_folder)
 
-        with open(file_name, 'wb') as file:
+        temp_file_name = f'{file_name}.tmp'
+        with open(temp_file_name, 'wb') as file:
             file.write(self.build_signature_and_version())
             file.write(self.build_header(day_data))
             file.write(zlib.compress(buf_data))
+        rename_file_force(temp_file_name, file_name)
 
     def load_from_cash(self, file_name):
 
@@ -189,6 +191,9 @@ class TimeframeData:
         if date_end is None:
             raise FTIException('No end_date set')
 
+        if date_begin > date_end:
+            raise ValueError('begin_date less then end_date')
+
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
         day_date = date_begin
         while day_date <= date_end:
@@ -212,7 +217,7 @@ class TimeframeData:
                              })
 
 
-def ticks_2_timeframe_data(tick_data, timeframe, date):
+def ticks_2_bar(tick_data, timeframe, date):
 
     assert date.time() == dt.time()
 

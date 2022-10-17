@@ -1,55 +1,57 @@
+import os.path as path
 import src.fast_trading_indicators as fti
 import pytest
 import datetime as dt
 import numpy as np
-from src.fast_trading_indicators.common import date_from_arg
+from src.fast_trading_indicators.common import date_from_arg, HOME_FOLDER
+from memory_profiler import memory_usage
 
 
-def test_bad_datasource():
+def test_bad_datasource(config_default):
     with pytest.raises(TypeError) as error:
         indicators = fti.Indicators(None)
 
 
-def test_no_date(default_source, default_symbol, default_timeframe):
+def test_no_date(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source)
     with pytest.raises(fti.FTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No begin_date set'
 
 
-def test_no_date_end(default_source, default_symbol, default_timeframe):
+def test_no_date_end(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source, date_begin=20200101)
     with pytest.raises(fti.FTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No end_date set'
 
 
-def test_no_date_begin(default_source, default_symbol, default_timeframe):
+def test_no_date_begin(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source, date_end=20200101)
     with pytest.raises(fti.FTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No begin_date set'
 
 
-def test_OHLCV_symbol_not_found(clear_data, default_timeframe):
-    indicators = fti.Indicators('binance_ticks', date_begin=20220201, date_end=20220201, common_data_path=clear_data)
+def test_OHLCV_symbol_not_found(config_clear_data, default_timeframe):
+    indicators = fti.Indicators('binance', date_begin=20220201, date_end=20220201)
     with pytest.raises(fti.FTIException) as error:
         out = indicators.OHLCV('cm/ethusd', default_timeframe)
-    assert error.value.message == 'Symbol cm/ethusd not found in source binance_ticks.'
+    assert error.value.message == 'Symbol cm/ethusd not found in source binance.'
 
 
 @pytest.mark.parametrize('source, symbol, date_begin, date_end, control_values', [
-    ('binance_ticks', 'um/ethusdt', 20200201, 20200201,
+    ('binance', 'um/ethusdt', 20200201, 20200201,
         ([180.14, 181.36, 184.00, 184.09], [181.73, 184.10, 184.58, 184.26], [179.41, 181.31, 182.93, 182.92],
         [181.36, 184.00, 184.10, 183.79], [19477.981, 31579.898, 30595.211, 17646.828])),
-    ('binance_ticks', 'um/ethusdt', 20200201, 20200202, None),
-    ('binance_ticks', 'cm/ethusd_perp', 20220201, 20220201, None),
-    ('binance_ticks', 'um/ethusdt', 20220930, 20220930, None),
-    ('binance_ticks', 'ethusdt', 20220930, 20220930, None),
+    ('binance', 'um/ethusdt', 20200201, 20200202, None),
+    ('binance', 'cm/ethusd_perp', 20220201, 20220201, None),
+    ('binance', 'um/ethusdt', 20220930, 20220930, None),
+    ('binance', 'ethusdt', 20220930, 20220930, None),
 ])
-def test_OHLCV_clear_data(source, symbol, date_begin, date_end, control_values, clear_data):
+def test_OHLCV_clear_data(config_clear_data, source, symbol, date_begin, date_end, control_values):
 
-    indicators = fti.Indicators(source, date_begin=date_begin, date_end=date_end, common_data_path=clear_data)
+    indicators = fti.Indicators(source, date_begin=date_begin, date_end=date_end)
 
     out = indicators.OHLCV(symbol, fti.Timeframe.t1h)
     if control_values:
@@ -60,12 +62,24 @@ def test_OHLCV_clear_data(source, symbol, date_begin, date_end, control_values, 
         assert (out.volume[:4] == control_values[4]).all()
 
 
-def test_OHLCV(default_source, default_symbol, default_timeframe):
+def test_memory_leak(config_clear_data, default_source, default_symbol):
+
+    mu_begin = memory_usage()[0]
+
+    sources_folder = path.join(HOME_FOLDER, 'data', 'sources', 'binance')
+    fti.config(sources_folder=sources_folder)
+    indicators = fti.Indicators(default_source, date_begin=20220901, date_end=20220902)
+
+    out = indicators.OHLCV(default_symbol, fti.Timeframe.t1h)
+    assert memory_usage()[0] - mu_begin < 100
+
+
+def test_OHLCV(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
     out = indicators.OHLCV(default_symbol, default_timeframe)
 
 
-def test_check_bar_data(default_source, default_symbol, default_timeframe):
+def test_check_bar_data(config_default, default_source, default_symbol, default_timeframe):
 
     n_bars = 10 * 24 * 60 * 60 // default_timeframe.value
 
@@ -110,7 +124,7 @@ def test_check_bar_data(default_source, default_symbol, default_timeframe):
     assert empty_bars_fraction == 9 / n_bars and empty_bars_consecutive == 6
 
 
-def test_too_many_empty_bars_exception(default_source, default_symbol, default_timeframe):
+def test_too_many_empty_bars_exception(config_default, default_source, default_symbol, default_timeframe):
 
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
@@ -132,7 +146,7 @@ def test_too_many_empty_bars_exception(default_source, default_symbol, default_t
     ([20, 21, 22, -3, -2, -1],),
     ([0, 1, 2, 20, 21, 22, -3, -2, -1],),
 ])
-def test_restore_bar_data(default_source, default_symbol, cleared_points):
+def test_restore_bar_data(config_default, default_source, default_symbol, cleared_points):
 
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1000)
     out = indicators.OHLCV(default_symbol, fti.Timeframe.t1h).copy()
@@ -148,7 +162,7 @@ def test_restore_bar_data(default_source, default_symbol, cleared_points):
     assert (out.close != 0).all()
 
 
-def test_change_dates(default_source, default_symbol, default_timeframe):
+def test_change_dates(config_default, default_source, default_symbol, default_timeframe):
 
     indicators = fti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, default_timeframe, date_begin=20220101, date_end=20220110)
@@ -163,18 +177,19 @@ def test_change_dates(default_source, default_symbol, default_timeframe):
     assert out == out1[int(2 * 24 * 60 * 60 // default_timeframe.value):]
 
 
-def test_different_dates(default_source, default_symbol, default_timeframe):
+def test_different_dates(config_default, default_source, default_symbol, default_timeframe):
 
     indicators = fti.Indicators(default_source)
 
     test_dates = [
-        (20220301, 20220301),
-        (20220301, 20220310),
-        (20220302, 20220305),
-        (20220225, 20220306),
-        (20220301, 20220315),
-        (20220201, 20220320),
-        (20220210, 20220302),
+        (20220901, 20220901),
+        (20220901, 20220910),
+        (20220902, 20220905),
+        (20220925, 20221006),
+        (20220901, 20221010),
+        (20220901, 20221012),
+        (20220810, 20221002),
+        (20220901, 20221014)
     ]
 
     for date_begin, date_end in test_dates:

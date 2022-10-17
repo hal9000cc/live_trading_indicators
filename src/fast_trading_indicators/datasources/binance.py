@@ -3,13 +3,13 @@ import os.path as path
 import urllib
 import urllib.request
 import json
-import numpy as np
-import pandas as pd
 import logging
+import numpy as np
 from ..common import *
-from ..datasources import ticks_2_timeframe_data
+from ..datasources import ticks_2_bar
 
-__all__ = ['datasource_name', 'init', 'DATA_URL', 'timeframe_day_data']
+
+__all__ = ['datasource_name', 'init', 'DATA_URL', 'bars_of_day']
 
 DATA_URL = 'https://data.binance.vision/'
 SPOT_API_URL = 'https://api.binance.com/api/v3/'
@@ -21,24 +21,23 @@ symbol_set = None
 
 
 def datasource_name():
-    return 'binance_ticks'
+    return __name__.split('.')[-1]
 
 
-def init(common_data_path=None):
+def init():
     global source_data_path
 
-    source_data_path = path.join(DEFAULT_DATA_PATH if common_data_path is None else common_data_path,
-                                                                            'source_data', datasource_name())
+    source_data_path = path.join(config['sources_folder'], datasource_name())
 
 
 def get_url_tick_day(symbol, date):
 
     symbol_parts = symbol.split('/')
     if len(symbol_parts) > 1:
-        file_name = day_file_name_basic(symbol_parts[1], date, 'zip')
+        file_name = tickfile_name_basic(symbol_parts[1], date, 'zip')
         url = f'data/futures/{symbol_parts[0]}/daily/trades/{symbol_parts[1].upper()}/{file_name}'
     else:
-        file_name = day_file_name_basic(symbol, date, 'zip')
+        file_name = tickfile_name_basic(symbol, date, 'zip')
         url = f'data/spot/daily/trades/{symbol.upper()}/{file_name}'
 
     return urllib.parse.urljoin(DATA_URL, url)
@@ -64,9 +63,7 @@ def symbols():
     return symbol_set
 
 
-def download_tick_day_file(symbol, date, tick_day_file_name):
-
-    logging.info(f'Download tick data for {symbol} for {date.date()}...')
+def download_ticks(symbol, date):
 
     download_url = get_url_tick_day(symbol, date)
 
@@ -80,51 +77,69 @@ def download_tick_day_file(symbol, date, tick_day_file_name):
         else:
             raise FTIException(f'Symbol {symbol} not found in source {datasource_name()}.')
 
-    length = dl_file.getheader('content-length')
+    length = int(dl_file.getheader('content-length'))
     buf = dl_file.read()
+    assert len(buf) == length
+    return buf
+
+
+def download_bars(symbol, timeframe, date):
+    pass
+
+
+def download_tickfile(symbol, date, tick_day_file_name):
+
+    logging.info(f'Download tick data for {symbol} for {date.date()}...')
+
+    buf = download_ticks(symbol, date)
 
     file_folder = path.split(tick_day_file_name)[0]
     if not path.isdir(file_folder):
         os.makedirs(file_folder)
 
-    with open(tick_day_file_name, 'wb') as file:
+    temp_file_name = f'{tick_day_file_name}.tmp'
+    with open(temp_file_name, 'wb') as file:
         file.write(buf)
+    rename_file_force(temp_file_name, tick_day_file_name)
 
 
-def day_file_name_basic(symbol, date, ext):
+def tickfile_name_basic(symbol, date, ext):
     return f'{symbol.upper()}-trades-{date.date()}.{ext}'
 
 
-def day_file_name_parts(symbol, date, ext):
+def tickfile_name_parts(symbol, date, ext):
 
     symbol_parts = symbol.split('/')
 
     if len(symbol_parts) > 1:
-        return symbol_parts[:-1] + [day_file_name_basic(symbol_parts[-1], date, ext)]
+        return symbol_parts[:-1] + [tickfile_name_basic(symbol_parts[-1], date, ext)]
 
-    return [day_file_name_basic(symbol, date, ext)]
-
-
-def timeframe_day_data_from_file(file_name, timeframe, date):
-
-    trade_data = pd.read_csv(file_name, header=None)
-    if trade_data[0].dtype != np.int64:
-        trade_data = pd.read_csv(file_name, skiprows=1, header=None)
-
-    time = trade_data[4].to_numpy().astype('datetime64[ms]')
-    price = trade_data[1].to_numpy().astype(PRICE_TYPE)
-    volume = trade_data[2].to_numpy().astype(VOLUME_TYPE)
-    tick_data = IndicatorData({'time': time, 'price': price, 'volume': volume})
-
-    return ticks_2_timeframe_data(tick_data, timeframe, date)
+    return [tickfile_name_basic(symbol, date, ext)]
 
 
-def timeframe_day_data(symbol, timeframe, date):
+def read_tickfile(file_name):
 
-    tick_day_file_name_parts = day_file_name_parts(symbol, date, 'zip')
-    tick_day_file_name = path.join(source_data_path, *tick_day_file_name_parts)
+    string_data_table = read_zipcsv_to_strings(file_name)
 
-    if not path.isfile(tick_day_file_name):
-        download_tick_day_file(symbol, date, tick_day_file_name)
+    first_line = 0 if string_data_table[0, 4].isdigit() else 1
+    price = string_data_table[first_line:, 1].astype(float)
+    volume = string_data_table[first_line:, 2].astype(float)
+    time = string_data_table[first_line:, 4].astype(int).astype('datetime64[ms]')
 
-    return timeframe_day_data_from_file(tick_day_file_name, timeframe, date)
+    return IndicatorData({'time': time, 'price': price, 'volume': volume})
+
+
+def bars_of_day_from_tickfile(file_name, timeframe, date):
+    tick_data = read_tickfile(file_name)
+    return ticks_2_bar(tick_data, timeframe, date)
+
+
+def bars_of_day(symbol, timeframe, date):
+
+    file_name_tickfile_parts = tickfile_name_parts(symbol, date, 'zip')
+    file_name_tickfile = path.join(source_data_path, *file_name_tickfile_parts)
+
+    if not path.isfile(file_name_tickfile):
+        download_tickfile(symbol, date, file_name_tickfile)
+
+    return bars_of_day_from_tickfile(file_name_tickfile, timeframe, date)

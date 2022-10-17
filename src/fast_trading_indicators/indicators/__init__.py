@@ -16,6 +16,9 @@ class IndicatorProxy:
 
         use_date_begin, use_date_end = self.indicators.set_date_interval(date_begin, date_end)
 
+        if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
+            raise ValueError('The begin date less then the end date')
+
         out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
 
         if out is None:
@@ -35,10 +38,9 @@ class Indicators:
     def __init__(self, datasource,
                  date_begin=None,
                  date_end=None,
-                 max_empty_bars_fraction=0.001,  # it's 0.1%
-                 max_empty_bars_consecutive=1,
-                 restore_empty_bars=True,  # open=high=low=close = last price
-                 common_data_path=None):
+                 max_empty_bars_fraction=0.01,  # it's 1%
+                 max_empty_bars_consecutive=2,
+                 restore_empty_bars=True):  # open=high=low=close = last price
 
         self.indicators = {}
         self.max_empty_bars_fraction = max_empty_bars_fraction
@@ -54,8 +56,8 @@ class Indicators:
             raise TypeError('Bad type of datasource')
 
         self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init(common_data_path)
-        self.timeframe_data_cash = datasources.TimeframeData(datasource_module, common_data_path=common_data_path)
+        datasource_module.init()
+        self.timeframe_data_cash = datasources.TimeframeData(datasource_module)
 
         self.date_begin = None
         self.date_end = None

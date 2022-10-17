@@ -1,15 +1,19 @@
 import datetime
+import json
+import os
 import os.path as path
 import datetime as dt
 from pathlib import Path
 from enum import IntEnum
+from zipfile import ZipFile
+import numpy as np
 
 __all__ = [
 
     'PRICE_TYPE',
     'VOLUME_TYPE',
     'TIME_TYPE',
-    'DEFAULT_DATA_PATH',
+    'HOME_FOLDER',
 
     'Timeframe',
     'FTIException',
@@ -18,15 +22,22 @@ __all__ = [
     'IndicatorData',
 
     'date_from_arg',
+    'rename_file_force',
+    'read_zipcsv_to_strings',
+    'load_config',
+    'save_config',
+    'set_default_config',
+    'config'
 
 ]
-
-import numpy as np
 
 PRICE_TYPE = float
 VOLUME_TYPE = float
 TIME_TYPE = 'datetime64[ms]'
-DEFAULT_DATA_PATH = path.join(Path.home(), '.fti')
+HOME_FOLDER = path.join(Path.home(), '.fti')
+CONFIG_FILE_NAME = 'config.json'
+
+config = None
 
 
 class Timeframe(IntEnum):
@@ -94,8 +105,6 @@ class IndicatorData:
         assert 'time' in data_dict.keys()
         self.data = data_dict
         self.__read_only = False
-        assert 'date_begin' not in data_dict.keys()
-        assert 'date_end' not in data_dict.keys()
 
         self.data['first_bar_time'] = self.data['time'][0].astype(dt.datetime)
         self.data['end_bar_time'] = self.data['time'][-1].astype(dt.datetime)
@@ -147,6 +156,9 @@ class IndicatorData:
 
         i_start = self.index_from_time(time_start)
         i_stop = self.index_from_time(time_stop)
+
+        if i_start > i_stop: raise ValueError
+        if i_start < 0 or i_stop < 0: raise ValueError
 
         return self.slice_by_int(i_start, i_stop)
 
@@ -203,3 +215,66 @@ def date_from_arg(date_value):
 
     assert type(date_value) == datetime.datetime
     return date_value
+
+
+def rename_file_force(source, destination):
+
+    if path.isfile(destination):
+        os.remove(destination)
+
+    os.rename(source, destination)
+
+
+def read_zipcsv_to_strings(file_name):
+
+    with ZipFile(file_name) as zip_file:
+        csv_text = zip_file.read(zip_file.namelist()[0])
+
+    max_line_length = 200
+    for i in range(10):
+        first_lines = csv_text[:max_line_length * 2].splitlines()
+        if len(first_lines) > 2: break
+    else:
+        FTIException(f'Bad csv file: {file_name}')
+
+    n_columns = first_lines[1].count(b',') + 1
+
+    return np.array(csv_text.replace(b',', b'\n').splitlines()).reshape((-1, n_columns))
+
+
+def set_default_config():
+    global config
+
+    config = {
+        'cash_folder': path.join(HOME_FOLDER, 'data', 'timeframe_data'),
+        'sources_folder': path.join(HOME_FOLDER, 'data', 'sources')
+    }
+
+
+def load_config():
+    global config
+
+    settings_file_name = path.join(HOME_FOLDER, CONFIG_FILE_NAME)
+
+    if path.isfile(settings_file_name):
+
+        with open(settings_file_name, 'r') as file:
+            config = json.load(file)
+
+    else:
+
+        set_default_config()
+
+
+def save_config():
+    global config
+
+    if not path.isdir(HOME_FOLDER):
+        os.makedirs(HOME_FOLDER)
+
+    settings_file_name = path.join(HOME_FOLDER, CONFIG_FILE_NAME)
+    with open(settings_file_name, 'w') as file:
+        json.dump(config, file)
+
+
+load_config()
