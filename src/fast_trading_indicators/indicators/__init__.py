@@ -2,50 +2,17 @@ import importlib
 import numpy as np
 import datetime as dt
 from ..common import *
+from ..exceptions import *
 from .. import datasources
-
-
-class IndicatorProxy:
-
-    def __init__(self, indicator_name, indicators):
-        self.indicator_name = indicator_name
-        self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
-        self.indicators = indicators
-
-    def __call__(self, *args, date_begin=None, date_end=None, **kwargs):
-
-        use_date_begin, use_date_end = self.indicators.set_date_interval(date_begin, date_end)
-
-        if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
-            raise ValueError('The begin date less then the end date')
-
-        out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
-
-        if out is None:
-            out = self.indicator_module.get_indicator_out(self.indicators, *args, **kwargs)
-            out.read_only = True
-            self.indicators.put_out_to_cache(self.indicator_name, args, kwargs, out)
-
-        return out[use_date_begin: use_date_end + dt.timedelta(days=1) if use_date_end else None]
-
-    def __del__(self):
-        self.indicator_module = None
-        self.indicators = None
 
 
 class Indicators:
 
-    def __init__(self, datasource,
-                 date_begin=None,
-                 date_end=None,
-                 max_empty_bars_fraction=0.01,  # it's 1%
-                 max_empty_bars_consecutive=2,
-                 restore_empty_bars=True):  # open=high=low=close = last price
+    def __init__(self, datasource, date_begin=None, date_end=None, **config_mod):
 
         self.indicators = {}
-        self.max_empty_bars_fraction = max_empty_bars_fraction
-        self.max_empty_bars_consecutive = max_empty_bars_consecutive
-        self.restore_empty_bars = restore_empty_bars
+
+        self.config = config_load() | config_mod
 
         datasource_type = type(datasource)
         if datasource_type == str:
@@ -56,8 +23,8 @@ class Indicators:
             raise TypeError('Bad type of datasource')
 
         self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init()
-        self.timeframe_data_cash = datasources.TimeframeData(datasource_module)
+        datasource_module.init(self.config)
+        self.source_data = datasources.SourceData(datasource_module, self.config)
 
         self.date_begin = None
         self.date_end = None
@@ -112,7 +79,7 @@ class Indicators:
 
     def check_bar_data(self, bar_data):
 
-        if self.max_empty_bars_fraction is None and self.max_empty_bars_consecutive is None:
+        if self.config['max_empty_bars_fraction'] is None and self.max_empty_bars_consecutive is None:
             return
 
         n_bars = len(bar_data.time)
@@ -129,7 +96,7 @@ class Indicators:
         empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
         empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
 
-        if empty_bars_fraction > self.max_empty_bars_fraction or empty_bars_consecutive > self.max_empty_bars_consecutive:
+        if empty_bars_fraction > self.config['max_empty_bars_fraction'] or empty_bars_consecutive > self.config['max_empty_bars_consecutive']:
             raise FTIExceptionTooManyEmptyBars(self.datasource_name,
                                                bar_data.symbol,
                                                bar_data.timeframe,
@@ -168,12 +135,47 @@ class Indicators:
 
     def get_bar_data(self, symbol, timeframe, date_begin, date_end):
 
-        bar_data = self.timeframe_data_cash.get_timeframe_data(symbol, timeframe, date_begin, date_end)
+        bar_data = self.source_data.get_bar_data(symbol, timeframe, date_begin, date_end)
+
+        if self.config['endpoints_required']:
+            if len(bar_data) == 0:
+                raise FTISourceDataNotFound(symbol, date_begin)
+            if bar_data.close[0] == 0:
+                raise FTISourceDataNotFound(symbol, date_begin)
+            if bar_data.close[-1] == 0:
+                raise FTISourceDataNotFound(symbol, date_end)
 
         self.check_bar_data(bar_data)
 
-        if self.restore_empty_bars:
+        if self.config['restore_empty_bars']:
             self.restore_bar_data(bar_data)
 
         return bar_data
 
+
+class IndicatorProxy:
+
+    def __init__(self, indicator_name, indicators):
+        self.indicator_name = indicator_name
+        self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
+        self.indicators = indicators
+
+    def __call__(self, *args, date_begin=None, date_end=None, **kwargs):
+
+        use_date_begin, use_date_end = self.indicators.set_date_interval(date_begin, date_end)
+
+        if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
+            raise ValueError('The begin date less then the end date')
+
+        out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
+
+        if out is None:
+            out = self.indicator_module.get_indicator_out(self.indicators, *args, **kwargs)
+            out.read_only = True
+            self.indicators.put_out_to_cache(self.indicator_name, args, kwargs, out)
+
+        return out[use_date_begin: use_date_end + dt.timedelta(days=1) if use_date_end else None]
+
+    def __del__(self):
+        self.indicator_module = None
+        self.indicators = None

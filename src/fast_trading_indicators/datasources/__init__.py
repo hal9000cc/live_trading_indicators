@@ -4,20 +4,23 @@ import os.path as path
 import numpy as np
 import construct as cs
 import zlib
-from multiprocessing import Pool
+from zipfile import ZipFile
 import logging
 from ..common import *
+from ..exceptions import *
+from ..indicator_data import *
 
 
 CASH_FILE_SIGNATURE = b'FTI'
 CASH_FILE_VERSION = 1
 
 
-class TimeframeData:
+class SourceData:
 
-    def __init__(self, datasource_module):
+    def __init__(self, datasource_module, config):
 
-        self.cash_folder = path.join(config['cash_folder'], datasource_module.datasource_name())
+        self.config = config # config_load()
+        self.cash_folder = path.join(self.config['cash_folder'], datasource_module.datasource_name())
 
         self.datasource_module = datasource_module
 
@@ -26,17 +29,18 @@ class TimeframeData:
         filename = f'{symbol_parts[-1]}-{timeframe}-{day_date.date()}.ftid'
         return path.join(self.cash_folder, *symbol_parts[:-1], filename)
 
-    def get_timeframe_day_data(self, symbol, timeframe, day_date):
+    def bars_of_day(self, symbol, timeframe, day_date):
 
         filename = self.filename_day_data(symbol, timeframe, day_date)
         if path.isfile(filename):
-            day_data = self.load_from_cash(filename)
+            bar_data = self.load_from_cash(filename, symbol, timeframe)
         else:
-            day_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
-            self.check_day_data(day_data, symbol, timeframe, day_date)
-            self.save_to_cash(filename, day_data)
+            bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
+            self.check_day_data(bar_data, symbol, timeframe, day_date)
+            if not bar_data.is_empty():
+                self.save_to_cash(filename, bar_data)
 
-        return day_data
+        return bar_data
 
     @staticmethod
     def check_day_data(day_data, symbol, timeframe, day_date):
@@ -135,18 +139,18 @@ class TimeframeData:
             'volume' / cs.Double[n_bars]
         )
 
-    def save_to_cash(self, file_name, day_data):
+    def save_to_cash(self, file_name, bar_data):
 
-        n_bars = len(day_data.time)
+        n_bars = len(bar_data.time)
 
         data_struct = self.get_file_data_struct(n_bars)
         buf_data = data_struct.build({
-            'time': day_data.time.astype(int),
-            'open': day_data.open,
-            'high': day_data.high,
-            'low': day_data.low,
-            'close': day_data.close,
-            'volume': day_data.volume
+            'time': bar_data.time.astype(int),
+            'open': bar_data.open,
+            'high': bar_data.high,
+            'low': bar_data.low,
+            'close': bar_data.close,
+            'volume': bar_data.volume
         })
 
         file_folder = path.split(file_name)[0]
@@ -156,11 +160,11 @@ class TimeframeData:
         temp_file_name = f'{file_name}.tmp'
         with open(temp_file_name, 'wb') as file:
             file.write(self.build_signature_and_version())
-            file.write(self.build_header(day_data))
+            file.write(self.build_header(bar_data))
             file.write(zlib.compress(buf_data))
         rename_file_force(temp_file_name, file_name)
 
-    def load_from_cash(self, file_name):
+    def load_from_cash(self, file_name, symbol, timeframe):
 
         with open(file_name, 'rb') as file:
 
@@ -174,7 +178,9 @@ class TimeframeData:
             data_struct = self.get_file_data_struct(header.n_bars)
             file_data = data_struct.parse(buf)
 
-        return IndicatorData({
+        return OHLCV_data({
+            'symbol': symbol,
+            'timeframe': timeframe,
             'time': np.array(file_data.time, dtype=int).astype(TIME_TYPE),
             'open': np.array(file_data.open, dtype=PRICE_TYPE),
             'high': np.array(file_data.high, dtype=PRICE_TYPE),
@@ -183,7 +189,7 @@ class TimeframeData:
             'volume': np.array(file_data.volume, dtype=VOLUME_TYPE)
         })
 
-    def get_timeframe_data(self, symbol, timeframe, date_begin, date_end):
+    def get_bar_data(self, symbol, timeframe, date_begin, date_end):
 
         if date_begin is None:
             raise FTIException('No begin_date set')
@@ -197,7 +203,7 @@ class TimeframeData:
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
         day_date = date_begin
         while day_date <= date_end:
-            day_data = self.get_timeframe_day_data(symbol, timeframe, day_date)
+            day_data = self.bars_of_day(symbol, timeframe, day_date)
             td_time.append(day_data.time)
             td_open.append(day_data.open)
             td_high.append(day_data.high)
@@ -217,50 +223,33 @@ class TimeframeData:
                              })
 
 
-def ticks_2_bar(tick_data, timeframe, date):
+def rename_file_force(source, destination):
 
-    assert date.time() == dt.time()
+    if path.isfile(destination):
+        os.remove(destination)
 
-    day_start_ms = np.datetime64(date).astype('datetime64[ms]').astype(int)
-    step_ms = timeframe.value * 1000
-    n_candles = 24 * 60 * 60 // timeframe.value
+    os.rename(source, destination)
 
-    tick_time, tick_price, tick_volumes = tick_data.time, tick_data.price, tick_data.volume
 
-    if len(tick_price) == 0: raise FTIExceptionBadSourceData('Empty day, no ticks')
-    if (tick_time[:-1] > tick_time[1:]).any(): raise FTIExceptionBadSourceData('Non-ordered ticks time')
+def byte_csv_to_strings(csv_text):
 
-    first_price = tick_price[0]
+    max_line_length = 200
+    for i in range(10):
+        first_lines = csv_text[:max_line_length * 2].splitlines()
+        if len(first_lines) > 2: break
+    else:
+        FTIException(f'Bad csv file: {file_name}')
 
-    timeframe_starts = (day_start_ms + np.arange(n_candles) * step_ms).astype('datetime64[ms]')
-    ix_tf_end = np.searchsorted(tick_time, timeframe_starts)[1:]
-    interval_prices = np.split(tick_price, ix_tf_end)
-    interval_volumes = np.split(tick_volumes, ix_tf_end)
+    n_columns = first_lines[1].count(b',') + 1
 
-    tf_open, tf_high, tf_low, tf_close, tf_volume =\
-        np.zeros(n_candles, dtype=PRICE_TYPE),\
-        np.zeros(n_candles, dtype=PRICE_TYPE),\
-        np.zeros(n_candles, dtype=PRICE_TYPE),\
-        np.zeros(n_candles, dtype=PRICE_TYPE),\
-        np.zeros(n_candles, dtype=VOLUME_TYPE)
+    return np.array(csv_text.replace(b',', b'\n').splitlines()).reshape((-1, n_columns))
 
-    tf_time = timeframe_starts
 
-    for i_tf in range(n_candles):
+def read_zipcsv_to_strings(source):
 
-        if len(interval_prices[i_tf]) == 0: continue
+    with ZipFile(source) as zip_file:
+        csv_text = zip_file.read(zip_file.namelist()[0])
 
-        tf_open[i_tf] = interval_prices[i_tf][0]
-        tf_high[i_tf] = interval_prices[i_tf].max()
-        tf_low[i_tf] = interval_prices[i_tf].min()
-        tf_close[i_tf] = interval_prices[i_tf][-1]
-        tf_volume[i_tf] = interval_volumes[i_tf].sum()
+    return byte_csv_to_strings(csv_text)
 
-    return IndicatorData({
-        'time': tf_time,
-        'open': tf_open,
-        'high': tf_high,
-        'low': tf_low,
-        'close': tf_close,
-        'volume': tf_volume
-    })
+
