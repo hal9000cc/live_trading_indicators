@@ -77,61 +77,35 @@ class Indicators:
     def key_from_args(indicator, args, kwargs):
         return args, tuple(kwargs.items())
 
-    def check_bar_data(self, bar_data):
-
-        if self.config['max_empty_bars_fraction'] is None and self.max_empty_bars_consecutive is None:
-            return
-
-        n_bars = len(bar_data.time)
-        if n_bars == 0: raise FTIException('Bad bar data')
-
-        bx_empty_bars = bar_data.volume == 0
-        n_empty_bars = bx_empty_bars.sum()
-
-        empty_bars_fraction = n_empty_bars / n_bars
-
-        ix_change = np.flatnonzero(np.diff(bx_empty_bars) != 0) + 1
-        intervals = np.hstack((ix_change, n_bars)) - np.hstack((0, ix_change))
-
-        empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
-        empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
-
-        if empty_bars_fraction > self.config['max_empty_bars_fraction'] or empty_bars_consecutive > self.config['max_empty_bars_consecutive']:
-            raise FTIExceptionTooManyEmptyBars(self.datasource_name,
-                                               bar_data.symbol,
-                                               bar_data.timeframe,
-                                               bar_data.first_bar_time,
-                                               bar_data.end_bar_time,
-                                               empty_bars_fraction,
-                                               empty_bars_consecutive)
-
-        return empty_bars_fraction, empty_bars_consecutive
-
-    @staticmethod
-    def restore_bar_data(bar_data):
-
-        n_bars = len(bar_data.time)
-        bx_empty_bars = bar_data.volume == 0
-        ix_change = np.hstack((
-            np.zeros(1, dtype=int),
-            np.flatnonzero(np.diff(bx_empty_bars)) + 1,
-            np.array(n_bars)
-        ))
-
-        for i, point in enumerate(ix_change[:-1]):
-
-            if bar_data.volume[point] > 0: continue
-
-            if point == 0:
-                price = bar_data.open[ix_change[i + 1]]
-            else:
-                price = bar_data.close[point - 1]
-
-            point_end = ix_change[i + 1]
-            bar_data.open[point : point_end] = price
-            bar_data.high[point : point_end] = price
-            bar_data.low[point : point_end] = price
-            bar_data.close[point : point_end] = price
+    # def check_bar_data(self, bar_data):
+    #
+    #     if self.config['max_empty_bars_fraction'] is None and self.max_empty_bars_consecutive is None:
+    #         return
+    #
+    #     n_bars = len(bar_data.time)
+    #     if n_bars == 0: raise FTIException('Bad bar data')
+    #
+    #     bx_empty_bars = bar_data.volume == 0
+    #     n_empty_bars = bx_empty_bars.sum()
+    #
+    #     empty_bars_fraction = n_empty_bars / n_bars
+    #
+    #     ix_change = np.flatnonzero(np.diff(bx_empty_bars) != 0) + 1
+    #     intervals = np.hstack((ix_change, n_bars)) - np.hstack((0, ix_change))
+    #
+    #     empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
+    #     empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
+    #
+    #     if empty_bars_fraction > self.config['max_empty_bars_fraction'] or empty_bars_consecutive > self.config['max_empty_bars_consecutive']:
+    #         raise FTIExceptionTooManyEmptyBars(self.datasource_name,
+    #                                            bar_data.symbol,
+    #                                            bar_data.timeframe,
+    #                                            bar_data.first_bar_time,
+    #                                            bar_data.end_bar_time,
+    #                                            empty_bars_fraction,
+    #                                            empty_bars_consecutive)
+    #
+    #     return empty_bars_fraction, empty_bars_consecutive
 
     def get_bar_data(self, symbol, timeframe, date_begin, date_end):
 
@@ -145,10 +119,22 @@ class Indicators:
             if bar_data.close[-1] == 0:
                 raise FTISourceDataNotFound(symbol, date_end)
 
-        self.check_bar_data(bar_data)
+        max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config['max_empty_bars_consecutive']
+        if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
+
+            empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
+            if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction'])\
+                    or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
+                raise FTIExceptionTooManyEmptyBars(self.datasource_name,
+                                                   bar_data.symbol,
+                                                   bar_data.timeframe,
+                                                   bar_data.first_bar_time,
+                                                   bar_data.end_bar_time,
+                                                   empty_bars_fraction,
+                                                   empty_bars_consecutive)
 
         if self.config['restore_empty_bars']:
-            self.restore_bar_data(bar_data)
+            bar_data.restore_bar_data()
 
         return bar_data
 

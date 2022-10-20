@@ -212,15 +212,14 @@ class SourceData:
             td_volume.append(day_data.volume)
             day_date += dt.timedelta(days=1)
 
-        return IndicatorData({  'symbol': symbol,
-                                'timeframe': timeframe,
-                                'time': np.hstack(td_time),
-                                'open': np.hstack(td_open),
-                                'high': np.hstack(td_high),
-                                'low': np.hstack(td_low),
-                                'close': np.hstack(td_close),
-                                'volume': np.hstack(td_volume)
-                             })
+        return OHLCV_data({'symbol': symbol,
+                           'timeframe': timeframe,
+                           'time': np.hstack(td_time),
+                           'open': np.hstack(td_open),
+                           'high': np.hstack(td_high),
+                           'low': np.hstack(td_low),
+                           'close': np.hstack(td_close),
+                           'volume': np.hstack(td_volume)})
 
 
 def rename_file_force(source, destination):

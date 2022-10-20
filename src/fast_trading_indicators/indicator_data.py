@@ -2,6 +2,7 @@ import datetime as dt
 import numpy as np
 import logging
 from .common import *
+from .exceptions import *
 
 
 class IndicatorData:
@@ -149,19 +150,39 @@ class OHLCV_data(IndicatorData):
             'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
         })
 
-    def fix_end_bars(self, date):
+    def fix_time(self, time_need):
 
-        seconds_from_begin = (self.time[-1] - np.datetime64(date.date())).astype(int)
-        if seconds_from_begin % self.timeframe.value != 0: return
+        if set(self.time) - set(time_need):
+            return False
 
-        pass
+        if (self.time != np.sort(self.time)).any():
+            return False
 
-    def fix_begin_bars(self, date):
+        n_bars = len(time_need)
+        tf_time = time_need
+        tf_open = np.zeros(n_bars, dtype=PRICE_TYPE)
+        tf_high = np.zeros(n_bars, dtype=PRICE_TYPE)
+        tf_low = np.zeros(n_bars, dtype=PRICE_TYPE)
+        tf_close = np.zeros(n_bars, dtype=PRICE_TYPE)
+        tf_volume = np.zeros(n_bars, dtype=VOLUME_TYPE)
 
-        seconds_from_begin = (self.time[0] - np.datetime64(date.date())).astype(int)
-        if seconds_from_begin % self.timeframe.value != 0: return
+        ix_time = np.searchsorted(tf_time, self.time)
+        tf_open[ix_time] = self.open
+        tf_high[ix_time] = self.high
+        tf_low[ix_time] = self.low
+        tf_close[ix_time] = self.close
+        tf_volume[ix_time] = self.volume
 
-        pass
+        self.data |= {
+            'time': tf_time,
+            'open': tf_open,
+            'high': tf_high,
+            'low': tf_low,
+            'close': tf_close,
+            'volume': tf_volume
+        }
+
+        return True
 
     def fix_errors(self, date):
 
@@ -170,24 +191,10 @@ class OHLCV_data(IndicatorData):
             return
 
         first_bar_time = np.datetime64(date.date(), 'ms')
-        if self.time.min() < first_bar_time:
-            self.clear_day(date)
-            return
-
         n_bars = 24 * 60 * 60 // self.timeframe.value
-        end_bar_time = first_bar_time + np.timedelta64((n_bars - 1) * self.timeframe.value, 's')
-        if self.time.max() > end_bar_time:
-            self.clear_day(date)
-            return
+        time_need = np.array([first_bar_time + np.timedelta64(i, 's') * self.timeframe.value for i in range(n_bars)])
 
-        if self.time[0] != first_bar_time:
-            self.fix_begin_bars(date)
-
-        if self.time[-1] != end_bar_time:
-            self.fix_end_bars(date)
-
-        if len(self.time) != n_bars or\
-                (self.time != np.array([first_bar_time + np.timedelta64(i, 's') * self.timeframe.value for i in range(n_bars)])).any():
+        if (len(self.time) != len(time_need) or (self.time != time_need).any()) and not self.fix_time(time_need):
             self.clear_day(date)
             return
 
@@ -221,6 +228,49 @@ class OHLCV_data(IndicatorData):
         self.low[ix_for_restore] = bar_data2.low[ix_for_restore]
         self.close[ix_for_restore] = bar_data2.close[ix_for_restore]
         self.volume[ix_for_restore] = bar_data2.volume[ix_for_restore]
+
+    def get_skips(self):
+
+        n_bars = len(self.time)
+        if n_bars == 0: raise FTIException('Bad bar data')
+
+        bx_empty_bars = self.close == 0
+        n_empty_bars = bx_empty_bars.sum()
+
+        empty_bars_fraction = n_empty_bars / n_bars
+
+        ix_change = np.flatnonzero(np.diff(bx_empty_bars) != 0) + 1
+        intervals = np.hstack((ix_change, n_bars)) - np.hstack((0, ix_change))
+
+        empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
+        empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
+
+        return empty_bars_fraction, empty_bars_consecutive
+
+    def restore_bar_data(self):
+
+        n_bars = len(self.time)
+        bx_empty_bars = self.volume == 0
+        ix_change = np.hstack((
+            np.zeros(1, dtype=int),
+            np.flatnonzero(np.diff(bx_empty_bars)) + 1,
+            np.array(n_bars)
+        ))
+
+        for i, point in enumerate(ix_change[:-1]):
+
+            if self.volume[point] > 0: continue
+
+            if point == 0:
+                price = self.open[ix_change[i + 1]]
+            else:
+                price = self.close[point - 1]
+
+            point_end = ix_change[i + 1]
+            self.open[point: point_end] = price
+            self.high[point: point_end] = price
+            self.low[point: point_end] = price
+            self.close[point: point_end] = price
 
     @staticmethod
     def from_ticks(tick_data, symbol, timeframe, date):

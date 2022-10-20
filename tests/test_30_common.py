@@ -126,3 +126,8 @@ def test_too_many_empty_bars_exception(config_default, default_source, default_s
 def test_OHLCV(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
     out = indicators.OHLCV(default_symbol, default_timeframe)
+
+
+def test_indicator_not_found(config_default, default_source, default_symbol, default_timeframe):
+    indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
+    out = indicators.ABCD(default_symbol, default_timeframe)
