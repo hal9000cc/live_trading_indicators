@@ -25,8 +25,9 @@ class SourceData:
         self.datasource_module = datasource_module
 
     def filename_day_data(self, symbol, timeframe, day_date):
+        assert type(day_date) == dt.date
         symbol_parts = symbol.split('/')
-        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date.date()}.ftid'
+        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.ftid'
         return path.join(self.cash_folder, *symbol_parts[:-1], filename)
 
     def bars_of_day(self, symbol, timeframe, day_date):
@@ -36,55 +37,11 @@ class SourceData:
             bar_data = self.load_from_cash(filename, symbol, timeframe)
         else:
             bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
-            self.check_day_data(bar_data, symbol, timeframe, day_date)
+            bar_data.check_day_data(symbol, timeframe, day_date)
             if not bar_data.is_empty():
                 self.save_to_cash(filename, bar_data)
 
         return bar_data
-
-    @staticmethod
-    def check_day_data(day_data, symbol, timeframe, day_date):
-
-        error = None
-        first_time = day_data.time[0]
-        n_bars = 24 * 60 * 60 // timeframe.value
-
-        if not(len(day_data.time) == n_bars and
-               len(day_data.open) == n_bars and
-               len(day_data.high) == n_bars and
-               len(day_data.low) == n_bars and
-               len(day_data.close) == n_bars and
-               len(day_data.volume) == n_bars):
-            error = 'bad data length'
-
-        if first_time != np.datetime64(day_date).astype(TIME_TYPE):
-            error = 'bad first bar time'
-
-        if (first_time + np.arange(n_bars) * timeframe.value * 1000 != day_data.time).any():
-            error = 'bad bars time'
-
-        if (day_data.high < day_data.low).any():
-            error = 'bad high/low values'
-
-        if (day_data.open > day_data.high).any() or (day_data.open < day_data.low).any():
-            error = 'bad open values'
-
-        if (day_data.close > day_data.high).any() or (day_data.close < day_data.low).any():
-            error = 'bad close values'
-
-        if (day_data.volume < 0).any():
-            error = 'bad volume values'
-
-        nonzero_volume = day_data.volume > 0
-
-        if (nonzero_volume & (day_data.open <= 0)).any():
-            error = 'bad open values'
-
-        if (nonzero_volume & (day_data.close <= 0)).any():
-            error = 'bad close values'
-
-        if error:
-            raise FTIException(f'Timeframe data error: {error}')
 
     @staticmethod
     def get_file_signature_struct():
@@ -178,7 +135,7 @@ class SourceData:
             data_struct = self.get_file_data_struct(header.n_bars)
             file_data = data_struct.parse(buf)
 
-        return OHLCV_data({
+        return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
             'time': np.array(file_data.time, dtype=int).astype(TIME_TYPE),
@@ -189,20 +146,20 @@ class SourceData:
             'volume': np.array(file_data.volume, dtype=VOLUME_TYPE)
         })
 
-    def get_bar_data(self, symbol, timeframe, date_begin, date_end):
+    def get_bar_data(self, symbol, timeframe, time_begin, time_end):
 
-        if date_begin is None:
-            raise FTIException('No begin_date set')
+        if time_begin is None:
+            raise FTIException('No begin_time set')
 
-        if date_end is None:
-            raise FTIException('No end_date set')
+        if time_end is None:
+            raise FTIException('No end_time set')
 
-        if date_begin > date_end:
-            raise ValueError('begin_date less then end_date')
+        if time_begin > time_end:
+            raise ValueError('begin_time less then end_time')
 
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
-        day_date = date_begin
-        while day_date <= date_end:
+        day_date = time_begin
+        while day_date <= time_end:
             day_data = self.bars_of_day(symbol, timeframe, day_date)
             td_time.append(day_data.time)
             td_open.append(day_data.open)
@@ -233,13 +190,14 @@ def rename_file_force(source, destination):
 def byte_csv_to_strings(csv_text):
 
     max_line_length = 200
-    for i in range(10):
-        first_lines = csv_text[:max_line_length * 2].splitlines()
-        if len(first_lines) > 2: break
-    else:
-        FTIException(f'Bad csv file: {file_name}')
+    for i in range(3):
+        max_line_length = max_line_length * 2
+        first_lines = csv_text[:max_line_length].splitlines()
+        if len(first_lines) > 1: break
+    # else:
+    #     return None
 
-    n_columns = first_lines[1].count(b',') + 1
+    n_columns = first_lines[0].count(b',') + 1
 
     return np.array(csv_text.replace(b',', b'\n').splitlines()).reshape((-1, n_columns))
 

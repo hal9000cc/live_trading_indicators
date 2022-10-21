@@ -1,8 +1,8 @@
 from .exceptions import *
 from .indicator_data import *
 from .indicators import Indicators
-from .common import Timeframe, \
-                    TIME_TYPE, \
+from .timeframe import Timeframe
+from .common import TIME_TYPE, \
                     PRICE_TYPE, \
                     VOLUME_TYPE
 

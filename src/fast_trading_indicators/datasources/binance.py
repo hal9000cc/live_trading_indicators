@@ -50,11 +50,13 @@ def init(config):
 
 
 def tickfile_name_basic(symbol, date, ext):
-    return f'{symbol.upper()}-trades-{date.date()}.{ext}'
+    assert type(date) == dt.date
+    return f'{symbol.upper()}-trades-{date}.{ext}'
 
 
 def barfile_name_basic(symbol, timeframe, date, ext):
-    return f'{symbol.upper()}-{timeframe}-{date.date()}.{ext}'
+    assert type(date) == dt.date
+    return f'{symbol.upper()}-{timeframe}-{date}.{ext}'
 
 
 def get_url_tick_day(symbol, date):
@@ -182,7 +184,8 @@ def download_klines(symbol, timeframe, date):
 
 def download_tickfile(symbol, date, tick_day_file_name):
 
-    logging.info(f'Download tick data for {symbol} for {date.date()}...')
+    assert type(date) == dt.date
+    logging.info(f'Download tick data for {symbol} for {date}...')
 
     buf = download_ticks(symbol, date)
     if buf is None: return
@@ -212,10 +215,10 @@ def read_tickfile(file_name):
 def bars_of_day_from_tickfile(file_name, symbol, timeframe, date):
 
     if not path.isfile(file_name):
-        return OHLCV_data.empty_day(symbol, timeframe, date)
+        return OHLCV_day.empty_day(symbol, timeframe, date)
 
     tick_data = read_tickfile(file_name)
-    return OHLCV_data.from_ticks(tick_data, symbol, timeframe, date)
+    return OHLCV_day.from_ticks(tick_data, symbol, timeframe, date)
 
 
 def bars_of_day_from_ticks(symbol, timeframe, date):
@@ -234,9 +237,11 @@ def bars_of_day_from_klines_raw(symbol, timeframe, date):
 
     byte_zipcsv = download_klines(symbol, timeframe, date)
     if byte_zipcsv is None:
-        return OHLCV_data.empty_day(symbol, timeframe, date)
+        return OHLCV_day.empty_day(symbol, timeframe, date)
 
     string_data_table = read_zipcsv_to_strings(io.BytesIO(byte_zipcsv))
+    if string_data_table is None:
+        raise FTIException(f'Bad downloaded csv data: symbol {symbol}, timeframe {timeframe}, date {date}')
 
     first_line = 0 if string_data_table[0, 0].isdigit() else 1
     tf_open = string_data_table[first_line:, 1].astype(float)
@@ -246,7 +251,7 @@ def bars_of_day_from_klines_raw(symbol, timeframe, date):
     tf_volume = string_data_table[first_line:, 5].astype(float)
     tf_time = string_data_table[first_line:, 0].astype(int).astype('datetime64[ms]')
 
-    return OHLCV_data({
+    return OHLCV_day({
         'symbol': symbol,
         'timeframe': timeframe,
         'time': tf_time,

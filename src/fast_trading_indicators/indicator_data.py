@@ -6,6 +6,8 @@ import logging
 from .common import *
 from .exceptions import *
 
+pandas_module = None
+
 
 class IndicatorData:
 
@@ -115,6 +117,18 @@ class IndicatorData:
 
     read_only = property(__read_only_get, __read_only_set)
 
+    def data_keys(self):
+        return [key for key, value in self.data.items() if type(value) == np.ndarray]
+
+    def pandas(self):
+        global pandas_module
+
+        if pandas_module is None:
+            pandas_module = importlib.import_module('pandas')
+
+        pandas_series_names = set(self.data_keys())
+        return pandas_module.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
+
 
 class OHLCV_data(IndicatorData):
 
@@ -132,6 +146,8 @@ class OHLCV_data(IndicatorData):
             info.append(
                 f'empty bars: count {self.empty_bars_count} ({self.empty_bars_fraction*100:.2f} %), max consecutive {self.empty_bars_consecutive}')
 
+        info.append(f'Values: {", ".join(self.data_keys())}')
+
         return '\n'.join(info)
 
     def __repr__(self):
@@ -139,8 +155,9 @@ class OHLCV_data(IndicatorData):
 
     def clear_day(self, date):
 
+        assert type(date) == dt.date
         n_bars = 24 * 60 * 60 // self.timeframe.value
-        self.first_bar_time = np.datetime64(date.date(), 'ms')
+        self.first_bar_time = np.datetime64(date, 'ms')
 
         self.data |= {
             'time': np.array([self.first_bar_time + np.timedelta64(i, 's') * self.timeframe.value for i in range(n_bars)]),
@@ -152,22 +169,6 @@ class OHLCV_data(IndicatorData):
         }
 
         self.end_bar_time = self.data['time'][-1]
-
-    @staticmethod
-    def empty_day(symbol, timeframe, date):
-        n_bars = 24 * 60 * 60 // timeframe.value
-        first_bar_time = np.datetime64(date.date(), 'ms')
-
-        return OHLCV_data({
-            'symbol': symbol,
-            'timeframe': timeframe,
-            'time': np.array([first_bar_time + np.timedelta64(i, 's') * timeframe.value for i in range(n_bars)]),
-            'open': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'high': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'low': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'close': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
-        })
 
     def fix_time(self, time_need):
 
@@ -205,11 +206,13 @@ class OHLCV_data(IndicatorData):
 
     def fix_errors(self, date):
 
+        assert type(date) == dt.date
+
         if self is None or len(self.time) == 0:
             self.clear_day(date)
             return
 
-        first_bar_time = np.datetime64(date.date(), 'ms')
+        first_bar_time = np.datetime64(date, 'ms')
         n_bars = 24 * 60 * 60 // self.timeframe.value
         time_need = np.array([first_bar_time + np.timedelta64(i, 's') * self.timeframe.value for i in range(n_bars)])
 
@@ -291,19 +294,73 @@ class OHLCV_data(IndicatorData):
             self.low[point: point_end] = price
             self.close[point: point_end] = price
 
-    def pandas(self):
-        global pandas_module
 
-        if pandas_module is None:
-            pandas_module = importlib.import_module('pandas')
+class OHLCV_day(OHLCV_data):
 
-        pandas_series_names = {'time', 'open', 'high', 'low', 'close', 'volume'}
-        return pandas_module.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
+    def check_day_data(self, symbol, timeframe, day_date):
+
+        error = None
+        first_time = self.time[0]
+        n_bars = 24 * 60 * 60 // timeframe.value
+
+        if not(len(self.time) == n_bars and
+               len(self.open) == n_bars and
+               len(self.high) == n_bars and
+               len(self.low) == n_bars and
+               len(self.close) == n_bars and
+               len(self.volume) == n_bars):
+            error = 'bad data length'
+
+        if first_time != np.datetime64(day_date).astype(TIME_TYPE):
+            error = 'bad first bar time'
+
+        if (first_time + np.arange(n_bars) * timeframe.value * 1000 != self.time).any():
+            error = 'bad bars time'
+
+        if (self.high < self.low).any():
+            error = 'bad high/low values'
+
+        if (self.open > self.high).any() or (self.open < self.low).any():
+            error = 'bad open values'
+
+        if (self.close > self.high).any() or (self.close < self.low).any():
+            error = 'bad close values'
+
+        if (self.volume < 0).any():
+            error = 'bad volume values'
+
+        nonzero_volume = self.volume > 0
+
+        if (nonzero_volume & (self.open <= 0)).any():
+            error = 'bad open values'
+
+        if (nonzero_volume & (self.close <= 0)).any():
+            error = 'bad close values'
+
+        if error:
+            raise FTIException(f'Timeframe data error: {error}')
+
+    @staticmethod
+    def empty_day(symbol, timeframe, date):
+        assert type(date) == dt.date
+        n_bars = 24 * 60 * 60 // timeframe.value
+        first_bar_time = np.datetime64(date, 'ms')
+
+        return OHLCV_day({
+            'symbol': symbol,
+            'timeframe': timeframe,
+            'time': np.array([first_bar_time + np.timedelta64(i, 's') * timeframe.value for i in range(n_bars)]),
+            'open': np.zeros(n_bars, dtype=PRICE_TYPE),
+            'high': np.zeros(n_bars, dtype=PRICE_TYPE),
+            'low': np.zeros(n_bars, dtype=PRICE_TYPE),
+            'close': np.zeros(n_bars, dtype=PRICE_TYPE),
+            'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
+        })
 
     @staticmethod
     def from_ticks(tick_data, symbol, timeframe, date):
 
-        assert date.time() == dt.time()
+        assert type(date) == dt.date
 
         day_start_ms = np.datetime64(date).astype('datetime64[ms]').astype(int)
         step_ms = timeframe.value * 1000
@@ -346,7 +403,7 @@ class OHLCV_data(IndicatorData):
             tf_volume[i_tf] = interval_volumes[i_tf].sum()
 
         volume_round = VOLUME_TYPE_PRECISION - int(np.ceil(np.log(tf_volume.max()) / np.log(10)))
-        return OHLCV_data({
+        return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
             'time': tf_time,

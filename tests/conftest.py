@@ -71,10 +71,7 @@ def config_default_t():  # source: ticks
     yield {'source_type': 'ticks'}
 
 
-def pytest_generate_tests(metafunc):
-
-    if 'all_symbols' not in metafunc.fixturenames:
-        return
+def generate_all_symbols():
 
     all_symbols = []
     # for part in ('um', 'cm', 'spot'):
@@ -85,4 +82,22 @@ def pytest_generate_tests(metafunc):
 
     for symbol in ('btcusd', 'ethusd', 'btcusd'):
         all_symbols += [f'{symbol}t', f'um/{symbol}t', f'cm/{symbol}_perp']
-    return metafunc.parametrize("all_symbols", all_symbols)
+
+    return all_symbols
+
+
+def generate_all_timeframe_regular():
+    return [ fti.Timeframe.t1h, fti.Timeframe.t2h, fti.Timeframe.t1d, fti.Timeframe.t1m, \
+             fti.Timeframe.t5m, fti.Timeframe.t4h, \
+             fti.Timeframe.t6h, fti.Timeframe.t12h, fti.Timeframe.t8h, fti.Timeframe.t10m, \
+             fti.Timeframe.t15m, fti.Timeframe.t30m ]
+
+
+def pytest_generate_tests(metafunc):
+
+    if 'all_symbols' in metafunc.fixturenames:
+        return metafunc.parametrize("all_symbols", generate_all_symbols())
+
+    if 'timeframe_all_regular' in metafunc.fixturenames:
+        return metafunc.parametrize("timeframe_all_regular", generate_all_timeframe_regular())
+

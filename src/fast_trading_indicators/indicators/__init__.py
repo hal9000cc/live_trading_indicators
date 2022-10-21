@@ -7,7 +7,20 @@ from .. import datasources
 
 
 class Indicators:
+    """
+    Pool af indicators.
 
+    Indicators(datasource, date_begin, date_end, **config_mod)
+
+        datasource:
+            Source of trading quotes. The name of the module from datasources or the module itself.
+
+        date_begin, date_end:
+            Start and end dates of the indicator calculation interval. Dates are set inclusive. Dates can be set as date, datetime, datetime64, or as an integer of the form YYYYMMDD.
+
+        config_mod:
+            Configuration modification.
+    """
     def __init__(self, datasource, date_begin=None, date_end=None, **config_mod):
 
         self.indicators = {}
@@ -27,12 +40,14 @@ class Indicators:
         datasource_module.init(self.config)
         self.source_data = datasources.SourceData(datasource_module, self.config)
 
-        self.date_begin = None
-        self.date_end = None
+        self.date_begin = param_time(date_begin, False).date() if date_begin is not None else None
+        self.date_end = param_time(date_end, True).date() if date_end is not None else None
+        self.fix_date_begin = self.date_begin is not None
+        self.fix_date_end = self.date_end is not None
 
         self.reset()
 
-        self.set_date_interval(date_begin, date_end)
+        #self.set_time_interval(time_begin, time_end)
 
     def init_log(self):
 
@@ -42,22 +57,22 @@ class Indicators:
                     format='%(asctime)s %(message)s',
                     handlers=[logging.StreamHandler()])
 
-    def set_date_interval(self, inp_date_begin, inp_date_end):
+    def set_time_interval(self, param_time_begin, param_time_end):
 
-        date_begin = date_from_arg(inp_date_begin)
-        date_end = date_from_arg(inp_date_end)
+        time_begin = param_time(param_time_begin, False)
+        time_end = param_time(param_time_end, True)
 
-        if date_begin is not None:
-            if self.date_begin is None or date_begin < self.date_begin:
-                self.date_begin = date_begin
+        if not self.fix_date_begin:
+            if time_begin is not None and (self.date_begin is None or time_begin.date() < self.date_begin):
+                self.date_begin = time_begin.date()
                 self.reset()
 
-        if date_end is not None:
-            if self.date_end is None or date_end > self.date_end:
-                self.date_end = date_end
+        if not self.fix_date_end:
+            if time_end is not None and (self.date_end is None or time_end.date() > self.date_end):
+                self.date_end = time_end.date()
                 self.reset()
 
-        return date_begin, date_end
+        return time_begin, time_end
 
     def __getattr__(self, item):
         return self.get_indicator(item)
@@ -170,9 +185,9 @@ class IndicatorProxy:
         except ModuleNotFoundError as error:
             raise FTIExceptionIndicatorNotFound(indicator_name)
 
-    def __call__(self, *args, date_begin=None, date_end=None, **kwargs):
+    def __call__(self, *args, time_begin=None, time_end=None, **kwargs):
 
-        use_date_begin, use_date_end = self.indicators.set_date_interval(date_begin, date_end)
+        use_date_begin, use_date_end = self.indicators.set_time_interval(time_begin, time_end)
 
         if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
             raise ValueError('End date less then begin date')
@@ -184,7 +199,11 @@ class IndicatorProxy:
             out.read_only = True
             self.indicators.put_out_to_cache(self.indicator_name, args, kwargs, out)
 
-        return out[use_date_begin: use_date_end + dt.timedelta(days=1) if use_date_end else None]
+        if (use_date_begin is not None and use_date_begin < out.time[0]) or\
+                (use_date_end is not None and out.timeframe.begin_of_tf(use_date_end) > out.time[-1]):
+            raise FTIExceptionOutOfThePeriod()
+
+        return out[use_date_begin: use_date_end + out.timeframe.timedelta() if use_date_end else None]
 
     def __del__(self):
         self.indicator_module = None

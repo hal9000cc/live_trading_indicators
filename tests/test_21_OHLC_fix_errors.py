@@ -2,15 +2,15 @@ import pytest
 import importlib
 import numpy as np
 import src.fast_trading_indicators as fti
-from src.fast_trading_indicators.common import date_from_arg
+from src.fast_trading_indicators.common import param_time
 
 
 @pytest.mark.parametrize('symbol, timeframe, date', [('um/ethusdt', fti.Timeframe.t1h, 20220901)])
 def test_bar_data_fix_ok(config_default, default_source, symbol, timeframe, date):
 
-    use_date = date_from_arg(date)
+    use_date = param_time(date, False).date()
     indicators = fti.Indicators(default_source)
-    source_out = indicators.OHLCV(symbol, timeframe, date_begin=use_date, date_end=use_date)
+    source_out = indicators.OHLCV(symbol, timeframe, time_begin=use_date, time_end=use_date)
 
     out = fti.OHLCV_data(source_out.data).copy()
     out.fix_errors(use_date)
@@ -19,9 +19,9 @@ def test_bar_data_fix_ok(config_default, default_source, symbol, timeframe, date
 
 @pytest.mark.parametrize('symbol, timeframe, date', [('um/ethusdt', fti.Timeframe.t1h, 20220901)])
 def test_bar_data_fix_bad(config_default, default_source, symbol, timeframe, date):
-    use_date = date_from_arg(date)
+    use_date = param_time(date, False).date()
     indicators = fti.Indicators(default_source)
-    source_out = indicators.OHLCV(symbol, timeframe, date_begin=use_date, date_end=use_date)
+    source_out = indicators.OHLCV(symbol, timeframe, time_begin=use_date, time_end=use_date)
 
     out = fti.OHLCV_data(source_out.data).copy()
     out.time[0] -= np.timedelta64(1, 's')
@@ -61,9 +61,9 @@ def test_bar_data_fix_bad(config_default, default_source, symbol, timeframe, dat
     ('um/ethusdt', fti.Timeframe.t1h, 20220901, [0, -1]),
 ])
 def test_bar_data_fix_skips(config_default, default_source, symbol, timeframe, date, skips):
-    use_date = date_from_arg(date)
+    use_date = param_time(date, False).date()
     indicators = fti.Indicators(default_source)
-    source_out = indicators.OHLCV(symbol, timeframe, date_begin=use_date, date_end=use_date)
+    source_out = indicators.OHLCV(symbol, timeframe, time_begin=use_date, time_end=use_date)
 
     ixb = np.array([True] * len(source_out.time))
     ixb[np.array(skips)] = False

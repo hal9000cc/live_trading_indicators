@@ -1,3 +1,5 @@
+import datetime as dt
+
 
 class FTIException(Exception):
 
@@ -40,10 +42,11 @@ class FTIExceptionTooManyEmptyBars(FTIException):
 class FTISourceDataNotFound(FTIException):
 
     def __init__(self, symbol, date):
+        assert type(date) == dt.date
         self.symbol = symbol
         self.date = date
 
-        super().__init__(f'Source data not found! Symbol {self.symbol}, date {self.date.date()}.')
+        super().__init__(f'Source data not found! Symbol {self.symbol}, date {self.date}.')
 
 
 class FTIExceptionIndicatorNotFound(FTIException):
@@ -52,3 +55,9 @@ class FTIExceptionIndicatorNotFound(FTIException):
         self.indicator_name = indicator_name
 
         super().__init__(f'Indicator "{self.indicator_name}" not found.')
+
+
+class FTIExceptionOutOfThePeriod(FTIException):
+
+    def __init__(self):
+        super().__init__('Time out of the calculation period')

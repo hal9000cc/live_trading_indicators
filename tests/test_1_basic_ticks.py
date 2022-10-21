@@ -1,7 +1,7 @@
 import os.path as path
 import src.fast_trading_indicators as fti
 import pytest
-from src.fast_trading_indicators.common import HOME_FOLDER, date_from_arg
+from src.fast_trading_indicators.common import HOME_FOLDER, param_time
 from memory_profiler import memory_usage
 import importlib
 
@@ -57,7 +57,7 @@ def test_OHLCV_bars(config_clear_data_t, source, symbol, date_begin, date_end):
 
     source_module = importlib.import_module(f'src.fast_trading_indicators.datasources.{source}', __package__)
     source_module.init(fti.config())
-    out_using_bars = source_module.bars_of_day_from_klines(symbol, timeframe, date_from_arg(date_begin))
+    out_using_bars = source_module.bars_of_day_from_klines(symbol, timeframe, param_time(date_begin, False).date())
 
     assert (out_using_ticks.time == out_using_bars.time).all()
     assert (out_using_ticks.open == out_using_bars.open).all()
@@ -82,7 +82,7 @@ def test_OHLCV_bars_all_symbols(config_default_t, source, timeframe, date_begin,
 
     source_module = importlib.import_module(f'src.fast_trading_indicators.datasources.{source}', __package__)
     source_module.init(fti.config())
-    out_using_bars = source_module.bars_of_day_from_klines(all_symbols, timeframe, date_from_arg(date_begin))
+    out_using_bars = source_module.bars_of_day_from_klines(all_symbols, timeframe, param_time(date_begin, False).date())
 
     assert (out_using_ticks.time == out_using_bars.time).all()
     assert (out_using_ticks.open == out_using_bars.open).all()

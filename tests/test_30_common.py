@@ -2,7 +2,7 @@ import pytest
 import datetime as dt
 import numpy as np
 import src.fast_trading_indicators as fti
-from src.fast_trading_indicators.common import date_from_arg, HOME_FOLDER
+from src.fast_trading_indicators.common import param_time, HOME_FOLDER
 
 
 def test_check_bar_data(config_default, default_source, default_symbol, default_timeframe):
@@ -67,8 +67,8 @@ def test_different_dates(config_default, default_source, default_symbol, default
 
     for date_begin, date_end in test_dates:
         out = indicators.OHLCV(default_symbol, default_timeframe, date_begin=date_begin, date_end=date_end)
-        assert out.time[0] == np.datetime64(date_from_arg(date_begin)).astype(fti.TIME_TYPE)
-        assert out.time[-1] == np.datetime64(date_from_arg(date_end) + dt.timedelta(days=1)).astype(fti.TIME_TYPE) - default_timeframe.value * 1000
+        assert out.time[0] == np.datetime64(param_time(date_begin)).astype(fti.TIME_TYPE)
+        assert out.time[-1] == np.datetime64(param_time(date_end) + dt.timedelta(days=1)).astype(fti.TIME_TYPE) - default_timeframe.value * 1000
 
 @pytest.mark.parametrize("cleared_points", [
     ([0, 1, 2, 3, 10, 11],),
@@ -112,8 +112,8 @@ def test_change_dates(config_default, default_source, default_symbol, default_ti
 
 def test_too_many_empty_bars_exception(config_default, default_source, default_symbol, default_timeframe):
 
-    use_date_begin = date_from_arg(20210901)
-    use_date_end = date_from_arg(20210901)
+    use_date_begin = param_time(20210901)
+    use_date_end = param_time(20210901)
     indicators = fti.Indicators(default_source, date_begin=use_date_begin, date_end=use_date_end)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
 

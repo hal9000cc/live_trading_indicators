@@ -2,7 +2,7 @@ import pytest
 import importlib
 import numpy as np
 import src.fast_trading_indicators as fti
-from src.fast_trading_indicators.common import date_from_arg
+from src.fast_trading_indicators.common import param_time
 from src.fast_trading_indicators.datasources import binance
 
 
