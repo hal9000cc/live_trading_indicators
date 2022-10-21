@@ -12,41 +12,41 @@ def test_check_bar_data(config_default, default_source, default_symbol, default_
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1e12)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
 
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 0 and empty_bars_consecutive == 0
 
-    out.volume[0:6] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[0:6] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 6 / n_bars and empty_bars_consecutive == 6
 
-    out.volume[-6:] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[-6:] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 12 / n_bars and empty_bars_consecutive == 6
 
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
-    out.volume[-6:] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[-6:] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 6 / n_bars and empty_bars_consecutive == 6
 
-    out.volume[20:32] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[20:32] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 18 / n_bars and empty_bars_consecutive == 12
 
-    out.volume[:6] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[:6] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 24 / n_bars and empty_bars_consecutive == 12
 
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
-    out.volume[30:33] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[30:33] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 3 / n_bars and empty_bars_consecutive == 3
 
-    out.volume[-6:-3] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[-6:-3] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 6 / n_bars and empty_bars_consecutive == 3
 
-    out.volume[-6:] = 0
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    out.close[-6:] = 0
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
     assert empty_bars_fraction == 9 / n_bars and empty_bars_consecutive == 6
 
 
@@ -87,7 +87,7 @@ def test_restore_bar_data(config_default, default_source, default_symbol, cleare
     for value_name in ('open', 'high', 'low', 'close', 'volume'):
         out.data[value_name][np.array(cleared_points)] = 0
 
-    indicators.restore_bar_data(out)
+    out.restore_bar_data()
 
     assert (out.open != 0).all()
     assert (out.high != 0).all()
@@ -112,15 +112,23 @@ def test_change_dates(config_default, default_source, default_symbol, default_ti
 
 def test_too_many_empty_bars_exception(config_default, default_source, default_symbol, default_timeframe):
 
-    indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
+    use_date_begin = date_from_arg(20210901)
+    use_date_end = date_from_arg(20210901)
+    indicators = fti.Indicators(default_source, date_begin=use_date_begin, date_end=use_date_end)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
 
-    empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+    empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out, default_symbol, use_date_begin, use_date_end)
     assert empty_bars_fraction == 0 and empty_bars_consecutive == 0
 
-    out.volume[0:6] = 0
+    test_out = out.copy()
+    test_out.close[0:6] = 0
+    with pytest.raises(fti.FTISourceDataNotFound) as error:
+        empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(test_out, default_symbol, use_date_begin, use_date_end)
+
+    test_out = out.copy()
+    test_out.close[1:7] = 0
     with pytest.raises(fti.FTIExceptionTooManyEmptyBars) as error:
-        empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out)
+        empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(test_out, default_symbol, use_date_begin, use_date_end)
 
 
 def test_OHLCV(config_default, default_source, default_symbol, default_timeframe):
@@ -130,4 +138,5 @@ def test_OHLCV(config_default, default_source, default_symbol, default_timeframe
 
 def test_indicator_not_found(config_default, default_source, default_symbol, default_timeframe):
     indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
-    out = indicators.ABCD(default_symbol, default_timeframe)
+    with pytest.raises(fti.FTIExceptionIndicatorNotFound) as error:
+        out = indicators.ABCD(default_symbol, default_timeframe)

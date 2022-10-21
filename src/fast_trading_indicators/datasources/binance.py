@@ -5,7 +5,7 @@ import urllib
 import urllib.request
 import json
 import logging
-import numpy as np
+import numpy as npf
 from ..common import *
 from ..exceptions import *
 from ..indicator_data import *
@@ -151,6 +151,7 @@ def check_symbol(symbol):
 def download_ticks(symbol, date):
 
     download_url = get_url_tick_day(symbol, date)
+    logging.info(f'download {download_url}...')
 
     try:
         dl_file = urllib.request.urlopen(download_url)
@@ -166,6 +167,7 @@ def download_ticks(symbol, date):
 def download_klines(symbol, timeframe, date):
 
     download_url = get_url_bar_day(symbol, timeframe, date)
+    logging.info(f'download {download_url}...')
 
     try:
         dl_file = urllib.request.urlopen(download_url)

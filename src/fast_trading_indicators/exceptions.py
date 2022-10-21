@@ -45,3 +45,10 @@ class FTISourceDataNotFound(FTIException):
 
         super().__init__(f'Source data not found! Symbol {self.symbol}, date {self.date.date()}.')
 
+
+class FTIExceptionIndicatorNotFound(FTIException):
+
+    def __init__(self, indicator_name):
+        self.indicator_name = indicator_name
+
+        super().__init__(f'Indicator "{self.indicator_name}" not found.')

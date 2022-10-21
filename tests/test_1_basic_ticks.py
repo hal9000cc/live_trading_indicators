@@ -67,7 +67,6 @@ def test_OHLCV_bars(config_clear_data_t, source, symbol, date_begin, date_end):
     assert (out_using_ticks.volume == out_using_bars.volume).all()
 
 
-@pytest.mark.skip('long test')
 @pytest.mark.parametrize('source, timeframe, date_begin, date_end', [
     ('binance', fti.Timeframe.t1h, 20220901, 20220901)])
 def test_OHLCV_bars_all_symbols(config_default_t, source, timeframe, date_begin, date_end, all_symbols):

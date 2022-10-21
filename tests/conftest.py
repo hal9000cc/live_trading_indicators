@@ -77,10 +77,12 @@ def pytest_generate_tests(metafunc):
         return
 
     all_symbols = []
-    for part in ('um', 'cm', 'spot'):
-        binance.download_exchange_info_part(part)
-        for symbol_name in binance.exchange_info_data[part]['symbols'].keys():
-            symbol = ('' if part == 'spot' else part + '/') + symbol_name
-            all_symbols.append(symbol)
+    # for part in ('um', 'cm', 'spot'):
+    #     binance.download_exchange_info_part(part)
+    #     for symbol_name in binance.exchange_info_data[part]['symbols'].keys():
+    #         symbol = ('' if part == 'spot' else part + '/') + symbol_name
+    #         all_symbols.append(symbol)
 
+    for symbol in ('btcusd', 'ethusd', 'btcusd'):
+        all_symbols += [f'{symbol}t', f'um/{symbol}t', f'cm/{symbol}_perp']
     return metafunc.parametrize("all_symbols", all_symbols)

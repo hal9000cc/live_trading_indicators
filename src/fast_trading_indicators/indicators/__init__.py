@@ -1,6 +1,6 @@
-import importlib
-import numpy as np
+import logging
 import datetime as dt
+import importlib
 from ..common import *
 from ..exceptions import *
 from .. import datasources
@@ -13,6 +13,7 @@ class Indicators:
         self.indicators = {}
 
         self.config = config_load() | config_mod
+        self.init_log()
 
         datasource_type = type(datasource)
         if datasource_type == str:
@@ -32,6 +33,14 @@ class Indicators:
         self.reset()
 
         self.set_date_interval(date_begin, date_end)
+
+    def init_log(self):
+
+        if not self.config['print_log']: return
+
+        logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(message)s',
+                    handlers=[logging.StreamHandler()])
 
     def set_date_interval(self, inp_date_begin, inp_date_end):
 
@@ -111,6 +120,14 @@ class Indicators:
 
         bar_data = self.source_data.get_bar_data(symbol, timeframe, date_begin, date_end)
 
+        self.check_bar_data(bar_data, symbol, date_begin, date_end)
+
+        if self.config['restore_empty_bars']:
+            bar_data.restore_bar_data()
+        return bar_data
+
+    def check_bar_data(self, bar_data, symbol, date_begin, date_end):
+
         if self.config['endpoints_required']:
             if len(bar_data) == 0:
                 raise FTISourceDataNotFound(symbol, date_begin)
@@ -122,7 +139,12 @@ class Indicators:
         max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config['max_empty_bars_consecutive']
         if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
 
-            empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
+            empty_bars_count, empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
+            bar_data.data |= {
+                'empty_bars_count': empty_bars_count,
+                'empty_bars_fraction': empty_bars_fraction,
+                'empty_bars_consecutive': empty_bars_consecutive
+            }
             if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction'])\
                     or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
                 raise FTIExceptionTooManyEmptyBars(self.datasource_name,
@@ -133,25 +155,27 @@ class Indicators:
                                                    empty_bars_fraction,
                                                    empty_bars_consecutive)
 
-        if self.config['restore_empty_bars']:
-            bar_data.restore_bar_data()
-
-        return bar_data
+        return empty_bars_count, empty_bars_fraction, empty_bars_consecutive
 
 
 class IndicatorProxy:
 
     def __init__(self, indicator_name, indicators):
+
         self.indicator_name = indicator_name
-        self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
-        self.indicators = indicators
+
+        try:
+            self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
+            self.indicators = indicators
+        except ModuleNotFoundError as error:
+            raise FTIExceptionIndicatorNotFound(indicator_name)
 
     def __call__(self, *args, date_begin=None, date_end=None, **kwargs):
 
         use_date_begin, use_date_end = self.indicators.set_date_interval(date_begin, date_end)
 
         if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
-            raise ValueError('The begin date less then the end date')
+            raise ValueError('End date less then begin date')
 
         out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
 

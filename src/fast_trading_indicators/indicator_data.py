@@ -1,4 +1,6 @@
 import datetime as dt
+import importlib
+
 import numpy as np
 import logging
 from .common import *
@@ -63,6 +65,9 @@ class IndicatorData:
         i_start = self.index_from_time(time_start)
         i_stop = self.index_from_time(time_stop)
 
+        if i_start == 0 and i_stop == len(self):
+            return self
+
         if i_start > i_stop: raise ValueError
         if i_start < 0 or i_stop < 0: raise ValueError
 
@@ -77,7 +82,7 @@ class IndicatorData:
             else:
                 new_data[key] = value
 
-        new_indicator_data = IndicatorData(new_data)
+        new_indicator_data = self.__class__(new_data)
         if self.read_only:
             new_indicator_data.read_only = True
 
@@ -117,6 +122,20 @@ class OHLCV_data(IndicatorData):
         super().__init__(data_dict)
         dict_keys = data_dict.keys()
         assert 'symbol' in dict_keys and 'timeframe' in dict_keys
+
+    def __str__(self):
+
+        info = [f'<OHLCV Bars> symbol: {self.symbol}, timeframe: {self.timeframe}',
+                f'date: {self.time[0].astype("datetime64[s]")} - {self.time[-1].astype("datetime64[s]")} (length: {len(self.time)})']
+
+        if self.data.get('empty_bars_count') is not None:
+            info.append(
+                f'empty bars: count {self.empty_bars_count} ({self.empty_bars_fraction*100:.2f} %), max consecutive {self.empty_bars_consecutive}')
+
+        return '\n'.join(info)
+
+    def __repr__(self):
+        return self.__str__()
 
     def clear_day(self, date):
 
@@ -245,7 +264,7 @@ class OHLCV_data(IndicatorData):
         empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
         empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
 
-        return empty_bars_fraction, empty_bars_consecutive
+        return n_empty_bars, empty_bars_fraction, empty_bars_consecutive
 
     def restore_bar_data(self):
 
@@ -271,6 +290,15 @@ class OHLCV_data(IndicatorData):
             self.high[point: point_end] = price
             self.low[point: point_end] = price
             self.close[point: point_end] = price
+
+    def pandas(self):
+        global pandas_module
+
+        if pandas_module is None:
+            pandas_module = importlib.import_module('pandas')
+
+        pandas_series_names = {'time', 'open', 'high', 'low', 'close', 'volume'}
+        return pandas_module.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
 
     @staticmethod
     def from_ticks(tick_data, symbol, timeframe, date):

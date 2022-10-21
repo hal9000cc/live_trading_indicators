@@ -14,6 +14,7 @@ __all__ = [
     'VOLUME_TYPE_PRECISION',
     'TIME_TYPE',
     'HOME_FOLDER',
+    'pandas_module',
 
     'Timeframe',
 
@@ -31,6 +32,7 @@ TIME_TYPE = 'datetime64[ms]'
 HOME_FOLDER = path.join(Path.home(), '.fti')
 CONFIG_FILE_NAME = 'config.json'
 
+pandas_module = None
 
 class Timeframe(IntEnum):
     t1m = 60
@@ -74,7 +76,8 @@ def config_get_default():
         'endpoints_required': True,
         'max_empty_bars_fraction': 0.01,
         'max_empty_bars_consecutive': 2,
-        'restore_empty_bars': True # open=high=low=close = last price
+        'restore_empty_bars': True,
+        'print_log': True
     }
 
 
@@ -82,14 +85,11 @@ def config_load():
 
     settings_file_name = path.join(HOME_FOLDER, CONFIG_FILE_NAME)
 
+    config = config_get_default()
+
     if path.isfile(settings_file_name):
-
         with open(settings_file_name, 'r') as file:
-            config = json.load(file)
-
-    else:
-
-        config = config_get_default()
+            config |= json.load(file)
 
     return config
 
