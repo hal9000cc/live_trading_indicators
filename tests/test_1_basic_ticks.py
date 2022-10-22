@@ -1,7 +1,7 @@
 import os.path as path
-import src.fast_trading_indicators as fti
+import src.live_trading_indicators as lti
 import pytest
-from src.fast_trading_indicators.common import HOME_FOLDER, param_time
+from src.live_trading_indicators.common import HOME_FOLDER, param_time
 from memory_profiler import memory_usage
 import importlib
 
@@ -17,9 +17,9 @@ import importlib
 ])
 def test_OHLCV_clear_data(config_clear_data_t, source, symbol, date_begin, date_end, control_values):
 
-    indicators = fti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_clear_data_t)
+    indicators = lti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_clear_data_t)
 
-    out = indicators.OHLCV(symbol, fti.Timeframe.t1h)
+    out = indicators.OHLCV(symbol, lti.Timeframe.t1h)
     if control_values:
         assert (out.open[:4] == control_values[0]).all()
         assert (out.high[:4] == control_values[1]).all()
@@ -34,9 +34,9 @@ def test_memory_leak(config_clear_data_t, default_source, default_symbol):
 
     sources_folder = path.join(HOME_FOLDER, 'data', 'sources')
     config_clear_data_t[sources_folder] = sources_folder
-    indicators = fti.Indicators(default_source, date_begin=20220901, date_end=20220902, **config_clear_data_t)
+    indicators = lti.Indicators(default_source, date_begin=20220901, date_end=20220902, **config_clear_data_t)
 
-    out = indicators.OHLCV(default_symbol, fti.Timeframe.t1h)
+    out = indicators.OHLCV(default_symbol, lti.Timeframe.t1h)
     assert memory_usage()[0] - mu_begin < 100
 
 
@@ -49,14 +49,14 @@ def test_memory_leak(config_clear_data_t, default_source, default_symbol):
 ])
 def test_OHLCV_bars(config_clear_data_t, source, symbol, date_begin, date_end):
 
-    timeframe = fti.Timeframe.t1h
+    timeframe = lti.Timeframe.t1h
 
-    indicators = fti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_clear_data_t)
+    indicators = lti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_clear_data_t)
 
     out_using_ticks = indicators.OHLCV(symbol, timeframe)
 
-    source_module = importlib.import_module(f'src.fast_trading_indicators.datasources.{source}', __package__)
-    source_module.init(fti.config())
+    source_module = importlib.import_module(f'src.live_trading_indicators.datasources.{source}', __package__)
+    source_module.init(lti.config())
     out_using_bars = source_module.bars_of_day_from_klines(symbol, timeframe, param_time(date_begin, False).date())
 
     assert (out_using_ticks.time == out_using_bars.time).all()
@@ -68,20 +68,20 @@ def test_OHLCV_bars(config_clear_data_t, source, symbol, date_begin, date_end):
 
 
 @pytest.mark.parametrize('source, timeframe, date_begin, date_end', [
-    ('binance', fti.Timeframe.t1h, 20220901, 20220901)])
+    ('binance', lti.Timeframe.t1h, 20220901, 20220901)])
 def test_OHLCV_bars_all_symbols(config_default_t, source, timeframe, date_begin, date_end, all_symbols):
 
-    indicators = fti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_default_t)
+    indicators = lti.Indicators(source, date_begin=date_begin, date_end=date_end, **config_default_t)
 
     try:
         out_using_ticks = indicators.OHLCV(all_symbols, timeframe)
-    except fti.FTISourceDataNotFound:
+    except lti.LTISourceDataNotFound:
         return
-    except fti.FTIExceptionTooManyEmptyBars:
+    except lti.LTIExceptionTooManyEmptyBars:
         return
 
-    source_module = importlib.import_module(f'src.fast_trading_indicators.datasources.{source}', __package__)
-    source_module.init(fti.config())
+    source_module = importlib.import_module(f'src.live_trading_indicators.datasources.{source}', __package__)
+    source_module.init(lti.config())
     out_using_bars = source_module.bars_of_day_from_klines(all_symbols, timeframe, param_time(date_begin, False).date())
 
     assert (out_using_ticks.time == out_using_bars.time).all()

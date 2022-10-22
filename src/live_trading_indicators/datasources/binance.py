@@ -19,6 +19,8 @@ SPOT_API_URL = 'https://api.binance.com/api/v3/'
 UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
 CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
+DEFAULT_SYMBOL_PART = 'spot'
+
 source_data_path = None
 subsources = None
 
@@ -147,7 +149,7 @@ def download_file(dl_file):
 def check_symbol(symbol):
     info = exchange_info(symbol)
     if info is None:
-        raise FTIException(f'Symbol {symbol} not found in source {datasource_name()}.')
+        raise LTIException(f'Symbol {symbol} not found in source {datasource_name()}.')
 
 
 def download_ticks(symbol, date):
@@ -241,7 +243,7 @@ def bars_of_day_from_klines_raw(symbol, timeframe, date):
 
     string_data_table = read_zipcsv_to_strings(io.BytesIO(byte_zipcsv))
     if string_data_table is None:
-        raise FTIException(f'Bad downloaded csv data: symbol {symbol}, timeframe {timeframe}, date {date}')
+        raise LTIException(f'Bad downloaded csv data: symbol {symbol}, timeframe {timeframe}, date {date}')
 
     first_line = 0 if string_data_table[0, 0].isdigit() else 1
     tf_open = string_data_table[first_line:, 1].astype(float)

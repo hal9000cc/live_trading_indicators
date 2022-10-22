@@ -1,1 +1,1 @@
-# fast_trading_indicators
+# live_trading_indicators

@@ -116,11 +116,11 @@ class Indicators:
 
         if self.config['endpoints_required']:
             if len(bar_data) == 0:
-                raise FTISourceDataNotFound(symbol, date_begin)
+                raise LTISourceDataNotFound(symbol, date_begin)
             if bar_data.close[0] == 0:
-                raise FTISourceDataNotFound(symbol, date_begin)
+                raise LTISourceDataNotFound(symbol, date_begin)
             if bar_data.close[-1] == 0:
-                raise FTISourceDataNotFound(symbol, date_end)
+                raise LTISourceDataNotFound(symbol, date_end)
 
         max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config['max_empty_bars_consecutive']
         if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
@@ -133,7 +133,7 @@ class Indicators:
             }
             if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction'])\
                     or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
-                raise FTIExceptionTooManyEmptyBars(self.datasource_name,
+                raise LTIExceptionTooManyEmptyBars(self.datasource_name,
                                                    bar_data.symbol,
                                                    bar_data.timeframe,
                                                    bar_data.first_bar_time,
@@ -154,7 +154,7 @@ class IndicatorProxy:
             self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
             self.indicators = indicators
         except ModuleNotFoundError as error:
-            raise FTIExceptionIndicatorNotFound(indicator_name)
+            raise LTIExceptionIndicatorNotFound(indicator_name)
 
     def __call__(self, *args, time_begin=None, time_end=None, **kwargs):
 
@@ -172,7 +172,7 @@ class IndicatorProxy:
 
         if (use_date_begin is not None and use_date_begin < out.time[0]) or\
                 (use_date_end is not None and out.timeframe.begin_of_tf(use_date_end) > out.time[-1]):
-            raise FTIExceptionOutOfThePeriod()
+            raise LTIExceptionOutOfThePeriod()
 
         return out[use_date_begin: use_date_end + out.timeframe.timedelta() if use_date_end else None]
 

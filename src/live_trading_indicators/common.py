@@ -26,7 +26,7 @@ PRICE_TYPE = float
 VOLUME_TYPE = float
 VOLUME_TYPE_PRECISION = 15
 TIME_TYPE = 'datetime64[ms]'
-HOME_FOLDER = path.join(Path.home(), '.fti')
+HOME_FOLDER = path.join(Path.home(), '.lti')
 CONFIG_FILE_NAME = 'config.json'
 
 

@@ -1,15 +1,15 @@
 import pytest
 import datetime as dt
 import numpy as np
-import src.fast_trading_indicators as fti
-from src.fast_trading_indicators.common import param_time
+import src.live_trading_indicators as lti
+from src.live_trading_indicators.common import param_time
 
 
 def test_check_bar_data(config_default, default_source, default_symbol, default_timeframe):
 
     n_bars = 10 * 24 * 60 * 60 // default_timeframe.value
 
-    indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1e12)
+    indicators = lti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1e12)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
 
     empty_bars_count, empty_bars_fraction, empty_bars_consecutive = out.get_skips()
@@ -52,7 +52,7 @@ def test_check_bar_data(config_default, default_source, default_symbol, default_
 
 def test_different_dates(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
 
     test_dates = [
         (20220901, 20220901),
@@ -67,7 +67,7 @@ def test_different_dates(config_default, default_source, default_symbol, a_timef
 
     for date_begin, date_end in test_dates:
         out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=date_begin, time_end=date_end)
-        assert out.time[0] == np.datetime64(param_time(date_begin, False)).astype(fti.TIME_TYPE)
+        assert out.time[0] == np.datetime64(param_time(date_begin, False)).astype(lti.TIME_TYPE)
         assert out.time[-1] == np.datetime64(a_timeframe.begin_of_tf(param_time(date_end, True)), 'ms')
 
 @pytest.mark.parametrize("cleared_points", [
@@ -81,8 +81,8 @@ def test_different_dates(config_default, default_source, default_symbol, a_timef
 ])
 def test_restore_bar_data(config_default, default_source, default_symbol, cleared_points):
 
-    indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1000)
-    out = indicators.OHLCV(default_symbol, fti.Timeframe.t1h).copy()
+    indicators = lti.Indicators(default_source, date_begin=20200101, date_end=20200110, max_empty_bars_fraction=1, max_empty_bars_consecutive=1000)
+    out = indicators.OHLCV(default_symbol, lti.Timeframe.t1h).copy()
 
     for value_name in ('open', 'high', 'low', 'close', 'volume'):
         out.data[value_name][np.array(cleared_points)] = 0
@@ -97,13 +97,13 @@ def test_restore_bar_data(config_default, default_source, default_symbol, cleare
 
 def test_change_dates(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=20220101, time_end=20220110)
     out1 = indicators.OHLCV(default_symbol, a_timeframe, time_begin=20220103, time_end=20220110)
 
     assert out[int(2 * 24 * 60 * 60 // a_timeframe.value):] == out1
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=20220103, time_end=20220110)
     out1 = indicators.OHLCV(default_symbol, a_timeframe, time_begin=20220101, time_end=20220110)
 
@@ -114,7 +114,7 @@ def test_too_many_empty_bars_exception(config_default, default_source, default_s
 
     use_date_begin = param_time(20210901, False)
     use_date_end = param_time(20210901, True)
-    indicators = fti.Indicators(default_source, date_begin=use_date_begin, date_end=use_date_end)
+    indicators = lti.Indicators(default_source, date_begin=use_date_begin, date_end=use_date_end)
     out = indicators.OHLCV(default_symbol, default_timeframe).copy()
 
     empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(out, default_symbol, use_date_begin, use_date_end)
@@ -122,16 +122,16 @@ def test_too_many_empty_bars_exception(config_default, default_source, default_s
 
     test_out = out.copy()
     test_out.close[0:6] = 0
-    with pytest.raises(fti.FTISourceDataNotFound) as error:
+    with pytest.raises(lti.LTISourceDataNotFound) as error:
         empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(test_out, default_symbol, use_date_begin, use_date_end)
 
     test_out = out.copy()
     test_out.close[1:7] = 0
-    with pytest.raises(fti.FTIExceptionTooManyEmptyBars) as error:
+    with pytest.raises(lti.LTIExceptionTooManyEmptyBars) as error:
         empty_bars_count, empty_bars_fraction, empty_bars_consecutive = indicators.check_bar_data(test_out, default_symbol, use_date_begin, use_date_end)
 
 
 def test_indicator_not_found(config_default, default_source, default_symbol, default_timeframe):
-    indicators = fti.Indicators(default_source, date_begin=20200101, date_end=20200110)
-    with pytest.raises(fti.FTIExceptionIndicatorNotFound) as error:
+    indicators = lti.Indicators(default_source, date_begin=20200101, date_end=20200110)
+    with pytest.raises(lti.LTIExceptionIndicatorNotFound) as error:
         out = indicators.ABCD(default_symbol, default_timeframe)

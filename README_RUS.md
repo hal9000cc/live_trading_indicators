@@ -1,11 +1,11 @@
-# fast_trading_indicators
+# live_trading_indicators
 Пакет для получения данных котировок из различных источников и расчета на основе этих котировок значений технических индикаторов.
 Запрос и загрузка данных происходит автоматически. Полученые данные сохраняются в кэше с возможностью быстрого использования.
 Кэширование данных происходит на нескольких уровнях. Файловый кэш используется для хранения котировок в различных таймфреймах. Кэш в памяти используется для быстрого доступа к значениям индикаторов.
 
-Папка данных пакета по умолчанию .fti в домашней папке пользователя. В этой папке может создаваться значительный объем данных, в зависимости от количества инструментов и их таймфреймов.
+Папка данных пакета по умолчанию .lti в домашней папке пользователя. В этой папке может создаваться значительный объем данных, в зависимости от количества инструментов и их таймфреймов.
 
-Производится тщательный контроль целостности данных и попытки восстановления. В частности, если у binance обнаруживаются потерянные данные klines, делается попытка восстановить их из trades. Одиночные пропуски могут быть восстановлены по close предыдущего интервала. Допустимое количество таких восстановленных пропусков контролируется параметрами max_empty_bars_fraction и max_empty_bars_consecutive, при невозможности восстановления происходит исключение FTIExceptionTooManyEmptyBars.
+Производится тщательный контроль целостности данных и попытки восстановления. В частности, если у binance обнаруживаются потерянные данные klines, делается попытка восстановить их из trades. Одиночные пропуски могут быть восстановлены по close предыдущего интервала. Допустимое количество таких восстановленных пропусков контролируется параметрами max_empty_bars_fraction и max_empty_bars_consecutive, при невозможности восстановления происходит исключение LTIExceptionTooManyEmptyBars.
 
 Полученная история всегда содержит все значения по времени, без пропусков. Например, если получить 10 дней на таймфрейме 1h, то в данных всегда будет 240 значений (10д*24ч).
 
@@ -21,42 +21,42 @@
 
 ### Быстрый пример
 ```
-import fast_trading_indicators as fti
+import live_trading_indicators as lti
 
-indicators = fti.Indicators('binance', 20210201, 20210202)
+indicators = lti.Indicators('binance', 20210201, 20210202)
 
-ohlcv = indicators.OHLCV('um/ethusdt', fti.Timeframe.t1h)
+ohlcv = indicators.OHLCV('um/ethusdt', lti.Timeframe.t1h)
 ohlcv
 ohlcv.time
 ohlcv.close
 ohlcv.pandas()
 
-ma22 = fti.indicators.SMA('um/ethusdt', fti.Timeframe.t1h, 'close', 22)
+ma22 = lti.indicators.SMA('um/ethusdt', lti.Timeframe.t1h, 'close', 22)
 ma22
 (ohlcv + ma22).pandas()
 ```
 ### Указание границ интервалов
 Время во входных параметрах может иметь тип date, datetime, datetime64, строка ISO 8601, или в виде целого числа YYYYMMDD:
 ```
-indicators = fti.Indicators('binance', 20220901, 20220931)
-fti.indicators.SMA('um/ethusdt', fti.Timeframe.t1h, 'close', 22, time_begin=dt.datetime(2022, 9, 1, 5, 40), time_end=dt.datetime(2022, 9, 1, 23, 59))
+indicators = lti.Indicators('binance', 20220901, 20220931)
+indicators.SMA('um/ethusdt', lti.Timeframe.t1h, 'close', 22, time_begin=dt.datetime(2022, 9, 1, 5, 40), time_end=dt.datetime(2022, 9, 1, 23, 59))
 ```
 
 Существуют две стратегии указания периода времени.
 #### 1. Период времени указывается при создании Indicators
-После этого все индикаторы будут расчитываться и сохранятся в кэше на укаанный интервал. Значения индикаторов можно получить за любой период в пределах интервала Indicators. При выходе за указанный интервал будет исключение FTIExceptionOutOfThePeriod.
+После этого все индикаторы будут расчитываться и сохранятся в кэше на укаанный интервал. Значения индикаторов можно получить за любой период в пределах интервала Indicators. При выходе за указанный интервал будет исключение LTIExceptionOutOfThePeriod.
 ##### Пример
 ```
-indicators = fti.Indicators('binance', 20220901, 20220931)
-ohlcv = indicators.OHLCV('um/ethusdt', fti.Timeframe.t1h)
-ma22 = fti.indicators.SMA('um/ethusdt', fti.Timeframe.t1h, 'close', 22, time_begin=20220905, time_end=20220915)
+indicators = lti.Indicators('binance', 20220901, 20220931)
+ohlcv = indicators.OHLCV('um/ethusdt', lti.Timeframe.t1h)
+ma22 = indicators.SMA('um/ethusdt', lti.Timeframe.t1h, 'close', 22, time_begin=20220905, time_end=20220915)
 ```
 #### 2. Период времени указывается только при получении данных
 В этом варианте при получении данных индикатора период надо указывать всегда. Период времени для расчета значений индикаторов в кэше определяется автоматически. При расширении интервала может происходит сброс кэша, это может замедлять работу.
 ##### Пример
 ```
-indicators = fti.Indicators('binance')
-ohlcv = indicators.OHLCV('um/ethusdt', fti.Timeframe.t1h, time_begin=20220801, time_end=20220815)
-ma22 = fti.indicators.SMA('um/ethusdt', fti.Timeframe.t1h, 'close', 22, time_begin=20220905, time_end=20220915)
+indicators = lti.Indicators('binance')
+ohlcv = indicators.OHLCV('um/ethusdt', lti.Timeframe.t1h, time_begin=20220801, time_end=20220815)
+ma22 = indicators.SMA('um/ethusdt', lti.Timeframe.t1h, 'close', 22, time_begin=20220905, time_end=20220915)
 ```
 Примечание: При создании Indicators можно указать только одну из дат. В этом случае период расчета индикаторов так же будет изменятся, но одна граница интервала остается фиксированной.

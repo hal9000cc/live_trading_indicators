@@ -60,9 +60,13 @@ class TimeframeData:
         n_bars = len(self.time)
 
         for key, value in self.data.items():
-            if type(value) == np.ndarray and len(value) != n_bars:
-                raise FTIException('Bad data length')
-
+            if type(value) == np.ndarray:
+                if len(value) != n_bars:
+                    raise LTIException('Bad data length')
+                if np.isnan(value).any():
+                    raise LTIException('Bad data value (nan)')
+                if np.isinf(value).any():
+                    raise LTIException('Bad data value (inf)')
     def copy(self):
 
         new_data = {}
@@ -268,7 +272,7 @@ class OHLCV_data(TimeframeData):
     def get_skips(self):
 
         n_bars = len(self.time)
-        if n_bars == 0: raise FTIException('Bad bar data')
+        if n_bars == 0: raise LTIException('Bad bar data')
 
         bx_empty_bars = self.close == 0
         n_empty_bars = bx_empty_bars.sum()
@@ -349,7 +353,7 @@ class OHLCV_day(OHLCV_data):
             error = 'bad close values'
 
         if error:
-            raise FTIException(f'Timeframe data error: {error}')
+            raise LTIException(f'Timeframe data error: {error}')
 
     @staticmethod
     def empty_day(symbol, timeframe, date):

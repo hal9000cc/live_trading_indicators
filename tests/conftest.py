@@ -1,12 +1,12 @@
 import pytest
 import os.path as path
-import src.fast_trading_indicators as fti
-import src.fast_trading_indicators.datasources.binance as binance
+import src.live_trading_indicators as lti
+import src.live_trading_indicators.datasources.binance as binance
 import shutil
 
 SOURCE = 'binance'
 SYMBOL = 'um/ethusdt'
-TIMEFRAME = fti.Timeframe.t1h
+TIMEFRAME = lti.Timeframe.t1h
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def config_clear_data_t():  # source_type: ticks
     cash_folder = path.join(data_path, 'timeframe_data')
     sources_folder = path.join(data_path, 'sources')
 
-    fti.config('set_default')
+    lti.config('set_default')
 
     shutil.rmtree(data_path, ignore_errors=True)
     yield {
@@ -49,7 +49,7 @@ def config_clear_data_b():  # source_type: bars
     cash_folder = path.join(data_path, 'timeframe_data')
     sources_folder = path.join(data_path, 'sources')
 
-    fti.config('set_default')
+    lti.config('set_default')
 
     shutil.rmtree(data_path, ignore_errors=True)
     yield {
@@ -62,12 +62,12 @@ def config_clear_data_b():  # source_type: bars
 
 @pytest.fixture
 def config_default():  # source: ticks
-    fti.config('set_default')
+    lti.config('set_default')
 
 
 @pytest.fixture
 def config_default_t():  # source: ticks
-    fti.config('set_default')
+    lti.config('set_default')
     yield {'source_type': 'ticks'}
 
 
@@ -87,10 +87,10 @@ def generate_all_symbols():
 
 
 def generate_all_timeframe_regular():
-    return [ fti.Timeframe.t1h, fti.Timeframe.t2h, fti.Timeframe.t1d, fti.Timeframe.t1m, \
-             fti.Timeframe.t5m, fti.Timeframe.t4h, \
-             fti.Timeframe.t6h, fti.Timeframe.t12h, fti.Timeframe.t8h, \
-             fti.Timeframe.t15m, fti.Timeframe.t30m ]
+    return [lti.Timeframe.t1h, lti.Timeframe.t2h, lti.Timeframe.t1m, \
+            lti.Timeframe.t5m, lti.Timeframe.t4h, \
+            lti.Timeframe.t6h, lti.Timeframe.t12h, lti.Timeframe.t8h, \
+            lti.Timeframe.t15m, lti.Timeframe.t30m, lti.Timeframe.t1d]
 
 
 def pytest_generate_tests(metafunc):

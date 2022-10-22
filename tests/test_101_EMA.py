@@ -1,5 +1,5 @@
 import pytest
-import src.fast_trading_indicators as fti
+import src.live_trading_indicators as lti
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -10,7 +10,7 @@ import src.fast_trading_indicators as fti
 ])
 def test_ema(config_default, default_source, default_symbol, time_begin, time_end, period, a_timeframe):
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=time_begin, time_end=time_end)
     ema = indicators.EMA(default_symbol, a_timeframe, period, time_begin=time_begin, time_end=time_end)
 

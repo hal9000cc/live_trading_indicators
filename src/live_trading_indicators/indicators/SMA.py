@@ -1,4 +1,3 @@
-import numpy as np
 from ..calculator import ma_calculate
 from ..indicator_data import IndicatorData
 

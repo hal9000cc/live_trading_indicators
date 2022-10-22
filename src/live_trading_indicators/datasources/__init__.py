@@ -11,7 +11,8 @@ from ..exceptions import *
 from ..indicator_data import *
 
 
-CASH_FILE_SIGNATURE = b'FTI'
+CASH_FILE_SIGNATURE = b'LTI'
+CASH_FILE_EXT = 'lti'
 CASH_FILE_VERSION = 1
 
 
@@ -24,10 +25,20 @@ class SourceData:
 
         self.datasource_module = datasource_module
 
+        if hasattr(datasource_module, 'DEFAULT_SYMBOL_PART'):
+            self.default_symbol_part_for_path = datasource_module.DEFAULT_SYMBOL_PART
+        else:
+            self.default_symbol_part_for_path = ''
+
     def filename_day_data(self, symbol, timeframe, day_date):
         assert type(day_date) == dt.date
+
         symbol_parts = symbol.split('/')
-        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.ftid'
+
+        if len(symbol_parts) < 2:
+            symbol_parts = [self.default_symbol_part_for_path] + symbol_parts
+
+        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.{CASH_FILE_EXT}'
         return path.join(self.cash_folder, *symbol_parts[:-1], filename)
 
     def bars_of_day(self, symbol, timeframe, day_date):
@@ -127,7 +138,7 @@ class SourceData:
 
             signature_and_version = self.parse_signature_and_version(file)
             if signature_and_version.signature != CASH_FILE_SIGNATURE:
-                raise FTIException('Bad cash file')
+                raise LTIException('Bad cash file')
 
             header = self.parse_header(file, signature_and_version.file_version)
 
@@ -149,10 +160,10 @@ class SourceData:
     def get_bar_data(self, symbol, timeframe, time_begin, time_end):
 
         if time_begin is None:
-            raise FTIException('No begin_time set')
+            raise LTIException('No begin_time set')
 
         if time_end is None:
-            raise FTIException('No end_time set')
+            raise LTIException('No end_time set')
 
         if time_begin > time_end:
             raise ValueError('begin_time less then end_time')

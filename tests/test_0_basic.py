@@ -1,33 +1,33 @@
 import pytest
 import datetime as dt
 import numpy as np
-from src.fast_trading_indicators import TIME_TYPE
-from src.fast_trading_indicators.common import param_time
-import src.fast_trading_indicators as fti
+from src.live_trading_indicators import TIME_TYPE
+from src.live_trading_indicators.common import param_time
+import src.live_trading_indicators as lti
 
 
 def test_bad_datasource(config_default):
     with pytest.raises(TypeError) as error:
-        indicators = fti.Indicators(None)
+        indicators = lti.Indicators(None)
 
 
 def test_no_date(config_default, default_source, default_symbol, default_timeframe):
-    indicators = fti.Indicators(default_source)
-    with pytest.raises(fti.FTIException) as error:
+    indicators = lti.Indicators(default_source)
+    with pytest.raises(lti.LTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No begin_time set'
 
 
 def test_no_date_end(config_default, default_source, default_symbol, default_timeframe):
-    indicators = fti.Indicators(default_source, 20200101)
-    with pytest.raises(fti.FTIException) as error:
+    indicators = lti.Indicators(default_source, 20200101)
+    with pytest.raises(lti.LTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No end_time set'
 
 
 def test_no_date_begin(config_default, default_source, default_symbol, default_timeframe):
-    indicators = fti.Indicators(default_source, date_end=20200101)
-    with pytest.raises(fti.FTIException) as error:
+    indicators = lti.Indicators(default_source, date_end=20200101)
+    with pytest.raises(lti.LTIException) as error:
         indicators.OHLCV(default_symbol, default_timeframe)
     assert error.value.message == 'No begin_time set'
 
@@ -37,7 +37,7 @@ def test_no_date_begin(config_default, default_source, default_symbol, default_t
     (20220725, 20220731)
 ])
 def test_date_type_int(config_default, default_source, default_symbol, time_begin, time_end, a_timeframe):
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=time_begin, time_end=time_end)
     assert out.time[0] == np.datetime64(param_time(time_begin, False)).astype(TIME_TYPE)
     assert out.time[-1] == np.datetime64(a_timeframe.begin_of_tf(param_time(time_end, True))).astype(TIME_TYPE)
@@ -49,7 +49,7 @@ def test_date_type_int(config_default, default_source, default_symbol, time_begi
     ('2022-07-25', '2022-07-31')
 ])
 def test_date_type_str(config_default, default_source, default_symbol, time_begin, time_end, a_timeframe):
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=time_begin, time_end=time_end)
     assert out.time[0] == np.datetime64(a_timeframe.begin_of_tf(param_time(time_begin, False))).astype(TIME_TYPE)
     assert out.time[-1] == np.datetime64(a_timeframe.begin_of_tf(param_time(time_end, True))).astype(TIME_TYPE)
@@ -57,7 +57,7 @@ def test_date_type_str(config_default, default_source, default_symbol, time_begi
 
 def test_date_datetime(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source, 20220901, 20220905)
+    indicators = lti.Indicators(default_source, 20220901, 20220905)
 
     time_begin, time_end = dt.datetime(2022, 9, 1, 3, 0), dt.datetime(2022, 9, 2, 2, 0)
 
@@ -68,7 +68,7 @@ def test_date_datetime(config_default, default_source, default_symbol, a_timefra
 
 def test_date_v1(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source, 20220901, 20220905)
+    indicators = lti.Indicators(default_source, 20220901, 20220905)
 
     data = indicators.OHLCV(default_symbol, a_timeframe)
 
@@ -78,7 +78,7 @@ def test_date_v1(config_default, default_source, default_symbol, a_timeframe):
 
 def test_date_v1_interval(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source, 20220901, 20220905)
+    indicators = lti.Indicators(default_source, 20220901, 20220905)
 
     time_begin, time_end = dt.datetime(2022, 9, 1, 3, 0), dt.datetime(2022, 9, 2, 2, 0)
 
@@ -95,7 +95,7 @@ def test_date_v1_interval(config_default, default_source, default_symbol, a_time
 
 def test_date_v1_interval_date(config_default, default_source, default_symbol, a_timeframe):
 
-    indicators = fti.Indicators(default_source, 20220901, 20220905)
+    indicators = lti.Indicators(default_source, 20220901, 20220905)
 
     time_begin, time_end = dt.date(2022, 9, 1), dt.date(2022, 9, 5)
 
@@ -105,16 +105,16 @@ def test_date_v1_interval_date(config_default, default_source, default_symbol, a
 
 
 def test_OHLCV_out_of_the_period(config_default, default_timeframe):
-    indicators = fti.Indicators('binance', date_begin=20220201, date_end=20220220)
-    with pytest.raises(fti.FTIExceptionOutOfThePeriod) as error:
+    indicators = lti.Indicators('binance', date_begin=20220201, date_end=20220220)
+    with pytest.raises(lti.LTIExceptionOutOfThePeriod) as error:
         out = indicators.OHLCV('um/ethusdt', default_timeframe, time_begin=20220210, time_end=20220221)
 
 
 def test_OHLCV_ticks_not_found(config_default, default_timeframe):
 
-    indicators = fti.Indicators('binance', date_begin=20100201, date_end=20100201)
+    indicators = lti.Indicators('binance', date_begin=20100201, date_end=20100201)
 
     for symbol in ('um/ethusdt', 'cm/ethusd_perp', 'ethusdt'):
-        with pytest.raises(fti.FTISourceDataNotFound) as error:
+        with pytest.raises(lti.LTISourceDataNotFound) as error:
             out = indicators.OHLCV(symbol, default_timeframe)
 

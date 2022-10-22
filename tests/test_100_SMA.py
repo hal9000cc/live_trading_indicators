@@ -1,5 +1,5 @@
 import pytest
-import src.fast_trading_indicators as fti
+import src.live_trading_indicators as lti
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -11,7 +11,7 @@ import src.fast_trading_indicators as fti
 ])
 def test_sma(config_default, default_source, default_symbol, time_begin, time_end, period, a_timeframe):
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=time_begin, time_end=time_end)
     sma = indicators.SMA(default_symbol, a_timeframe, period, time_begin=time_begin, time_end=time_end)
 
@@ -31,14 +31,14 @@ def test_sma(config_default, default_source, default_symbol, time_begin, time_en
 
 
 @pytest.mark.parametrize('time_begin, time_end, period, timeframe', [
-    ('2022-07-01', '2022-07-10', 22, fti.Timeframe.t1d),
-    ('2022-07-01', '2022-07-21', 22, fti.Timeframe.t1d),
-    ('2022-07-01', '2022-07-10', 241, fti.Timeframe.t1d),
-    ('2022-07-01', '2022-07-10', 0, fti.Timeframe.t1d)
+    ('2022-07-01', '2022-07-10', 22, lti.Timeframe.t1d),
+    ('2022-07-01', '2022-07-21', 22, lti.Timeframe.t1d),
+    ('2022-07-01', '2022-07-10', 241, lti.Timeframe.t1d),
+    ('2022-07-01', '2022-07-10', 0, lti.Timeframe.t1d)
 ])
 def test_sma_value_error(config_default, default_source, default_symbol, time_begin, time_end, period, timeframe):
 
-    indicators = fti.Indicators(default_source)
+    indicators = lti.Indicators(default_source)
     out = indicators.OHLCV(default_symbol, timeframe, time_begin=time_begin, time_end=time_end)
     with pytest.raises(ValueError):
         sma = indicators.SMA(default_symbol, timeframe, period, time_begin=time_begin, time_end=time_end)

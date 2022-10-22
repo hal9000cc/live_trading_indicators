@@ -1,7 +1,7 @@
 import datetime as dt
 
 
-class FTIException(Exception):
+class LTIException(Exception):
 
     def __init__(self, message=None):
         self.message = message
@@ -13,7 +13,7 @@ class FTIException(Exception):
             return self.__class__.__name__
 
 
-class FTIExceptionBadSourceData(FTIException):
+class LTIExceptionBadSourceData(LTIException):
 
     def __init__(self, data_error_message, source=None, symbol=None, day_date=None):
         self.source = source
@@ -23,7 +23,7 @@ class FTIExceptionBadSourceData(FTIException):
         super().__init__(f'Bad source data (source {source}, symbol {symbol}, date {day_date.date()}')
 
 
-class FTIExceptionTooManyEmptyBars(FTIException):
+class LTIExceptionTooManyEmptyBars(LTIException):
 
     def __init__(self, source_name, symbol, timeframe, first_bar_time, end_bar_time, fraction, consecutive):
         self.source_name = source_name
@@ -39,7 +39,7 @@ class FTIExceptionTooManyEmptyBars(FTIException):
             f'Source {source_name}, symbol {symbol}, timeframe {timeframe}, date {first_bar_time} - {end_bar_time}.')
 
 
-class FTISourceDataNotFound(FTIException):
+class LTISourceDataNotFound(LTIException):
 
     def __init__(self, symbol, date):
         #assert type(date) == dt.date
@@ -49,7 +49,7 @@ class FTISourceDataNotFound(FTIException):
         super().__init__(f'Source data not found! Symbol {self.symbol}, date {self.date}.')
 
 
-class FTIExceptionIndicatorNotFound(FTIException):
+class LTIExceptionIndicatorNotFound(LTIException):
 
     def __init__(self, indicator_name):
         self.indicator_name = indicator_name
@@ -57,7 +57,7 @@ class FTIExceptionIndicatorNotFound(FTIException):
         super().__init__(f'Indicator "{self.indicator_name}" not found.')
 
 
-class FTIExceptionOutOfThePeriod(FTIException):
+class LTIExceptionOutOfThePeriod(LTIException):
 
     def __init__(self):
         super().__init__('Time out of the calculation period')
