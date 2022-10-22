@@ -45,6 +45,12 @@ def param_time(time_value, as_end):
             return dt.datetime(next_date.year, next_date.month, next_date.day) - dt.timedelta(microseconds=1)
         else:
             return dt.datetime(time_value.year, time_value.month, time_value.day)
+    elif type(time_value) == str:
+        if as_end:
+            next_date = np.datetime64(time_value) + 1
+            return (next_date.astype(TIME_TYPE) - 1).astype(dt.datetime)
+        else:
+            return np.datetime64(time_value, 'ms').astype(dt.datetime)
 
     assert type(time_value) == datetime.datetime
     return time_value

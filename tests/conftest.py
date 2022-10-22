@@ -89,7 +89,7 @@ def generate_all_symbols():
 def generate_all_timeframe_regular():
     return [ fti.Timeframe.t1h, fti.Timeframe.t2h, fti.Timeframe.t1d, fti.Timeframe.t1m, \
              fti.Timeframe.t5m, fti.Timeframe.t4h, \
-             fti.Timeframe.t6h, fti.Timeframe.t12h, fti.Timeframe.t8h, fti.Timeframe.t10m, \
+             fti.Timeframe.t6h, fti.Timeframe.t12h, fti.Timeframe.t8h, \
              fti.Timeframe.t15m, fti.Timeframe.t30m ]
 
 
@@ -98,6 +98,6 @@ def pytest_generate_tests(metafunc):
     if 'all_symbols' in metafunc.fixturenames:
         return metafunc.parametrize("all_symbols", generate_all_symbols())
 
-    if 'timeframe_all_regular' in metafunc.fixturenames:
-        return metafunc.parametrize("timeframe_all_regular", generate_all_timeframe_regular())
+    if 'a_timeframe' in metafunc.fixturenames:
+        return metafunc.parametrize("a_timeframe", generate_all_timeframe_regular())
 

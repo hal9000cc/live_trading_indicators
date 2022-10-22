@@ -16,7 +16,8 @@ class Indicators:
             Source of trading quotes. The name of the module from datasources or the module itself.
 
         date_begin, date_end:
-            Start and end dates of the indicator calculation interval. Dates are set inclusive. Dates can be set as date, datetime, datetime64, or as an integer of the form YYYYMMDD.
+            Start and end dates of the indicator calculation interval. Dates are set inclusive.
+            Dates can be set as date, datetime, datetime64, string ISO 8601, or as an integer of the form YYYYMMDD.
 
         config_mod:
             Configuration modification.
@@ -100,36 +101,6 @@ class Indicators:
     @staticmethod
     def key_from_args(indicator, args, kwargs):
         return args, tuple(kwargs.items())
-
-    # def check_bar_data(self, bar_data):
-    #
-    #     if self.config['max_empty_bars_fraction'] is None and self.max_empty_bars_consecutive is None:
-    #         return
-    #
-    #     n_bars = len(bar_data.time)
-    #     if n_bars == 0: raise FTIException('Bad bar data')
-    #
-    #     bx_empty_bars = bar_data.volume == 0
-    #     n_empty_bars = bx_empty_bars.sum()
-    #
-    #     empty_bars_fraction = n_empty_bars / n_bars
-    #
-    #     ix_change = np.flatnonzero(np.diff(bx_empty_bars) != 0) + 1
-    #     intervals = np.hstack((ix_change, n_bars)) - np.hstack((0, ix_change))
-    #
-    #     empty_bars_cons_length = intervals[0 if bx_empty_bars[0] else 1 :: 2]
-    #     empty_bars_consecutive = empty_bars_cons_length.max() if len(empty_bars_cons_length) > 0 else 0
-    #
-    #     if empty_bars_fraction > self.config['max_empty_bars_fraction'] or empty_bars_consecutive > self.config['max_empty_bars_consecutive']:
-    #         raise FTIExceptionTooManyEmptyBars(self.datasource_name,
-    #                                            bar_data.symbol,
-    #                                            bar_data.timeframe,
-    #                                            bar_data.first_bar_time,
-    #                                            bar_data.end_bar_time,
-    #                                            empty_bars_fraction,
-    #                                            empty_bars_consecutive)
-    #
-    #     return empty_bars_fraction, empty_bars_consecutive
 
     def get_bar_data(self, symbol, timeframe, date_begin, date_end):
 

@@ -42,7 +42,7 @@ class FTIExceptionTooManyEmptyBars(FTIException):
 class FTISourceDataNotFound(FTIException):
 
     def __init__(self, symbol, date):
-        assert type(date) == dt.date
+        #assert type(date) == dt.date
         self.symbol = symbol
         self.date = date
 

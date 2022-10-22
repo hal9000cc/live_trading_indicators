@@ -209,7 +209,7 @@ def read_tickfile(file_name):
     volume = string_data_table[first_line:, 2].astype(float)
     time = string_data_table[first_line:, 4].astype(int).astype('datetime64[ms]')
 
-    return IndicatorData({'time': time, 'price': price, 'volume': volume})
+    return TimeframeData({'time': time, 'price': price, 'volume': volume})
 
 
 def bars_of_day_from_tickfile(file_name, symbol, timeframe, date):

@@ -9,12 +9,14 @@ from .exceptions import *
 pandas_module = None
 
 
-class IndicatorData:
+class TimeframeData:
 
     def __init__(self, data_dict):
-        assert 'time' in data_dict.keys()
+
         self.data = data_dict
         self.__read_only = False
+
+        assert 'time' in data_dict.keys()
 
         self.first_bar_time = self.data['time'][0].astype(dt.datetime)
         self.end_bar_time = self.data['time'][-1].astype(dt.datetime)
@@ -46,6 +48,20 @@ class IndicatorData:
 
     def __deepcopy__(self, memodict={}):
         return self.copy()
+
+    def str_period(self):
+        return f'date: {self.time[0].astype("datetime64[s]")} - {self.time[-1].astype("datetime64[s]")} (length: {len(self.time)})'
+
+    def str_values(self):
+        return f'Values: {", ".join(self.data_keys())}'
+
+    def check_series(self):
+
+        n_bars = len(self.time)
+
+        for key, value in self.data.items():
+            if type(value) == np.ndarray and len(value) != n_bars:
+                raise FTIException('Bad data length')
 
     def copy(self):
 
@@ -130,23 +146,21 @@ class IndicatorData:
         return pandas_module.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
 
 
-class OHLCV_data(IndicatorData):
+class OHLCV_data(TimeframeData):
 
     def __init__(self, data_dict):
         super().__init__(data_dict)
-        dict_keys = data_dict.keys()
-        assert 'symbol' in dict_keys and 'timeframe' in dict_keys
+        assert not {'timeframe', 'symbol'} - set(data_dict.keys())
 
     def __str__(self):
 
-        info = [f'<OHLCV Bars> symbol: {self.symbol}, timeframe: {self.timeframe}',
-                f'date: {self.time[0].astype("datetime64[s]")} - {self.time[-1].astype("datetime64[s]")} (length: {len(self.time)})']
+        info = [f'<OHLCV data> symbol: {self.symbol}, timeframe: {self.timeframe}', self.str_period()]
 
         if self.data.get('empty_bars_count') is not None:
             info.append(
                 f'empty bars: count {self.empty_bars_count} ({self.empty_bars_fraction*100:.2f} %), max consecutive {self.empty_bars_consecutive}')
 
-        info.append(f'Values: {", ".join(self.data_keys())}')
+        info.append(self.str_values())
 
         return '\n'.join(info)
 
@@ -299,16 +313,13 @@ class OHLCV_day(OHLCV_data):
 
     def check_day_data(self, symbol, timeframe, day_date):
 
+        self.check_series()
+
         error = None
         first_time = self.time[0]
         n_bars = 24 * 60 * 60 // timeframe.value
 
-        if not(len(self.time) == n_bars and
-               len(self.open) == n_bars and
-               len(self.high) == n_bars and
-               len(self.low) == n_bars and
-               len(self.close) == n_bars and
-               len(self.volume) == n_bars):
+        if len(self.time) != n_bars:
             error = 'bad data length'
 
         if first_time != np.datetime64(day_date).astype(TIME_TYPE):
@@ -413,3 +424,22 @@ class OHLCV_day(OHLCV_data):
             'close': tf_close,
             'volume': np.round(tf_volume, volume_round),
         })
+
+
+class IndicatorData(TimeframeData):
+
+    def __init__(self, data_dict):
+        super().__init__(data_dict)
+        assert not {'timeframe', 'name'} - set(data_dict.keys())
+        self.check_series()
+
+    def __str__(self):
+
+        info = [f'<IndicatorData> name: {self.name}, '
+                f'timeframe: {self.timeframe}', self.str_period(),
+                self.str_values()]
+
+        return '\n'.join(info)
+
+    def __repr__(self):
+        return self.__str__()
