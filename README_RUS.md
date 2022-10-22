@@ -36,7 +36,7 @@ ma22
 (ohlcv + ma22).pandas()
 ```
 ### Указание границ интервалов
-Время во входных параметрах может иметь тип datetime или в виде целого числа YYYYMMDD:
+Время во входных параметрах может иметь тип date, datetime, datetime64, строка ISO 8601, или в виде целого числа YYYYMMDD:
 ```
 indicators = fti.Indicators('binance', 20220901, 20220931)
 fti.indicators.SMA('um/ethusdt', fti.Timeframe.t1h, 'close', 22, time_begin=dt.datetime(2022, 9, 1, 5, 40), time_end=dt.datetime(2022, 9, 1, 23, 59))
