@@ -1,6 +1,6 @@
 import numpy as np
 from ..indicator_data import IndicatorData
-from .. import acelerator
+from ..calculator import ema_calculate
 
 
 def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
@@ -9,7 +9,7 @@ def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
     values = ohlcv.data[value]
 
     alpha = 1.0 / (period + 1)
-    out = acelerator.ema_calculate(values, alpha)
+    out = ema_calculate(values, alpha)
 
     return IndicatorData({
         'name': 'EMA',

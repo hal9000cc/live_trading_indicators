@@ -16,3 +16,18 @@ def ema_calculate(source_values, alpha):
         result[i] = ema_value
 
     return result
+
+
+def ma_calculate(source_values, period):
+
+    if period == 1:
+        return source_values
+
+    weights = np.ones(period, dtype=source_values.dtype) / period
+
+    out = np.convolve(source_values, weights)[:-period+1]
+    begin_multiple = period / np.arange(1, period, dtype=float)
+    out[:period - 1] *= begin_multiple
+
+    return out
+
