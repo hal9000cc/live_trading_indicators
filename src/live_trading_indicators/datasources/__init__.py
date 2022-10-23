@@ -15,6 +15,8 @@ CASH_FILE_SIGNATURE = b'LTI'
 CASH_FILE_EXT = 'lti'
 CASH_FILE_VERSION = 1
 
+DAYS_WAIT_FOR_ENTIRE = 30
+
 
 class SourceData:
 
@@ -50,7 +52,8 @@ class SourceData:
             bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
             bar_data.check_day_data(symbol, timeframe, day_date)
             if not bar_data.is_empty():
-                self.save_to_cash(filename, bar_data)
+                if bar_data.is_entire() or (dt.datetime.now().date() - day_date).days > DAYS_WAIT_FOR_ENTIRE:
+                    self.save_to_cash(filename, bar_data)
 
         return bar_data
 
@@ -169,8 +172,9 @@ class SourceData:
             raise ValueError('begin_time less then end_time')
 
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
-        day_date = time_begin
-        while day_date <= time_end:
+        date_end = time_end.date()
+        day_date = time_begin.date()
+        while day_date <= date_end:
             day_data = self.bars_of_day(symbol, timeframe, day_date)
             td_time.append(day_data.time)
             td_open.append(day_data.open)

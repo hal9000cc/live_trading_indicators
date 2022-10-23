@@ -22,6 +22,7 @@ class Indicators:
         config_mod:
             Configuration modification.
     """
+
     def __init__(self, datasource, date_begin=None, date_end=None, **config_mod):
 
         self.indicators = {}
@@ -48,15 +49,15 @@ class Indicators:
 
         self.reset()
 
-        #self.set_time_interval(time_begin, time_end)
+        # self.set_time_interval(time_begin, time_end)
 
     def init_log(self):
 
         if not self.config['print_log']: return
 
         logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(message)s',
-                    handlers=[logging.StreamHandler()])
+                            format='%(asctime)s %(message)s',
+                            handlers=[logging.StreamHandler()])
 
     def set_time_interval(self, param_time_begin, param_time_end):
 
@@ -67,11 +68,30 @@ class Indicators:
             if time_begin is not None and (self.date_begin is None or time_begin.date() < self.date_begin):
                 self.date_begin = time_begin.date()
                 self.reset()
+        else:
+            if time_begin is not None and time_begin.date() < self.date_begin:
+                raise LTIExceptionOutOfThePeriod()
 
         if not self.fix_date_end:
             if time_end is not None and (self.date_end is None or time_end.date() > self.date_end):
                 self.date_end = time_end.date()
                 self.reset()
+        else:
+            if time_end is not None and time_end.date() > self.date_end:
+                raise LTIExceptionOutOfThePeriod()
+
+        if time_begin is None:
+            if self.date_begin is None: raise LTIException('No begin_time set')
+            time_begin = dt.datetime(self.date_begin.year, self.date_begin.month, self.date_begin.day)
+
+        if time_end is None:
+            if self.date_end is None: raise LTIException('No end_time set')
+            time_end = dt.datetime(self.date_end.year, self.date_end.month, self.date_end.day) + dt.timedelta(
+                days=1) - dt.timedelta(milliseconds=1)
+
+        if time_end >= dt.datetime.utcnow():
+            time_end = dt.datetime.utcnow()
+            self.reset()
 
         return time_begin, time_end
 
@@ -102,11 +122,16 @@ class Indicators:
     def key_from_args(indicator, args, kwargs):
         return args, tuple(kwargs.items())
 
-    def get_bar_data(self, symbol, timeframe, date_begin, date_end):
+    def get_bar_data(self, symbol, timeframe, time_begin, time_end):
 
-        bar_data = self.source_data.get_bar_data(symbol, timeframe, date_begin, date_end)
+        bar_data = self.source_data.get_bar_data(symbol, timeframe, time_begin, time_end)
 
-        self.check_bar_data(bar_data, symbol, date_begin, date_end)
+        ix_last_bar = bar_data.index_from_time(time_end)
+
+        if ix_last_bar < len(bar_data) - 1:
+            bar_data = bar_data[:ix_last_bar + 1]
+
+        self.check_bar_data(bar_data, symbol, time_begin, time_end)
 
         if self.config['restore_empty_bars']:
             bar_data.restore_bar_data()
@@ -122,7 +147,8 @@ class Indicators:
             if bar_data.close[-1] == 0:
                 raise LTISourceDataNotFound(symbol, date_end)
 
-        max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config['max_empty_bars_consecutive']
+        max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config[
+            'max_empty_bars_consecutive']
         if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
 
             empty_bars_count, empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
@@ -131,7 +157,7 @@ class Indicators:
                 'empty_bars_fraction': empty_bars_fraction,
                 'empty_bars_consecutive': empty_bars_consecutive
             }
-            if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction'])\
+            if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction']) \
                     or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
                 raise LTIExceptionTooManyEmptyBars(self.datasource_name,
                                                    bar_data.symbol,
@@ -158,23 +184,24 @@ class IndicatorProxy:
 
     def __call__(self, *args, time_begin=None, time_end=None, **kwargs):
 
-        use_date_begin, use_date_end = self.indicators.set_time_interval(time_begin, time_end)
+        use_time_begin, use_time_end = self.indicators.set_time_interval(time_begin, time_end)
+        kwargs_indicators = kwargs | {'time_begin': use_time_begin, 'time_end': use_time_end}
 
-        if use_date_begin is not None and use_date_end is not None and use_date_begin > use_date_end:
+        if use_time_begin is not None and use_time_end is not None and use_time_begin > use_time_end:
             raise ValueError('End date less then begin date')
 
         out = self.indicators.get_out_from_cache(self.indicator_name, args, kwargs)
 
         if out is None:
-            out = self.indicator_module.get_indicator_out(self.indicators, *args, **kwargs)
+            out = self.indicator_module.get_indicator_out(self.indicators, *args, **kwargs_indicators)
             out.read_only = True
             self.indicators.put_out_to_cache(self.indicator_name, args, kwargs, out)
 
-        if (use_date_begin is not None and use_date_begin < out.time[0]) or\
-                (use_date_end is not None and out.timeframe.begin_of_tf(use_date_end) > out.time[-1]):
+        if (use_time_begin is not None and use_time_begin < out.time[0]) or \
+                (use_time_end is not None and out.timeframe.begin_of_tf(use_time_end) > out.time[-1]):
             raise LTIExceptionOutOfThePeriod()
 
-        return out[use_date_begin: use_date_end + out.timeframe.timedelta() if use_date_end else None]
+        return out[use_time_begin: use_time_end + out.timeframe.timedelta() if use_time_end else None]
 
     def __del__(self):
         self.indicator_module = None

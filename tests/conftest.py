@@ -37,10 +37,26 @@ def config_clear_data_t():  # source_type: ticks
     yield {
         'cash_folder' : cash_folder,
         'sources_folder': sources_folder,
-        'source_type': 'ticks'
+        'source_type': 'full_ticks'
     }
     shutil.rmtree(data_path, ignore_errors=True)
 
+@pytest.fixture
+def config_clear_data_a():  # source_type: ticks
+
+    data_path = 'test_data'
+    cash_folder = path.join(data_path, 'timeframe_data')
+    sources_folder = path.join(data_path, 'sources')
+
+    lti.config('set_default')
+
+    shutil.rmtree(data_path, ignore_errors=True)
+    yield {
+        'cash_folder' : cash_folder,
+        'sources_folder': sources_folder,
+        'source_type': 'agg_ticks'
+    }
+    shutil.rmtree(data_path, ignore_errors=True)
 
 @pytest.fixture
 def config_clear_data_b():  # source_type: bars
@@ -66,9 +82,9 @@ def config_default():  # source: ticks
 
 
 @pytest.fixture
-def config_default_t():  # source: ticks
+def config_default_a():  # source: ticks
     lti.config('set_default')
-    yield {'source_type': 'ticks'}
+    yield {'source_type': 'agg_ticks'}
 
 
 def generate_all_symbols():

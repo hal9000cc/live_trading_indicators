@@ -41,6 +41,9 @@ class TimeframeData:
         if type(item.start) == int and item.stop is None and item.step is None:
             return self.slice_by_int(item.start, item.stop)
 
+        if item.start is None and type(item.stop) == int and item.step is None:
+            return self.slice_by_int(0, item.stop)
+
         raise NotImplementedError
 
     def __getattr__(self, item):
@@ -67,6 +70,7 @@ class TimeframeData:
                     raise LTIException('Bad data value (nan)')
                 if np.isinf(value).any():
                     raise LTIException('Bad data value (inf)')
+
     def copy(self):
 
         new_data = {}

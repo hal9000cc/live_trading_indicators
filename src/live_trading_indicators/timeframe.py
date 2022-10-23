@@ -32,3 +32,19 @@ class Timeframe(IntEnum):
 
     def begin_of_tf(self, time):
         return (np.datetime64(time, 's').astype(int) // self.value * self.value).astype('datetime64[s]').astype(dt.datetime)
+
+    @staticmethod
+    def cast(value):
+
+        if type(value) == Timeframe:
+            return value
+
+        if type(value) == int:
+            return Timeframe(value)
+
+        if type(value) == str:
+            if hasattr(Timeframe, f't{value}'):
+                return Timeframe[f't{value}']
+
+        return None
+    

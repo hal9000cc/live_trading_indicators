@@ -20,6 +20,7 @@ UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
 CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
 DEFAULT_SYMBOL_PART = 'spot'
+ONLINE_HOURS_AVAILABLE = 25
 
 source_data_path = None
 subsources = None
@@ -41,8 +42,13 @@ def init(config):
     for subsource_name in source_type.replace(' ', '').split(','):
         if subsource_name == 'bars':
             subsources_list.append(bars_of_day_from_klines)
-        elif subsource_name == 'ticks':
-            subsources_list.append(bars_of_day_from_ticks)
+        elif subsource_name == 'full_ticks':
+            subsources_list.append(bars_of_day_from_full_ticks)
+        elif subsource_name == 'agg_ticks':
+            subsources_list.append(bars_of_day_from_agg_ticks)
+        elif subsource_name == 'online':
+            subsources_list.append(bars_of_day_online)
+            pass
         else:
             raise ValueError(f'Bad value in config parameter "source_type": {source_type}')
 
@@ -51,9 +57,9 @@ def init(config):
         raise ValueError('Empty value in config parameter "source_type".')
 
 
-def tickfile_name_basic(symbol, date, ext):
+def tickfile_name_basic(symbol, date, ticks_type, ext):
     assert type(date) == dt.date
-    return f'{symbol.upper()}-trades-{date}.{ext}'
+    return f'{symbol.upper()}-{ticks_type}-{date}.{ext}'
 
 
 def barfile_name_basic(symbol, timeframe, date, ext):
@@ -61,14 +67,14 @@ def barfile_name_basic(symbol, timeframe, date, ext):
     return f'{symbol.upper()}-{timeframe}-{date}.{ext}'
 
 
-def get_url_tick_day(symbol, date):
+def get_url_tick_day(symbol, date, ticks_type):
 
     symbol_parts = symbol.split('/')
     if len(symbol_parts) > 1:
-        file_name = tickfile_name_basic(symbol_parts[1], date, 'zip')
-        url = f'data/futures/{symbol_parts[0]}/daily/trades/{symbol_parts[1].upper()}/{file_name}'
+        file_name = tickfile_name_basic(symbol_parts[1], date, ticks_type, 'zip')
+        url = f'data/futures/{symbol_parts[0]}/daily/{ticks_type}/{symbol_parts[1].upper()}/{file_name}'
     else:
-        file_name = tickfile_name_basic(symbol, date, 'zip')
+        file_name = tickfile_name_basic(symbol, date, ticks_type, 'zip')
         url = f'data/spot/daily/trades/{symbol.upper()}/{file_name}'
 
     return urllib.parse.urljoin(DATA_URL, url)
@@ -152,9 +158,9 @@ def check_symbol(symbol):
         raise LTIException(f'Symbol {symbol} not found in source {datasource_name()}.')
 
 
-def download_ticks(symbol, date):
+def download_ticks(symbol, date, ticks_type):
 
-    download_url = get_url_tick_day(symbol, date)
+    download_url = get_url_tick_day(symbol, date, ticks_type)
     logging.info(f'download {download_url}...')
 
     try:
@@ -184,13 +190,14 @@ def download_klines(symbol, timeframe, date):
     return download_file(dl_file)
 
 
-def download_tickfile(symbol, date, tick_day_file_name):
+def download_tickfile(symbol, date, ticks_type, tick_day_file_name):
 
     assert type(date) == dt.date
     logging.info(f'Download tick data for {symbol} for {date}...')
 
-    buf = download_ticks(symbol, date)
-    if buf is None: return
+    buf = download_ticks(symbol, date, ticks_type)
+    if buf is None:
+        return
 
     file_folder = path.split(tick_day_file_name)[0]
     if not path.isdir(file_folder):
@@ -202,44 +209,57 @@ def download_tickfile(symbol, date, tick_day_file_name):
     rename_file_force(temp_file_name, tick_day_file_name)
 
 
-def read_tickfile(file_name):
+def read_tickfile(file_name, n_time_col, n_price_col, n_volume_col):
 
     string_data_table = read_zipcsv_to_strings(file_name)
 
     first_line = 0 if string_data_table[0, 4].isdigit() else 1
-    price = string_data_table[first_line:, 1].astype(float)
-    volume = string_data_table[first_line:, 2].astype(float)
-    time = string_data_table[first_line:, 4].astype(int).astype('datetime64[ms]')
+
+    price = string_data_table[first_line:, n_price_col].astype(float)
+    volume = string_data_table[first_line:, n_volume_col].astype(float)
+    time = string_data_table[first_line:, n_time_col].astype(int).astype('datetime64[ms]')
 
     return TimeframeData({'time': time, 'price': price, 'volume': volume})
 
 
-def bars_of_day_from_tickfile(file_name, symbol, timeframe, date):
+def bars_of_day_from_tickfile(file_name, symbol, timeframe, date, ticks_type):
 
     if not path.isfile(file_name):
-        return OHLCV_day.empty_day(symbol, timeframe, date)
+        return None
 
-    tick_data = read_tickfile(file_name)
+    if ticks_type == 'trades':
+        tick_data = read_tickfile(file_name, 4, 1, 2)
+    else:
+        tick_data = read_tickfile(file_name, 5, 1, 2)
+
     return OHLCV_day.from_ticks(tick_data, symbol, timeframe, date)
 
 
-def bars_of_day_from_ticks(symbol, timeframe, date):
+def bars_of_day_from_ticks(symbol, timeframe, date, ticks_type):
 
     part, symbol_name = symbol_decode(symbol)
 
-    file_name_tickfile = path.join(source_data_path, part, tickfile_name_basic(symbol_name, date, 'zip'))
+    file_name_tickfile = path.join(source_data_path, part, tickfile_name_basic(symbol_name, date, ticks_type, 'zip'))
 
     if not path.isfile(file_name_tickfile):
-        download_tickfile(symbol, date, file_name_tickfile)
+        download_tickfile(symbol, date, ticks_type, file_name_tickfile)
 
-    return bars_of_day_from_tickfile(file_name_tickfile, symbol, timeframe, date)
+    return bars_of_day_from_tickfile(file_name_tickfile, symbol, timeframe, date, ticks_type)
+
+
+def bars_of_day_from_agg_ticks(symbol, timeframe, date):
+    return bars_of_day_from_ticks(symbol, timeframe, date, 'aggTrades')
+
+
+def bars_of_day_from_full_ticks(symbol, timeframe, date):
+    return bars_of_day_from_ticks(symbol, timeframe, date, 'trades')
 
 
 def bars_of_day_from_klines_raw(symbol, timeframe, date):
 
     byte_zipcsv = download_klines(symbol, timeframe, date)
     if byte_zipcsv is None:
-        return OHLCV_day.empty_day(symbol, timeframe, date)
+        return None
 
     string_data_table = read_zipcsv_to_strings(io.BytesIO(byte_zipcsv))
     if string_data_table is None:
@@ -265,19 +285,83 @@ def bars_of_day_from_klines_raw(symbol, timeframe, date):
 
 
 def bars_of_day_from_klines(symbol, timeframe, date):
+
     bar_data = bars_of_day_from_klines_raw(symbol, timeframe, date)
-    bar_data.fix_errors(date)
+
+    if bar_data is not None:
+        bar_data.fix_errors(date)
+
     return bar_data
+
+
+def bars_of_day_online_request(symbol, timeframe, date):
+    part, symbol = symbol_decode(symbol)
+    api_url = get_api_url(part)
+    request_start_time = np.datetime64(date, 'ms').astype(int)
+    request_end_time = ((np.datetime64(date, 'D') + 1).astype('datetime64[ms]') - 1).astype(int)
+    request_limit = int(24 * 60 * 60 / timeframe.value)
+    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={request_start_time}&endTime={request_end_time}&limit={request_limit}'
+    response = urllib.request.urlopen(request_url).read()
+    return json.loads(response)
+
+
+def bars_of_day_online(symbol, timeframe, date):
+
+    # online_from_time = dt.datetime.utcnow() - dt.timedelta(hours=ONLINE_HOURS_AVAILABLE)
+    # if date < online_from_time.date():
+    #     return None
+
+    logging.info(f'Download using api symbol {symbol} timeframe {timeframe} date {date}...')
+
+    received_time = []
+    received_open = []
+    received_high = []
+    received_low = []
+    received_close = []
+    received_volume = []
+
+    klines_data = bars_of_day_online_request(symbol, timeframe, date)
+    for data_time_set in klines_data:
+        received_open.append(PRICE_TYPE(data_time_set[1]))
+        received_high.append(PRICE_TYPE(data_time_set[2]))
+        received_low.append(PRICE_TYPE(data_time_set[3]))
+        received_close.append(PRICE_TYPE(data_time_set[4]))
+        received_volume.append(PRICE_TYPE(data_time_set[5]))
+        received_time.append(int(data_time_set[0]))
+
+    if len(received_time) == 0:
+        return None
+
+    day_data = OHLCV_day({
+        'symbol': symbol,
+        'timeframe': timeframe,
+        'time': np.array(received_time, dtype=TIME_TYPE),
+        'open': np.array(received_open, dtype=PRICE_TYPE),
+        'high': np.array(received_high, dtype=PRICE_TYPE),
+        'low': np.array(received_low, dtype=PRICE_TYPE),
+        'close': np.array(received_close, dtype=PRICE_TYPE),
+        'volume': np.array(received_open, dtype=VOLUME_TYPE)
+    })
+
+    day_data.fix_errors(date)
+    return day_data
 
 
 def bars_of_day(symbol, timeframe, date):
 
-    bar_data1 = subsources[0](symbol, timeframe, date)
+    bar_data = None
+    i_subsource = 0
+    while True:
 
-    if len(subsources) < 2 or bar_data1.is_entire():
-        return bar_data1
+        bar_data_sub = subsources[i_subsource](symbol, timeframe, date)
+        if bar_data is None:
+            bar_data = bar_data_sub
+        elif bar_data_sub is not None:
+            bar_data.suppliment(bar_data_sub)
 
-    bar_data2 = subsources[1](symbol, timeframe, date)
-    bar_data1.suppliment(bar_data2)
-    bar_data1.fix_errors(date)
-    return bar_data1
+        if i_subsource == len(subsources) - 1 or (bar_data is not None and bar_data.is_entire()):
+            break
+
+        i_subsource += 1
+
+    return OHLCV_day.empty_day(symbol, timeframe, date) if bar_data is None else bar_data

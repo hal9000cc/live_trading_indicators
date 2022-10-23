@@ -36,7 +36,11 @@ def param_time(time_value, as_end):
         return None
 
     if type(time_value) == int:
-        return datetime.datetime(time_value // 10000, time_value % 10000 // 100, time_value % 100)
+        if as_end:
+            return datetime.datetime(time_value // 10000, time_value % 10000 // 100, time_value % 100) \
+                                                                + dt.timedelta(days=1) - dt.timedelta(milliseconds=1)
+        else:
+            return datetime.datetime(time_value // 10000, time_value % 10000 // 100, time_value % 100)
     elif type(time_value) == np.datetime64:
         return time_value.astype(dt.datetime)
     elif type(time_value) == dt.date:
@@ -61,7 +65,7 @@ def config_get_default():
     return {
         'cash_folder': path.join(HOME_FOLDER, 'data', 'timeframe_data'),
         'sources_folder': path.join(HOME_FOLDER, 'data', 'sources'),
-        'source_type': 'bars, ticks',
+        'source_type': 'online',
         'endpoints_required': True,
         'max_empty_bars_fraction': 0.01,
         'max_empty_bars_consecutive': 2,
