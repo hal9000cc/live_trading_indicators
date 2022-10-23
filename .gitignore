@@ -131,3 +131,5 @@ dmypy.json
 .idea/
 
 /tests/test_data/
+/bin
+pyvenv.cfg

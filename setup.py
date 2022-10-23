@@ -3,29 +3,33 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# requirements = ["requests<=2.21.0"]
+requirements = [
+    'construct<=2.10.0',
+    'numba<=0.56.3']
 
 setuptools.setup(
-    name="live_trading_indicators",
-    version="0.0.1",
-    author="Eric Chi",
+    name='live_trading_indicators',
+    version='0.0.2',
+    author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
-    description="A Hello World package",
-    # Длинное описание, которое будет отображаться на странице PyPi. Использует README.md репозитория для заполнения.
+    description='A package for obtaining quotation data from various online sources and calculating the values of '
+                'technical indicators based on these quotations.',
+
     long_description=long_description,
-    # Определяет тип контента, используемый в long_description.
-    long_description_content_type="text/markdown",
-    # URL-адрес, представляющий домашнюю страницу проекта. Большинство проектов ссылаются на репозиторий.
-    url="https://github.com/ericjaychi/sample-pypi-package",
-    # Находит все пакеты внутри проекта и объединяет их в дистрибутив.
-    packages=setuptools.find_packages(),
-    # requirements или dependencies, которые будут установлены вместе с пакетом, когда пользователь установит его через pip.
-    # install_requires=requirements,
-    # Предоставляет pip некоторые метаданные о пакете. Также отображается на странице PyPi.
+    long_description_content_type='text/markdown',
+
+    url='https://github.com/hal9000cc/live_trading_indicators',
+
+    packages=setuptools.find_packages(where='src'),
+    package_dir={
+        'live_trading_indicators': './src/live_trading_indicators',
+        'datasources': './datasources'
+    },
     classifiers=[
-        "Programming Language :: Python :: 3.8",
-        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.10",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    install_requires=requirements,
+    python_requires='>=3.10',
 )
