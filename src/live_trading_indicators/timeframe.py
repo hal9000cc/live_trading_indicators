@@ -1,37 +1,35 @@
 from enum import IntEnum
 import numpy as np
 import datetime as dt
+from .constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_SECOND
 
 
 class Timeframe(IntEnum):
-    t1m = 60
-    t3m = 60 * 3
-    t5m = 60 * 5
-    t10m = 60 * 10
-    t15m = 60 * 15
-    t30m = 60 * 30
-    t1h = 60 * 60
-    t2h = 60 * 60 * 2
-    t4h = 60 * 60 * 4
-    t6h = 60 * 60 * 6
-    t8h = 60 * 60 * 8
-    t12h = 60 * 60 * 12
-    t1d = 60 * 60 * 24
-    t2d = 60 * 60 * 24 * 2
-    t4d = 60 * 60 * 24 * 4
-    t1w = 60 * 60 * 24 * 7
+    t1m = 60 * TIME_UNITS_IN_ONE_SECOND
+    t3m = 60 * 3 * TIME_UNITS_IN_ONE_SECOND
+    t5m = 60 * 5 * TIME_UNITS_IN_ONE_SECOND
+    t10m = 60 * 10 * TIME_UNITS_IN_ONE_SECOND
+    t15m = 60 * 15 * TIME_UNITS_IN_ONE_SECOND
+    t30m = 60 * 30 * TIME_UNITS_IN_ONE_SECOND
+    t1h = 60 * 60 * TIME_UNITS_IN_ONE_SECOND
+    t2h = 60 * 60 * 2 * TIME_UNITS_IN_ONE_SECOND
+    t4h = 60 * 60 * 4 * TIME_UNITS_IN_ONE_SECOND
+    t6h = 60 * 60 * 6 * TIME_UNITS_IN_ONE_SECOND
+    t8h = 60 * 60 * 8 * TIME_UNITS_IN_ONE_SECOND
+    t12h = 60 * 60 * 12 * TIME_UNITS_IN_ONE_SECOND
+    t1d = 60 * 60 * 24 * TIME_UNITS_IN_ONE_SECOND
+    t2d = 60 * 60 * 24 * 2 * TIME_UNITS_IN_ONE_SECOND
+    t4d = 60 * 60 * 24 * 4 * TIME_UNITS_IN_ONE_SECOND
+    t1w = 60 * 60 * 24 * 7 * TIME_UNITS_IN_ONE_SECOND
 
     def __str__(self):
         return self.name[1:]
 
-    def timedelta(self):
-        return dt.timedelta(seconds=self.value)
-
     def timedelta64(self):
-        return np.timedelta64(self.value, 's')
+        return np.timedelta64(self.value, TIME_TYPE_UNIT)
 
     def begin_of_tf(self, time):
-        return (np.datetime64(time, 's').astype(int) // self.value * self.value).astype('datetime64[s]').astype(dt.datetime)
+        return (np.datetime64(time, TIME_TYPE_UNIT).astype(int) // self.value * self.value).astype(TIME_TYPE)
 
     @staticmethod
     def cast(value):
@@ -47,4 +45,3 @@ class Timeframe(IntEnum):
                 return Timeframe[f't{value}']
 
         return None
-    

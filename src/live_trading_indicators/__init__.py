@@ -1,8 +1,9 @@
 from .exceptions import *
 from .indicator_data import *
-from .indicators import Indicators
+from .indicators_set import Indicators
 from .timeframe import Timeframe
-from .common import TIME_TYPE, \
+from .config import config_get_default, config_load, config_save
+from .constants import TIME_TYPE, \
                     PRICE_TYPE, \
                     VOLUME_TYPE
 
@@ -10,9 +11,9 @@ from .common import TIME_TYPE, \
 def config(actions=None, **kwargs):
 
     if actions == 'set_default':
-        config = common.config_get_default()
+        config = config_get_default()
     else:
-        config = common.config_load()
+        config = config_load()
 
     if len(kwargs):
 
@@ -23,7 +24,7 @@ def config(actions=None, **kwargs):
                 del config[settings_name]
 
     if len(kwargs) or actions is not None:
-        common.config_save(config)
+        config_save(config)
 
     return config
 

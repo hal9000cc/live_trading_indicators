@@ -6,9 +6,9 @@ import construct as cs
 import zlib
 from zipfile import ZipFile
 import logging
-from ..common import *
 from ..exceptions import *
 from ..indicator_data import *
+from ..constants import PRICE_TYPE, VOLUME_TYPE
 
 
 CASH_FILE_SIGNATURE = b'LTI'
@@ -33,7 +33,7 @@ class SourceData:
             self.default_symbol_part_for_path = ''
 
     def filename_day_data(self, symbol, timeframe, day_date):
-        assert type(day_date) == dt.date
+        assert type(day_date) == np.datetime64 and day_date.dtype.name == 'datetime64[D]'
 
         symbol_parts = symbol.split('/')
 
@@ -52,10 +52,18 @@ class SourceData:
             bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
             bar_data.check_day_data(symbol, timeframe, day_date)
             if not bar_data.is_empty():
-                if bar_data.is_entire() or (dt.datetime.now().date() - day_date).days > DAYS_WAIT_FOR_ENTIRE:
+                if bar_data.is_entire() or (np.datetime64(dt.datetime.now(), 'D') - day_date).astype(int) > DAYS_WAIT_FOR_ENTIRE:
                     self.save_to_cash(filename, bar_data)
 
         return bar_data
+
+    @staticmethod
+    def rename_file_force(source, destination):
+
+        if path.isfile(destination):
+            os.remove(destination)
+
+        os.rename(source, destination)
 
     @staticmethod
     def get_file_signature_struct():
@@ -133,7 +141,7 @@ class SourceData:
             file.write(self.build_signature_and_version())
             file.write(self.build_header(bar_data))
             file.write(zlib.compress(buf_data))
-        rename_file_force(temp_file_name, file_name)
+        self.rename_file_force(temp_file_name, file_name)
 
     def load_from_cash(self, file_name, symbol, timeframe):
 
@@ -162,19 +170,19 @@ class SourceData:
 
     def get_bar_data(self, symbol, timeframe, time_begin, time_end):
 
-        if time_begin is None:
-            raise LTIException('No begin_time set')
-
-        if time_end is None:
-            raise LTIException('No end_time set')
-
-        if time_begin > time_end:
-            raise ValueError('begin_time less then end_time')
+        assert time_begin is not None
+        assert time_end is not None
+        assert time_end > time_begin
 
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
-        date_end = time_end.date()
-        day_date = time_begin.date()
+        day_dates = []
+        date_end = time_end.astype('datetime64[D]')
+        day_date = time_begin.astype('datetime64[D]')
         while day_date <= date_end:
+            day_dates.append(day_date)
+            day_date += 1
+
+        for day_date in day_dates:
             day_data = self.bars_of_day(symbol, timeframe, day_date)
             td_time.append(day_data.time)
             td_open.append(day_data.open)
@@ -182,7 +190,6 @@ class SourceData:
             td_low.append(day_data.low)
             td_close.append(day_data.close)
             td_volume.append(day_data.volume)
-            day_date += dt.timedelta(days=1)
 
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,
@@ -192,36 +199,3 @@ class SourceData:
                            'low': np.hstack(td_low),
                            'close': np.hstack(td_close),
                            'volume': np.hstack(td_volume)})
-
-
-def rename_file_force(source, destination):
-
-    if path.isfile(destination):
-        os.remove(destination)
-
-    os.rename(source, destination)
-
-
-def byte_csv_to_strings(csv_text):
-
-    max_line_length = 200
-    for i in range(3):
-        max_line_length = max_line_length * 2
-        first_lines = csv_text[:max_line_length].splitlines()
-        if len(first_lines) > 1: break
-    # else:
-    #     return None
-
-    n_columns = first_lines[0].count(b',') + 1
-
-    return np.array(csv_text.replace(b',', b'\n').splitlines()).reshape((-1, n_columns))
-
-
-def read_zipcsv_to_strings(source):
-
-    with ZipFile(source) as zip_file:
-        csv_text = zip_file.read(zip_file.namelist()[0])
-
-    return byte_csv_to_strings(csv_text)
-
-
