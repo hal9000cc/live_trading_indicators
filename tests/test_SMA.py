@@ -9,11 +9,13 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22)
 ])
-def test_sma(config_default, default_source, default_symbol, time_begin, time_end, period, a_timeframe):
+def test_sma(config_default, test_source, test_symbol, time_begin, time_end, period, a_timeframe):
 
-    indicators = lti.Indicators(default_source)
-    out = indicators.OHLCV(default_symbol, a_timeframe, time_begin=time_begin, time_end=time_end)
-    sma = indicators.SMA(default_symbol, a_timeframe, period, time_begin=time_begin, time_end=time_end)
+    test_symbol = 'um/ethusdt'
+
+    indicators = lti.Indicators(test_source)
+    out = indicators.OHLCV(test_symbol, a_timeframe, time_begin, time_end)
+    sma = indicators.SMA(test_symbol, a_timeframe, time_begin, time_end, period=period)
 
     values = out.close
     values_sma = sma.value
@@ -36,9 +38,11 @@ def test_sma(config_default, default_source, default_symbol, time_begin, time_en
     ('2022-07-01', '2022-07-10', 241, lti.Timeframe.t1d),
     ('2022-07-01', '2022-07-10', 0, lti.Timeframe.t1d)
 ])
-def test_sma_value_error(config_default, default_source, default_symbol, time_begin, time_end, period, timeframe):
+def test_sma_value_error(config_default, test_source, time_begin, time_end, period, timeframe):
 
-    indicators = lti.Indicators(default_source)
-    out = indicators.OHLCV(default_symbol, timeframe, time_begin=time_begin, time_end=time_end)
+    symbol = 'btcusdt'
+
+    indicators = lti.Indicators(test_source)
+    out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
     with pytest.raises(ValueError):
-        sma = indicators.SMA(default_symbol, timeframe, period, time_begin=time_begin, time_end=time_end)
+        sma = indicators.SMA(symbol, timeframe, time_begin, time_end, period=period)

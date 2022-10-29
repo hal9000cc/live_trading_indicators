@@ -4,7 +4,7 @@ from ..constants import PRICE_TYPE
 from ..calculator import ema_calculate
 
 
-def rsi_calculate(source_values, period):
+def K_calculate(high, low, period):
 
     U = np.hstack((np.zeros(1, dtype=PRICE_TYPE) + 1e-10, np.diff(source_values)))
     D = -U.copy()
@@ -18,15 +18,15 @@ def rsi_calculate(source_values, period):
     return U / (U + D) * 100
 
 
-def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
+def get_indicator_out(indicators, symbol, timeframe, period_K, period_D, slowing, ma_method='sma'):
 
     ohlcv = indicators.get_bar_data(symbol, timeframe)
-    source_values = ohlcv.data[value]
+    assert len(ohlcv) > 0
 
-    if len(source_values) == 0:
-        out = np.zeros(0, dtype=PRICE_TYPE)
-    else:
-        out = rsi_calculate(source_values, period)
+    high = ohlcv.high
+    low = ohlcv.low
+
+
 
     return IndicatorData({
         'name': 'RSI',

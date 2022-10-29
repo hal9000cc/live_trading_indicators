@@ -66,15 +66,15 @@ def test_compare_full_and_agg_ticks(config_clear_data_t, config_clear_data_a, so
     assert (out_full.volume == out_agg.volume).all()
 
 
-def test_memory_leak_tickd_downlad(config_clear_data_t, default_source, default_symbol):
+def test_memory_leak_tickd_downlad(config_clear_data_t, test_source, test_symbol):
 
     mu_begin = memory_usage()[0]
 
     sources_folder = path.join(HOME_FOLDER, 'data', 'sources')
     config_clear_data_t[sources_folder] = sources_folder
-    indicators = lti.Indicators(default_source, date_begin=20220901, date_end=20220902, **config_clear_data_t)
+    indicators = lti.Indicators(test_source, date_begin=20220901, date_end=20220902, **config_clear_data_t)
 
-    out = indicators.OHLCV(default_symbol, lti.Timeframe.t1h)
+    out = indicators.OHLCV(test_symbol, lti.Timeframe.t1h)
     assert memory_usage()[0] - mu_begin < 100
 
 

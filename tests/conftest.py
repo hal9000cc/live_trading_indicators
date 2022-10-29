@@ -14,6 +14,11 @@ def test_source():
     return 'binance'
 
 
+@pytest.fixture
+def test_symbol():
+    return 'um/ethusdt'
+
+
 def test_symbols():
 
     symbols = []
@@ -24,9 +29,12 @@ def test_symbols():
 
 
 def test_timeframes():
+
     timeframes = []
     for tf_str in ('1m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d'):
-        timeframes += Timeframe.cast(tf_str)
+        timeframes.append(Timeframe.cast(tf_str))
+
+    return timeframes
 
 
 def ohlcv_set(files, timeframe, symbol, date_start):
@@ -53,10 +61,10 @@ def ohlcv_set(files, timeframe, symbol, date_start):
 
 def pytest_generate_tests(metafunc):
 
-    if 'test_symbol' in metafunc.fixturenames:
+    if 'a_symbol' in metafunc.fixturenames:
         return metafunc.parametrize('a_symbol', test_symbols())
 
-    if 'test_timeframe' in metafunc.fixturenames:
+    if 'a_timeframe' in metafunc.fixturenames:
         return metafunc.parametrize("a_timeframe", test_timeframes())
 
     if 'ohlcv_set' in metafunc.fixturenames:

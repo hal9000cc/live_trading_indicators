@@ -12,6 +12,8 @@ SPOT_API_URL = 'https://api.binance.com/api/v3/'
 UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
 CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
+DEFAULT_SYMBOL_PART = 'spot'
+
 exchange_info_data = {}
 
 
@@ -53,7 +55,7 @@ def symbol_decode(symbol):
     if len(symbol_parts) == 2:
         part = symbol_parts[0]
         if part != 'um' and part != 'cm':
-            raise ValueError(f'Bad symbol: {symbol}')
+            raise LTIExceptionSymbolNotFound(symbol)
 
     return part, symbol_parts[-1]
 

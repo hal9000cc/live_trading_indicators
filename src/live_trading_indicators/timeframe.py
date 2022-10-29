@@ -29,6 +29,7 @@ class Timeframe(IntEnum):
         return np.timedelta64(self.value, TIME_TYPE_UNIT)
 
     def begin_of_tf(self, time):
+        assert time is not None
         return (np.datetime64(time, TIME_TYPE_UNIT).astype(int) // self.value * self.value).astype(TIME_TYPE)
 
     @staticmethod

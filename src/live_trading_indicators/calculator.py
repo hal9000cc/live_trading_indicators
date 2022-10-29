@@ -1,6 +1,6 @@
 import numpy as np
 import numba as nb
-from .common import PRICE_TYPE
+from .constants import PRICE_TYPE
 
 
 @nb.njit

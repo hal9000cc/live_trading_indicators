@@ -5,7 +5,7 @@ from ..calculator import ema_calculate
 
 def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe, indicators.date_begin, indicators.date_end)
+    ohlcv = indicators.get_bar_data(symbol, timeframe)
     values = ohlcv.data[value]
 
     alpha = 1.0 / (period + 1)

@@ -4,7 +4,7 @@ from ..indicator_data import IndicatorData
 
 def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe, indicators.date_begin, indicators.date_end)
+    ohlcv = indicators.get_bar_data(symbol, timeframe)
     source_values = ohlcv.data[value]
 
     data_len = len(source_values)

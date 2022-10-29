@@ -17,6 +17,9 @@ class TimeframeData:
 
         assert 'time' in data_dict.keys()
 
+        if len(data_dict['time']) == 0:
+            raise LTIExceptionEmptyBarData()
+
         self.first_bar_time = self.data['time'][0]
         self.end_bar_time = self.data['time'][-1]
 
@@ -31,7 +34,7 @@ class TimeframeData:
         if type(item.start) == np.datetime64 and type(item.stop) == np.datetime64 and item.step is None:
             return self.slice_by_datetime64(item.start, item.stop)
 
-        if type(item.start) == dt.datetime64 and item.stop is None and item.step is None:
+        if type(item.start) == np.datetime64 and item.stop is None and item.step is None:
             return self.slice_by_datetime64(item.start, item.stop)
 
         if type(item.start) == int and type(item.stop) == int and item.step is None:
@@ -112,13 +115,15 @@ class TimeframeData:
     def slice_by_datetime64(self, time_start, time_stop):
 
         i_start = self.index_from_time64(time_start)
-        i_stop = self.index_from_time64(time_stop)
+        i_stop = self.index_from_time64(time_stop) if time_stop is not None else len(self) + 1
 
         if i_start == 0 and i_stop == len(self):
             return self
 
-        if i_start > i_stop: raise ValueError
-        if i_start < 0 or i_stop < 0: raise ValueError
+        if i_start > i_stop:
+            raise ValueError
+        if i_start < 0 or i_stop < 0:
+            raise ValueError
 
         return self.slice_by_int(i_start, i_stop)
 

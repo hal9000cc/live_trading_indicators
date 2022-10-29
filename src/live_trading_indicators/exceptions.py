@@ -4,7 +4,7 @@ class LTIException(Exception):
     pass
 
 
-class LTIBadTimeParameter(LTIException):
+class LTIExceptionBadTimeParameter(LTIException):
     def __init__(self, value):
         self.value = value
         super().__init__(f'Bad date or time value: {value}')
@@ -16,10 +16,22 @@ class LTIExceptionSymbolNotFound(LTIException):
         super().__init__(f'Symbol not found: {symbol}')
 
 
-class LTIBadTimeframeParameter(LTIException):
+class LTIExceptionEmptyBarData(LTIException):
+    def __init__(self):
+        super().__init__('Empty bar data')
+
+
+class LTIExceptionBadTimeframeParameter(LTIException):
     def __init__(self, value):
         self.value = value
         super().__init__(f'Bad timeframe value: {value}')
+
+
+class LTIExceptionTimeBeginLaterTimeEnd(LTIException):
+    def _init_(self, time_begin, time_end):
+        self.time_begin = time_begin
+        self.time_end = time_end
+        super().__init__(f'Time begin is later than time end ({time_begin} < {time_end}')
 
 
 class LTIExceptionBadSourceData(LTIException):

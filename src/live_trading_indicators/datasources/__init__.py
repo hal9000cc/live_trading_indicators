@@ -67,7 +67,7 @@ class SourceData:
 
     @staticmethod
     def get_file_signature_struct():
-        return cs.Struct('signature' / cs.Const(CASH_FILE_SIGNATURE), 'file_version' / cs.Int)
+        return cs.Struct('signature' / cs.Const(CASH_FILE_SIGNATURE), 'file_version' / cs.Int16ub)
 
     @staticmethod
     def build_signature_and_version():
@@ -103,13 +103,16 @@ class SourceData:
     def parse_header(file, file_version):
 
         if file_version == 1:
-            return __class__.get_header_struct_v1().parse_stream(file)
+            header_struct = __class__.get_header_struct_v1()
+        else:
+            raise NotImplementedError
 
-        raise NotImplementedError
+        return header_struct.sizeof(), header_struct.parse(file)
 
     @staticmethod
     def get_file_data_struct(n_bars):
         return cs.Struct(
+
             'time' / cs.Long[n_bars],
             'open' / cs.Double[n_bars],
             'high' / cs.Double[n_bars],
@@ -123,14 +126,15 @@ class SourceData:
         n_bars = len(bar_data.time)
 
         data_struct = self.get_file_data_struct(n_bars)
-        buf_data = data_struct.build({
-            'time': bar_data.time.astype(int),
-            'open': bar_data.open,
-            'high': bar_data.high,
-            'low': bar_data.low,
-            'close': bar_data.close,
-            'volume': bar_data.volume
-        })
+        buf_data = [self.build_header(bar_data),
+                    data_struct.build({
+                    'time': bar_data.time.astype(int),
+                    'open': bar_data.open,
+                    'high': bar_data.high,
+                    'low': bar_data.low,
+                    'close': bar_data.close,
+                    'volume': bar_data.volume
+                })]
 
         file_folder = path.split(file_name)[0]
         if not path.isdir(file_folder):
@@ -139,8 +143,7 @@ class SourceData:
         temp_file_name = f'{file_name}.tmp'
         with open(temp_file_name, 'wb') as file:
             file.write(self.build_signature_and_version())
-            file.write(self.build_header(bar_data))
-            file.write(zlib.compress(buf_data))
+            file.write(zlib.compress(b''.join(buf_data)))
         self.rename_file_force(temp_file_name, file_name)
 
     def load_from_cash(self, file_name, symbol, timeframe):
@@ -151,11 +154,10 @@ class SourceData:
             if signature_and_version.signature != CASH_FILE_SIGNATURE:
                 raise LTIException('Bad cash file')
 
-            header = self.parse_header(file, signature_and_version.file_version)
-
             buf = zlib.decompress(file.read())
+            header_len, header = self.parse_header(buf, signature_and_version.file_version)
             data_struct = self.get_file_data_struct(header.n_bars)
-            file_data = data_struct.parse(buf)
+            file_data = data_struct.parse(buf[header_len:])
 
         return OHLCV_day({
             'symbol': symbol,
@@ -172,7 +174,7 @@ class SourceData:
 
         assert time_begin is not None
         assert time_end is not None
-        assert time_end > time_begin
+        assert time_end >= time_begin
 
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
         day_dates = []

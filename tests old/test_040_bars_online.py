@@ -11,10 +11,10 @@ from src.live_trading_indicators.datasources import binance
     ('um/btcusdt', '1h', 20221019),
     ('um/ethusdt', '1h', 20221018)
 ])
-def test_bar_dates(config_default, default_source, symbol, timeframe, date_begin):
+def test_bar_dates(config_default, test_source, symbol, timeframe, date_begin):
 
     date_end = dt.date.today()
-    indicators = lti.Indicators(default_source, date_begin, date_end)
+    indicators = lti.Indicators(test_source, date_begin, date_end)
     ohlcv = indicators.OHLCV(symbol, timeframe)
 
     assert ohlcv.time[0] == lti.Timeframe.cast(timeframe).begin_of_tf(param_time(date_begin, False))

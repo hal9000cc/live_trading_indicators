@@ -13,12 +13,12 @@ def cast_time(time_value):
             dt.datetime(time_value // 10000, time_value % 10000 // 100, time_value % 100), TIME_TYPE_UNIT)
     elif type(time_value) == np.datetime64:
         return time_value.astype(TIME_TYPE)
-    elif type(time_value) == dt.date:
+    elif type(time_value) == dt.date or type(time_value) == dt.datetime:
         return np.datetime64(time_value, TIME_TYPE_UNIT)
     elif type(time_value) == str:
         return np.datetime64(time_value, TIME_TYPE_UNIT)
     else:
-        raise exceptions.LTIBadTimeParameter(time_value)
+        raise exceptions.LTIExceptionBadTimeParameter(time_value)
 
 
 def cast_timeframe(timeframe_value):

@@ -10,12 +10,12 @@ TIMEFRAME = lti.Timeframe.t1h
 
 
 @pytest.fixture
-def default_source():
+def test_source():
     return SOURCE
 
 
 @pytest.fixture
-def default_symbol():
+def test_symbol():
     return SYMBOL
 
 
