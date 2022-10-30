@@ -6,41 +6,67 @@
 
 ## Примеры использования
 ### Получение котировок
-```
+```python
 import live_trading_indicators as lti
 
 indicators = lti.Indicators('binance')
 ohlcv = indicators.OHLCV('ethusdt', '4h', '2022-07-01', '2022-07-01')
 print(ohlcv)
 ```
+```
+<OHLCV data> symbol: ethusdt, timeframe: 4h
+date: 2022-07-01T00:00:00 - 2022-07-01T20:00:00 (length: 6)
+empty bars: count 0 (0.00 %), max consecutive 0
+Values: time, open, high, low, close, volume
+```
+
 Теперь ohlcv содержит котировки в виде numpy array (ohlcv.time, ohlcv.open, ohlcv.high, ohlcv.low, ohlcv.close, ohlcv.volume).
 
 ### pandas dataframe
 ```
 dataframe = ohlcv.pandas()
-dataframe.head()
+print(dataframe.head())
+```
+```
+                 time     open     high      low    close       volume
+0 2022-07-01 00:00:00  1071.02  1117.00  1050.46  1054.52  430646.8720
+1 2022-07-01 04:00:00  1054.52  1076.43  1045.41  1066.81  275557.9328
+2 2022-07-01 08:00:00  1066.81  1086.44  1033.44  1050.22  252105.5665
+3 2022-07-01 12:00:00  1050.21  1074.23  1043.00  1056.86  298465.0695
+4 2022-07-01 16:00:00  1056.86  1083.10  1054.82  1067.91  158796.2248
 ```
 ### MACD индикатор
 ```
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
-macd.pandas().head()
+print(macd.pandas().head())
+```
+```
+                 time      macd  macd_signal  macd_hist
+0 2022-07-01 00:00:00  0.000000     0.000000   0.000000
+1 2022-07-01 01:00:00  0.021389     0.010694   0.010694
+2 2022-07-01 02:00:00 -0.061712    -0.013441  -0.048271
+3 2022-07-01 03:00:00 -1.105457    -0.286445  -0.819012
+4 2022-07-01 04:00:00 -2.146765    -0.658509  -1.488256
 ```
 ### Получение данных в реальном времени (последние 5 минут на таймфрейме 1m без неполного бара)
 ```
 import datetime as dt
 import live_trading_indicators as lti
 
-indicators = lti.Indicators('binance'. dt.datetime.utcnow() - dt.timedelta(minutes=6))
-indicators.OHLCV('btcusdt', '1m').pandas().head()
+indicators = lti.Indicators('binance', dt.datetime.utcnow() - dt.timedelta(minutes=6))
+ohlcv = indicators.OHLCV('btcusdt', '1m')
+print(ohlcv.pandas().head())
+```
+```
+                 time      open      high       low     close     volume
+0 2022-10-30 19:45:00  20676.29  20679.80  20674.50  20679.37   38.85197
+1 2022-10-30 19:46:00  20678.49  20683.90  20677.44  20682.98   26.57476
+2 2022-10-30 19:47:00  20682.98  20685.10  20679.59  20684.49   33.39769
+3 2022-10-30 19:48:00  20683.33  20688.13  20654.00  20663.27  351.74054
+4 2022-10-30 19:49:00  20662.47  20663.50  20648.52  20654.75  204.41242
 ```
 ### Получение данных в реальном времени (последние 5 минут на таймфрейме 1m с неполным баром)
-```
-import datetime as dt
-import live_trading_indicators as lti
 
-indicators = lti.Indicators('binance'. dt.datetime.utcnow() - dt.timedelta(minutes=5))
-indicators.OHLCV('btcusdt', '1m').pandas().head()
-```
 ## Подробнее
 Поддерживаются все типовые тамфреймы до 1 суток включительно: 1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
 ### Источники данных
