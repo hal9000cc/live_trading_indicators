@@ -19,10 +19,16 @@ low = ohlcv.low # numpy array
 close = ohlcv.close # numpy array
 volume = ohlcv.volume # numpy array
 
-```
-### Получение котировок в pandas
-dataframe = ohlcv.pandas() # pandas dataframe
+# pandas dataframe
+dataframe = ohlcv.pandas()
+dataframe.head()
 
+# MACD индикатор
+macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
+
+# Информация о содержимом
+print(macd)
+```
 Поддерживаются все типовые тамфреймы до 1 суток включительно: 1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
 # Источники данных
 Текущая версия получает данные из одного источника - открытые данные торговли криптобиржи binance. 
