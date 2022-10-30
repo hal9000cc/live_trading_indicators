@@ -13,6 +13,7 @@ indicators = lti.Indicators('binance')
 ohlcv = indicators.OHLCV('ethusdt', '4h', '2022-07-01', '2022-07-01')
 print(ohlcv)
 ```
+###### Результат:
 ```
 <OHLCV data> symbol: ethusdt, timeframe: 4h
 date: 2022-07-01T00:00:00 - 2022-07-01T20:00:00 (length: 6)
@@ -23,10 +24,11 @@ Values: time, open, high, low, close, volume
 Теперь ohlcv содержит котировки в виде numpy array (ohlcv.time, ohlcv.open, ohlcv.high, ohlcv.low, ohlcv.close, ohlcv.volume).
 
 ### pandas dataframe
-```
+```python
 dataframe = ohlcv.pandas()
 print(dataframe.head())
 ```
+###### Результат:
 ```
                  time     open     high      low    close       volume
 0 2022-07-01 00:00:00  1071.02  1117.00  1050.46  1054.52  430646.8720
@@ -36,10 +38,11 @@ print(dataframe.head())
 4 2022-07-01 16:00:00  1056.86  1083.10  1054.82  1067.91  158796.2248
 ```
 ### MACD индикатор
-```
+```python
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 print(macd.pandas().head())
 ```
+###### Результат:
 ```
                  time      macd  macd_signal  macd_hist
 0 2022-07-01 00:00:00  0.000000     0.000000   0.000000
@@ -49,7 +52,7 @@ print(macd.pandas().head())
 4 2022-07-01 04:00:00 -2.146765    -0.658509  -1.488256
 ```
 ### Получение данных в реальном времени (последние 5 минут на таймфрейме 1m без неполного бара)
-```
+```python
 import datetime as dt
 import live_trading_indicators as lti
 
@@ -57,6 +60,7 @@ indicators = lti.Indicators('binance', dt.datetime.utcnow() - dt.timedelta(minut
 ohlcv = indicators.OHLCV('btcusdt', '1m')
 print(ohlcv.pandas().head())
 ```
+###### Результат:
 ```
                  time      open      high       low     close     volume
 0 2022-10-30 19:45:00  20676.29  20679.80  20674.50  20679.37   38.85197
