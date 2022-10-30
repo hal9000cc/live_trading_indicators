@@ -323,7 +323,15 @@ class OHLCV_data(TimeframeData):
     def restore_bar_data(self):
 
         n_bars = len(self.time)
-        bx_empty_bars = self.volume == 0
+        bx_empty_bars = self.close == 0
+        n_empty_bars = bx_empty_bars.sum()
+
+        if n_empty_bars == 0:
+            return
+
+        if n_bars < 2:
+            raise LTIExceptionSourceDataNotFound(self.symbol, self.data)
+
         ix_change = np.hstack((
             np.zeros(1, dtype=int),
             np.flatnonzero(np.diff(bx_empty_bars)) + 1,
@@ -332,7 +340,8 @@ class OHLCV_data(TimeframeData):
 
         for i, point in enumerate(ix_change[:-1]):
 
-            if self.volume[point] > 0: continue
+            if self.close[point] > 0:
+                continue
 
             if point == 0:
                 price = self.open[ix_change[i + 1]]

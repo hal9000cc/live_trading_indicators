@@ -18,8 +18,8 @@ def config_get_default():
         'sources_folder': path.join(home_folder, 'data', 'sources'),
         'source_type': 'online',
         'endpoints_required': True,
-        'max_empty_bars_fraction': 0.01,
-        'max_empty_bars_consecutive': 2,
+        'max_empty_bars_fraction': 0.0,
+        'max_empty_bars_consecutive': 0,
         'restore_empty_bars': True,
         'print_log': True
     }

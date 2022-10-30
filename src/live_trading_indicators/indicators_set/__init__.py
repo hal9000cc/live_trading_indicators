@@ -32,12 +32,14 @@ class Indicators:
             Configuration modification.
     """
 
-    def __init__(self, datasource, time_begin=None, time_end=None, **config_mod):
+    def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, **config_mod):
 
         self.indicators = {}
 
         self.config = config_load() | config_mod
         self.init_log()
+
+        self.with_incomplete_bar = with_incomplete_bar
 
         datasource_type = type(datasource)
         if datasource_type == str:
@@ -135,6 +137,9 @@ class Indicators:
         if self.time_end is None or self.time_end < time_end:
             self.time_end = time_end
             self.reset(timeframe)
+
+        if self.with_incomplete_bar:
+            self.reset()
 
         return time_begin, time_end
 
@@ -252,7 +257,7 @@ class IndicatorProxy:
             self.indicators = indicators
         except ModuleNotFoundError as error:
             if error.name.split('.')[-1] == indicator_name:
-                raise LTIExceptionIndicatorNotFound(indicator_name)
+                raise LTIExceptionIndicatorNotFound(indicator_name) from error
             raise
 
     def get_indicator_out(self, symbols, timeframe, time_begin, time_end, **kwargs):
