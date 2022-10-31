@@ -17,8 +17,12 @@ CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
 DEFAULT_SYMBOL_PART = 'spot'
 
+# Now request bar limit is 500 for spot and coin-m, and 1500 for usd-m.
+# Spot and usd-m apply the restriction from the start time, but coin-m do it from the end.
+# Therefore, specifying the limit for coin-m is mandatory.
+REQUEST_BAR_LIMITS = {'cm': 500}
+
 exchange_info_data = {}
-request_bar_limit = 1500
 
 request_cache = {}
 REQUEST_CACHE_TIMELIFE_HOUR = 1
@@ -29,8 +33,7 @@ def datasource_name():
 
 
 def init(config):
-    global request_bar_limit
-    request_bar_limit = config.get('request_bar_limit', request_bar_limit)
+    pass
 
 
 def bars_of_day(symbol, timeframe, day_date):
@@ -109,6 +112,8 @@ def bars_of_day_online(symbol, timeframe, date):
 
     logging.info(f'Download using api symbol {symbol} timeframe {timeframe} date {date}...')
 
+    assert date.dtype.name == 'datetime64[D]'
+
     received_time = []
     received_open = []
     received_high = []
@@ -116,15 +121,15 @@ def bars_of_day_online(symbol, timeframe, date):
     received_close = []
     received_volume = []
 
-    time_now = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT)
-    time_end = timeframe.begin_of_tf(min(np.datetime64(np.datetime64(date, 'D') + 1, TIME_TYPE_UNIT) - 1, time_now))
+    query_time = np.datetime64(date, TIME_TYPE_UNIT)
+    end_time = np.datetime64(date + 1, TIME_TYPE_UNIT)
 
-    query_time = date
+    live_day = False
+    while query_time < end_time:
 
-    while True:
-
-        klines_data = bars_online_request_to_end_day(symbol, timeframe, query_time)
+        klines_data = bars_online_request_to_end_day(symbol, timeframe, query_time, end_time)
         if len(klines_data) == 0:
+            live_day = True
             break
 
         for data_time_set in klines_data:
@@ -135,75 +140,55 @@ def bars_of_day_online(symbol, timeframe, date):
             received_volume.append(PRICE_TYPE(data_time_set[5]))
             received_time.append(int(data_time_set[0]))
 
+        first_received_bar = np.datetime64(np.datetime64(int(klines_data[0][0]), BINANCE_TIME_TYPE_UNIT), TIME_TYPE_UNIT)
         last_received_bar = np.datetime64(np.datetime64(int(klines_data[-1][0]), BINANCE_TIME_TYPE_UNIT), TIME_TYPE_UNIT)
-        if last_received_bar >= time_end:
-            break
+
+        assert first_received_bar == query_time
 
         query_time = last_received_bar + timeframe.value
 
     if len(received_time) == 0:
         return None
 
+    end_index = None if live_day else -1
     day_data = OHLCV_day({
         'symbol': symbol,
         'timeframe': timeframe,
-        'time': np.array(received_time, dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
-        'open': np.array(received_open, dtype=PRICE_TYPE),
-        'high': np.array(received_high, dtype=PRICE_TYPE),
-        'low': np.array(received_low, dtype=PRICE_TYPE),
-        'close': np.array(received_close, dtype=PRICE_TYPE),
-        'volume': np.array(received_volume, dtype=VOLUME_TYPE)
+        'live_day': live_day,
+        'time': np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
+        'open': np.array(received_open[:end_index], dtype=PRICE_TYPE),
+        'high': np.array(received_high[:end_index], dtype=PRICE_TYPE),
+        'low': np.array(received_low[:end_index], dtype=PRICE_TYPE),
+        'close': np.array(received_close[:end_index], dtype=PRICE_TYPE),
+        'volume': np.array(received_volume[:end_index], dtype=VOLUME_TYPE)
     })
 
-    clear_request_cache()
-
     day_data.fix_errors(date)
+
     return day_data
 
 
-def bars_online_request_to_end_day(symbol, timeframe, request_start_time):
+def bars_online_request(api_url, symbol, timeframe, start_time, end_time):
+
+    start_time_int = start_time.astype(int)
+    end_time_int = end_time.astype(int)
+
+    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
+
+    return urllib.request.urlopen(request_url).read()
+
+
+def bars_online_request_to_end_day(symbol, timeframe, start_time, end_time):
 
     part, symbol = symbol_decode(symbol)
 
     api_url = get_api_url(part)
 
-    time_end_of_day = (np.datetime64(request_start_time, 'D') + 1).astype(TIME_TYPE) - 1
-    max_request_end_time = np.datetime64(request_start_time, TIME_TYPE_UNIT) + timeframe.value * request_bar_limit - 1
-    request_end_time = min(time_end_of_day, max_request_end_time)
+    limit = REQUEST_BAR_LIMITS.get(part)
+    if limit:
+        end_time = min(end_time, start_time + timeframe.value * (limit - 1))
 
-    request_limit = request_bar_limit
+    response = bars_online_request(api_url, symbol, timeframe, start_time, end_time)
+    return json.loads(response)
 
-    request_start_time_int = np.datetime64(request_start_time, BINANCE_TIME_TYPE_UNIT).astype(int)
-    request_end_time_int = request_end_time.astype(BINANCE_TIME_TYPE).astype(int)
-    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={request_start_time_int}&endTime={request_end_time_int}&limit={request_limit}'
-    #logging.info(request_url)
-
-    response_data = request_cache.get(request_url)
-    #response_data = None
-    if response_data is None:
-        response = urllib.request.urlopen(request_url)
-        response_content_raw = response.read()
-        response_content = json.loads(response_content_raw)
-        if len(response_content) > 0:
-            answer_end_time = np.datetime64(response_content[-1][0], BINANCE_TIME_TYPE_UNIT)
-            begin_of_now_tf = timeframe.begin_of_tf(np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT))
-            begin_of_now_day = timeframe.begin_of_tf(np.datetime64(dt.datetime.utcnow().date(), TIME_TYPE_UNIT))
-            if begin_of_now_day < answer_end_time < begin_of_now_tf:
-                request_cache[request_url] = np.datetime64(dt.datetime.now(), TIME_TYPE_UNIT), response_content_raw
-    else:
-        response_content = json.loads(response_data[1])
-
-    return response_content
-
-
-def clear_request_cache():
-
-    now = np.datetime64(dt.datetime.now(), TIME_TYPE_UNIT)
-    keys_for_delete = []
-    for key, value in request_cache.items():
-        if (now - value[0]).astype(int) / TIME_UNITS_IN_ONE_SECOND / 60 / 60 > REQUEST_CACHE_TIMELIFE_HOUR:
-            keys_for_delete.append(key)
-
-    for key in keys_for_delete:
-        request_cache.pop(key)
 

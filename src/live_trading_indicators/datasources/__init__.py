@@ -51,9 +51,7 @@ class SourceData:
         else:
             bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
             bar_data.check_day_data(symbol, timeframe, day_date)
-            if not bar_data.is_empty():
-                if bar_data.is_entire() or (np.datetime64(dt.datetime.now(), 'D') - day_date).astype(int) > DAYS_WAIT_FOR_ENTIRE:
-                    self.save_to_cash(filename, bar_data)
+            self.save_to_cash_verified(filename, bar_data, day_date)
 
         return bar_data
 
@@ -169,6 +167,25 @@ class SourceData:
             'close': np.array(file_data.close, dtype=PRICE_TYPE),
             'volume': np.array(file_data.volume, dtype=VOLUME_TYPE)
         })
+
+    def save_to_cash_verified(self, filename, bar_data, day_date):
+
+        now = dt.datetime.now()
+
+        if bar_data.live_day:
+            return
+
+        if (np.datetime64(now, TIME_TYPE_UNIT) - day_date).astype(int) - TIME_UNITS_IN_ONE_DAY < MAX_TIME_MISTAKE:
+            return
+
+        if bar_data.is_empty():
+            return
+
+        if not bar_data.is_entire():
+            if (np.datetime64(now, 'D') - day_date).astype(int) < DAYS_WAIT_FOR_ENTIRE:
+                return
+
+        self.save_to_cash(filename, bar_data)
 
     def get_bar_data(self, symbol, timeframe, time_begin, time_end):
 

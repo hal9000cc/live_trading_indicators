@@ -4,15 +4,14 @@ from src import live_trading_indicators as lti
 from src.live_trading_indicators.cast_input_params import cast_time
 
 
-@pytest.mark.parametrize('request_bar_limit', [500, 1500])
-def test_fix_wo_time(clear_data, test_source, ohlcv_set, request_bar_limit):
+def test_fix_wo_time(clear_data, test_source, ohlcv_set):
 
     symbol = ohlcv_set[0]
     timeframe = ohlcv_set[1]
     time_begin = cast_time(ohlcv_set[2])
     data_set = ohlcv_set[3]
 
-    indicators = lti.Indicators(test_source, time_begin, time_begin + np.timedelta64(50, 'h'), **clear_data|{'request_bar_limit': request_bar_limit})
+    indicators = lti.Indicators(test_source, time_begin, time_begin + np.timedelta64(50, 'h'), **clear_data)
 
     ohlcv = indicators.OHLCV(symbol, timeframe)
 

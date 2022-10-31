@@ -68,7 +68,17 @@ def pytest_generate_tests(metafunc):
         return metafunc.parametrize("a_timeframe", test_timeframes())
 
     if 'ohlcv_set' in metafunc.fixturenames:
-        return metafunc.parametrize('ohlcv_set', [ohlcv_set(['ETHUSDT-1h-2022-08-24.zip'], '1h', 'um/ethusdt', '2022-08-24'),
+        return metafunc.parametrize('ohlcv_set', [
+
+                ohlcv_set(['BTCUSDT-1m-2022-09-05.zip'], '1m', 'um/btcusdt', '2022-09-05'),
+                ohlcv_set(['BTCUSDT-1m-2022-09-06.zip'], '1m', 'um/btcusdt', '2022-09-06'),
+                ohlcv_set(['BTCUSDT-1m-2022-09-05.zip', 'BTCUSDT-1m-2022-09-06.zip'], '1m', 'um/btcusdt', '2022-09-05'),
+
+                ohlcv_set(['ETHUSDT-1m-2022-08-14.zip'], '1m', 'ethusdt', '2022-08-14'),
+                ohlcv_set(['ETHUSDT-1m-2022-08-15.zip'], '1m', 'ethusdt', '2022-08-15'),
+                ohlcv_set(['ETHUSDT-1m-2022-08-14.zip', 'ETHUSDT-1m-2022-08-15.zip'], '1m', 'ethusdt', '2022-08-14'),
+
+                ohlcv_set(['ETHUSDT-1h-2022-08-24.zip'], '1h', 'um/ethusdt', '2022-08-24'),
                 ohlcv_set(['ETHUSDT-1h-2022-08-25.zip'], '1h', 'um/ethusdt', '2022-08-25'),
                 ohlcv_set(['ETHUSDT-1h-2022-08-24.zip', 'ETHUSDT-1h-2022-08-25.zip'], '1h', 'um/ethusdt', '2022-08-24'),
 
