@@ -2,6 +2,7 @@ from enum import IntEnum
 import numpy as np
 import datetime as dt
 from .constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_SECOND
+from .exceptions import LTIExceptionBadTimeframeValue
 
 
 class Timeframe(IntEnum):
@@ -45,4 +46,4 @@ class Timeframe(IntEnum):
             if hasattr(Timeframe, f't{value}'):
                 return Timeframe[f't{value}']
 
-        return None
+        raise LTIExceptionBadTimeframeValue(value)

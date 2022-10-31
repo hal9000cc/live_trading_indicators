@@ -24,7 +24,7 @@ def get_indicator_out(indicators, symbol, timeframe, period_short, period_long, 
         'timeframe': timeframe,
         'time': ohlcv.time,
         'macd': macd,
-        'signal': signal,
-        'hist': macd_hist
+        'macd_signal': signal,
+        'macd_hist': macd_hist
     })
 

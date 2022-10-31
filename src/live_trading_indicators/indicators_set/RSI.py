@@ -32,6 +32,6 @@ def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
         'name': 'RSI',
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'value': out
+        f'rsi_{value}': out
     })
 

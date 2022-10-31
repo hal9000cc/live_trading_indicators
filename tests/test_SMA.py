@@ -18,7 +18,7 @@ def test_sma(config_default, test_source, test_symbol, time_begin, time_end, per
     sma = indicators.SMA(test_symbol, a_timeframe, time_begin, time_end, period=period)
 
     values = out.close
-    values_sma = sma.value
+    values_sma = sma.sma_close
     sum = 0
     n = 0
     for i in range(len(values)):

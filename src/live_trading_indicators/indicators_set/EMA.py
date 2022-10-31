@@ -15,6 +15,6 @@ def get_indicator_out(indicators, symbol, timeframe, period, value='close'):
         'name': 'EMA',
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'value': out
+        f'ema_{value}': out
     })
 

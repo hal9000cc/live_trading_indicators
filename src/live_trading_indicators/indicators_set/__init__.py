@@ -57,7 +57,7 @@ class Indicators:
         self.source_data = datasources.SourceData(datasource_module, self.config)
 
         self.time_begin = cast_time(time_begin)
-        self.time_end = cast_time(time_end)
+        self.time_end = cast_time(time_end, True)
 
         if self.time_begin is not None:
             if self.time_end is not None:
@@ -133,7 +133,7 @@ class Indicators:
         if time_begin > now:
             raise LTIExceptionBadTimeParameter('Time begin later of the now time')
 
-        time_end = timeframe.begin_of_tf(dt.datetime.utcnow())
+        time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - (0 if self.with_incomplete_bar else timeframe.value)
         if self.time_end is None or self.time_end < time_end:
             self.time_end = time_end
             self.reset(timeframe)
@@ -278,7 +278,7 @@ class IndicatorProxy:
 
     def __call__(self, symbols, timeframe, time_begin=None, time_end=None, **kwargs):
 
-        use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end)
+        use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
         use_timeframe = Timeframe.cast(timeframe)
 
         if use_time_begin is not None and use_time_end is not None and use_time_begin > use_time_end:

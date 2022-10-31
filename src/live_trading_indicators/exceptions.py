@@ -21,7 +21,7 @@ class LTIExceptionEmptyBarData(LTIException):
         super().__init__('Empty bar data')
 
 
-class LTIExceptionBadTimeframeParameter(LTIException):
+class LTIExceptionBadTimeframeValue(LTIException):
     def __init__(self, value):
         self.value = value
         super().__init__(f'Bad timeframe value: {value}')
@@ -32,15 +32,6 @@ class LTIExceptionTimeBeginLaterTimeEnd(LTIException):
         self.time_begin = time_begin
         self.time_end = time_end
         super().__init__(f'Time begin is later than time end ({time_begin} < {time_end}')
-
-
-class LTIExceptionBadSourceData(LTIException):
-    def __init__(self, data_error_message, source=None, symbol=None, day_date=None):
-        self.source = source
-        self.symbol = symbol
-        self.date = day_date
-        self.data_error_message = data_error_message
-        super().__init__(f'Bad source data (source {source}, symbol {symbol}, date {day_date.date()}')
 
 
 class LTIExceptionTooManyEmptyBars(LTIException):

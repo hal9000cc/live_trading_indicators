@@ -15,7 +15,7 @@ def test_ema(config_default, test_source, test_symbol, time_begin, time_end, per
     ema = indicators.EMA(test_symbol, a_timeframe, period=period)
 
     source_values = out.close
-    values_ema = ema.value
+    values_ema = ema.ema_close
 
     alpha = 1.0 / (period + 1)
     alpha_n = 1.0 - alpha

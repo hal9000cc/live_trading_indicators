@@ -23,6 +23,10 @@ def ma_calculate(source_values, period):
     if period == 1:
         return source_values
 
+    data_len = len(source_values)
+    if data_len < period:
+        raise ValueError(f'Period SMA more then data size ({data_len} < {period})')
+
     weights = np.ones(period, dtype=source_values.dtype) / period
 
     out = np.convolve(source_values, weights)[:-period+1]

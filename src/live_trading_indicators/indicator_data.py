@@ -3,7 +3,7 @@ import importlib
 import numpy as np
 import logging
 from .exceptions import *
-from .constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY, PRICE_TYPE, VOLUME_TYPE
+from .constants import *
 
 pandas_module = None
 
@@ -305,7 +305,7 @@ class OHLCV_data(TimeframeData):
 
         n_bars = len(self.time)
         if n_bars == 0:
-            raise LTIException('Bad bar data')
+            raise LTIExceptionEmptyBarData()
 
         bx_empty_bars = self.close == 0
         n_empty_bars = bx_empty_bars.sum()
@@ -353,6 +353,37 @@ class OHLCV_data(TimeframeData):
             self.high[point: point_end] = price
             self.low[point: point_end] = price
             self.close[point: point_end] = price
+
+    def __and__(self, other):
+
+        if self.timeframe != other.timeframe:
+            raise LTIException(f'Timeframe does not match ({self.timeframe} != {other.timeframe}')
+
+        if len(self) != len(other):
+            raise LTIException(f'Length of data does not match ({len(self)} != {len(other)}')
+
+        if (self.time != other.time).any():
+            raise LTIException(f'Time series of data does not match ({len(self)} != {len(other)}')
+
+        name1 = self.name if 'name' in self.data.keys() else self.symbol.replace('/', '_')
+        name2 = other.name if 'name' in other.data.keys() else other.symbol.replace('/', '_')
+        if set(self.data.keys()) & set(other.data.keys()) == {'time', 'timeframe'}:
+            pref1 = ''
+            pref2 = ''
+        else:
+            pref1 = f'{name1}_'
+            pref2 = f'{name2}_'
+            if pref1 == pref2:
+                pref2 += '1'
+
+        result_data = \
+            {'time': self.time, 'timeframe': self.timeframe} |\
+            {f'{pref1}{key}': value for key, value in self.data.items() if key != 'time' and type(value) == np.ndarray} |\
+            {f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray}
+
+        result_data['name'] = '_'.join([name1, name2])
+
+        return IndicatorData(result_data)
 
 
 class OHLCV_day(OHLCV_data):
@@ -406,7 +437,7 @@ class OHLCV_day(OHLCV_data):
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
-            'time': np.array([first_bar_time + np.timedelta64(i, TIMEFRAME_TYPE_UNIT) * timeframe.value for i in range(n_bars)]),
+            'time': np.array([first_bar_time + np.timedelta64(i, TIME_TYPE_UNIT) * timeframe.value for i in range(n_bars)]),
             'open': np.zeros(n_bars, dtype=PRICE_TYPE),
             'high': np.zeros(n_bars, dtype=PRICE_TYPE),
             'low': np.zeros(n_bars, dtype=PRICE_TYPE),
