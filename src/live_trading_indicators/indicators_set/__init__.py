@@ -95,8 +95,8 @@ class Indicators:
         if time_end is None:
             time_end = self.time_end
 
-        if time_begin < self.time_begin or time_end > self.time_end:
-            raise LTIExceptionOutOfThePeriod()
+        # if time_begin < self.time_begin or time_end > self.time_end:
+        #     raise LTIExceptionOutOfThePeriod()
 
         return time_begin, time_end
 
@@ -113,11 +113,11 @@ class Indicators:
 
         if self.time_begin is None or self.time_begin > time_begin:
             self.time_begin = time_begin
-            self.reset()
+            #self.reset()
 
         if self.time_end is None or self.time_end < time_end:
             self.time_end = time_end
-            self.reset()
+            #self.reset()
 
         return time_begin, time_end
 
@@ -133,13 +133,19 @@ class Indicators:
         if time_begin > now:
             raise LTIExceptionBadTimeParameter('Time begin later of the now time')
 
-        time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - (0 if self.with_incomplete_bar else timeframe.value)
-        if self.time_end is None or self.time_end < time_end:
-            self.time_end = time_end
-            self.reset(timeframe)
-
         if self.with_incomplete_bar:
-            self.reset()
+            raise NotImplementedError()
+        else:
+            time_end = timeframe.begin_of_tf(now) - 1
+            self.time_end = time_end
+
+        # time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - (0 if self.with_incomplete_bar else timeframe.value)
+        # if self.time_end is None or self.time_end < time_end:
+        #     self.time_end = time_end
+        #     self.reset(timeframe)
+
+        # if self.with_incomplete_bar:
+        #     self.reset()
 
         return time_begin, time_end
 
@@ -173,6 +179,42 @@ class Indicators:
         key = self.key_from_args(indicator, symbols, timeframe, kwargs)
         self.cache[key] = out
 
+    def get_indicator_out_valid(self, indicator_name, symbols, timeframe, indicator_kwargs, time_begin, time_end):
+
+        if time_begin < self.time_begin:
+            return None, None
+
+        out = self.get_out_from_cache(indicator_name, symbols, timeframe, indicator_kwargs)
+
+        if out is None:
+            return None, None
+
+        if out.first_bar_time != timeframe.begin_of_tf(self.time_begin):
+            return None, None
+
+        if out.end_bar_time + timeframe.value <= time_end:
+            return None, out
+
+        return out, None
+
+    def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
+
+        use_time_begin, use_time_end = self.check_call_time_intervals(time_begin, time_end, timeframe)
+
+        out_valid, out_for_grow = self.get_indicator_out_valid(indicator_name, symbols, timeframe,
+                                                                      indicator_kwargs, use_time_begin, use_time_end)
+        if out_valid is None:
+
+            if out_for_grow is not None:
+                out_for_grow.read_only = False
+
+            out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
+
+            out_valid.read_only = True
+            self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
+
+        return out_valid[use_time_begin: use_time_end + timeframe.value]
+
     def reset(self, timeframe=None):
 
         if timeframe is None:
@@ -189,23 +231,21 @@ class Indicators:
     def key_from_args(indicator, symbols, timeframe, kwargs):
         return symbols, timeframe, tuple(kwargs.items())
 
-    def get_bar_data(self, symbol, timeframe):
+    def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 
         time_start = timeframe.begin_of_tf(self.time_begin)
+        time_end = timeframe.begin_of_tf(self.time_end)
 
-        if self.interval_mode == IntervalMode.live:
-            time_end = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT)
+        if bar_for_grow is None:
+            bar_data = self.source_data.get_bar_data(symbol, timeframe, time_start, time_end)
         else:
+            np.datetime64(bar_for_grow[-1], 'D')
+            time_start = timeframe.begin_of_tf(self.time_begin)
             time_end = timeframe.begin_of_tf(self.time_end)
 
-        bar_data = self.source_data.get_bar_data(symbol, timeframe, time_start, time_end)
 
-        if self.interval_mode == IntervalMode.live:
-            index_start = bar_data.index_from_time64(time_start)
-            index_end = bar_data.index_from_time64(time_end)
-            bar_data = bar_data[index_start: index_end + 1 if bar_data.close[index_end] else index_end]
-        else:
-            bar_data = bar_data[time_start : time_end + timeframe.value]
+
+        bar_data = bar_data[time_start : time_end + timeframe.value]
 
         self.check_bar_data(bar_data, symbol, self.time_begin, self.time_end)
 
@@ -260,22 +300,6 @@ class IndicatorProxy:
                 raise LTIExceptionIndicatorNotFound(indicator_name) from error
             raise
 
-    def get_indicator_out(self, symbols, timeframe, time_begin, time_end, **kwargs):
-
-        time_begin, time_end = self.indicators.check_call_time_intervals(time_begin, time_end, timeframe)
-
-        out = self.indicators.get_out_from_cache(self.indicator_name, symbols, timeframe, kwargs)
-
-        if out is None:
-
-            out = self.indicator_module.get_indicator_out(self.indicators, symbols, timeframe, **kwargs)
-            out.read_only = True
-
-            if time_end == out.time[-1]:
-                self.indicators.put_out_to_cache(self.indicator_name, symbols, timeframe, kwargs, out)
-
-        return out[time_begin: time_end + out.timeframe.timedelta64() if time_end else None]
-
     def __call__(self, symbols, timeframe, time_begin=None, time_end=None, **kwargs):
 
         use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
@@ -284,7 +308,8 @@ class IndicatorProxy:
         if use_time_begin is not None and use_time_end is not None and use_time_begin > use_time_end:
             raise LTIExceptionTimeBeginLaterTimeEnd(use_time_begin, use_time_end)
 
-        return self.get_indicator_out(symbols, use_timeframe, use_time_begin, use_time_end, **kwargs)
+        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, use_timeframe,
+                                                 kwargs, use_time_begin, use_time_end)
 
     def __del__(self):
         self.indicators = None

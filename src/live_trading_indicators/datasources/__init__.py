@@ -32,6 +32,9 @@ class SourceData:
         else:
             self.default_symbol_part_for_path = ''
 
+        self.count_datasource_get = 0
+        self.count_file_load = 0
+
     def filename_day_data(self, symbol, timeframe, day_date):
         assert type(day_date) == np.datetime64 and day_date.dtype.name == 'datetime64[D]'
 
@@ -47,8 +50,10 @@ class SourceData:
 
         filename = self.filename_day_data(symbol, timeframe, day_date)
         if path.isfile(filename):
+            self.count_file_load += 1
             bar_data = self.load_from_cash(filename, symbol, timeframe)
         else:
+            self.count_datasource_get += 1
             bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date)
             bar_data.check_day_data(symbol, timeframe, day_date)
             self.save_to_cash_verified(filename, bar_data, day_date)
@@ -172,11 +177,11 @@ class SourceData:
 
         now = dt.datetime.now()
 
-        if bar_data.live_day:
+        if bar_data.is_live_day:
             return
 
-        if (np.datetime64(now, TIME_TYPE_UNIT) - day_date).astype(int) - TIME_UNITS_IN_ONE_DAY < MAX_TIME_MISTAKE:
-            return
+        # if (np.datetime64(now, TIME_TYPE_UNIT) - day_date).astype(int) - TIME_UNITS_IN_ONE_DAY < MAX_TIME_MISTAKE:
+        #     return
 
         if bar_data.is_empty():
             return

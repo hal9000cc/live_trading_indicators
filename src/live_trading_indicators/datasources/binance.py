@@ -124,12 +124,12 @@ def bars_of_day_online(symbol, timeframe, date):
     query_time = np.datetime64(date, TIME_TYPE_UNIT)
     end_time = np.datetime64(date + 1, TIME_TYPE_UNIT)
 
-    live_day = False
+    is_live_day = False
     while query_time < end_time:
 
         klines_data = bars_online_request_to_end_day(symbol, timeframe, query_time, end_time)
         if len(klines_data) == 0:
-            live_day = True
+            is_live_day = True
             break
 
         for data_time_set in klines_data:
@@ -150,11 +150,11 @@ def bars_of_day_online(symbol, timeframe, date):
     if len(received_time) == 0:
         return None
 
-    end_index = None if live_day else -1
+    end_index = None if is_live_day else -1
     day_data = OHLCV_day({
         'symbol': symbol,
         'timeframe': timeframe,
-        'live_day': live_day,
+        'is_live_day': is_live_day,
         'time': np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
         'open': np.array(received_open[:end_index], dtype=PRICE_TYPE),
         'high': np.array(received_high[:end_index], dtype=PRICE_TYPE),

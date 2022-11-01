@@ -24,6 +24,26 @@ def test_flex_1(clear_data, test_source, ohlcv_set):
     assert (ohlcv.close[:n_bars] == data_set[4]).all()
     assert (ohlcv.volume[:n_bars] == data_set[5]).all()
 
+    time_begin1 = time_begin + timeframe.value + 1
+    time_end1 = time_begin + np.timedelta64(50, 'h') - 1
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin1, time_end1)
+    assert count_file_load == indicators.source_data.count_file_load
+    assert count_datasource_get == indicators.source_data.count_datasource_get
+    assert ohlcv.time[0] == timeframe.begin_of_tf(time_begin1)
+    assert ohlcv.time[-1] == timeframe.begin_of_tf(time_end1)
+
+    time_begin1 = time_begin + timeframe.value + 1
+    time_end1 = time_begin + np.timedelta64(50, 'h') + timeframe.value
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin1, time_end1)
+    assert indicators.source_data.count_file_load != count_file_load
+    assert indicators.source_data.count_datasource_get == count_datasource_get
+    assert ohlcv.time[0] == timeframe.begin_of_tf(time_begin1)
+    assert ohlcv.time[-1] == timeframe.begin_of_tf(time_end1)
+
 
 def test_flex_2(clear_data, test_source, ohlcv_set):
 
