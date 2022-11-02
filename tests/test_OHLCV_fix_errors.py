@@ -14,7 +14,7 @@ def test_bar_data_fix_ok(config_default, test_source, symbol, timeframe, date):
     indicators = lti.Indicators(test_source)
     source_out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out == source_out
 
@@ -28,32 +28,32 @@ def test_bar_data_fix_bad(config_default, test_source, symbol, timeframe, date):
     indicators = lti.Indicators(test_source)
     source_out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[0] -= np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[0] += np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[-1] -= np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[-1] += np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[3] -= np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
 
-    out = lti.OHLCV_data(source_out.data).copy()
+    out = lti.OHLCV_day(source_out.data).copy()
     out.time[3] += np.timedelta64(1, 's')
     out.fix_errors(time_begin.astype('datetime64[D]'))
     assert out.is_empty()
@@ -75,7 +75,7 @@ def test_bar_data_fix_skips(config_default, test_source, symbol, timeframe, date
 
     ixb = np.array([True] * len(source_out.time))
     ixb[np.array(skips)] = False
-    out = lti.OHLCV_data({
+    out = lti.OHLCV_day({
         'symbol': source_out.symbol,
         'timeframe': source_out.timeframe,
         'time': source_out.time[ixb],

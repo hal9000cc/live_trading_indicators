@@ -22,6 +22,8 @@ DEFAULT_SYMBOL_PART = 'spot'
 # Therefore, specifying the limit for coin-m is mandatory.
 REQUEST_BAR_LIMITS = {'cm': 500}
 
+MINIMAL_BAR_LIMITS = 500
+
 exchange_info_data = {}
 
 request_cache = {}
@@ -36,11 +38,11 @@ def init(config):
     pass
 
 
-def bars_of_day(symbol, timeframe, day_date):
+def bars_of_day(symbol, timeframe, day_date, bar_for_grow=None):
 
     try:
 
-        day_data =  bars_of_day_online(symbol, timeframe, day_date)
+        day_data =  bars_of_day_online(symbol, timeframe, day_date, bar_for_grow)
 
     except urllib.error.HTTPError as error:
 
@@ -108,11 +110,16 @@ def exchange_info(symbol):
     return part_info['symbols'].get(symbol)
 
 
-def bars_of_day_online(symbol, timeframe, date):
-
-    logging.info(f'Download using api symbol {symbol} timeframe {timeframe} date {date}...')
+def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
 
     assert date.dtype.name == 'datetime64[D]'
+
+    if day_for_grow is None:
+        query_time = np.datetime64(date, TIME_TYPE_UNIT)
+    else:
+        query_time = day_for_grow.time[-1]
+
+    logging.info(f'Download using api symbol {symbol} timeframe {timeframe} from {query_time}...')
 
     received_time = []
     received_open = []
@@ -121,13 +128,13 @@ def bars_of_day_online(symbol, timeframe, date):
     received_close = []
     received_volume = []
 
-    query_time = np.datetime64(date, TIME_TYPE_UNIT)
     end_time = np.datetime64(date + 1, TIME_TYPE_UNIT)
 
     is_live_day = False
     while query_time < end_time:
 
         klines_data = bars_online_request_to_end_day(symbol, timeframe, query_time, end_time)
+
         if len(klines_data) == 0:
             is_live_day = True
             break
@@ -140,6 +147,11 @@ def bars_of_day_online(symbol, timeframe, date):
             received_volume.append(PRICE_TYPE(data_time_set[5]))
             received_time.append(int(data_time_set[0]))
 
+        expected_bars = (end_time - query_time).astype(int) // timeframe.value
+        if len(klines_data) < expected_bars and len(klines_data) < MINIMAL_BAR_LIMITS:
+            is_live_day = True
+            break
+
         first_received_bar = np.datetime64(np.datetime64(int(klines_data[0][0]), BINANCE_TIME_TYPE_UNIT), TIME_TYPE_UNIT)
         last_received_bar = np.datetime64(np.datetime64(int(klines_data[-1][0]), BINANCE_TIME_TYPE_UNIT), TIME_TYPE_UNIT)
 
@@ -151,17 +163,31 @@ def bars_of_day_online(symbol, timeframe, date):
         return None
 
     end_index = None if is_live_day else -1
-    day_data = OHLCV_day({
-        'symbol': symbol,
-        'timeframe': timeframe,
-        'is_live_day': is_live_day,
-        'time': np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
-        'open': np.array(received_open[:end_index], dtype=PRICE_TYPE),
-        'high': np.array(received_high[:end_index], dtype=PRICE_TYPE),
-        'low': np.array(received_low[:end_index], dtype=PRICE_TYPE),
-        'close': np.array(received_close[:end_index], dtype=PRICE_TYPE),
-        'volume': np.array(received_volume[:end_index], dtype=VOLUME_TYPE)
-    })
+
+    if day_for_grow is None:
+        day_data = OHLCV_day({
+            'symbol': symbol,
+            'timeframe': timeframe,
+            'is_live_day': is_live_day,
+            'time': np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
+            'open': np.array(received_open[:end_index], dtype=PRICE_TYPE),
+            'high': np.array(received_high[:end_index], dtype=PRICE_TYPE),
+            'low': np.array(received_low[:end_index], dtype=PRICE_TYPE),
+            'close': np.array(received_close[:end_index], dtype=PRICE_TYPE),
+            'volume': np.array(received_volume[:end_index], dtype=VOLUME_TYPE)
+        })
+    else:
+        day_data = OHLCV_day({
+            'symbol': symbol,
+            'timeframe': timeframe,
+            'is_live_day': is_live_day,
+            'time': np.hstack([day_for_grow.time[:-1], np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE)]),
+            'open': np.hstack([day_for_grow.open[:-1], np.array(received_open[:end_index], dtype=PRICE_TYPE)]),
+            'high': np.hstack([day_for_grow.high[:-1], np.array(received_high[:end_index], dtype=PRICE_TYPE)]),
+            'low': np.hstack([day_for_grow.low[:-1], np.array(received_low[:end_index], dtype=PRICE_TYPE)]),
+            'close': np.hstack([day_for_grow.close[:-1], np.array(received_close[:end_index], dtype=PRICE_TYPE)]),
+            'volume': np.hstack([day_for_grow.volume[:-1], np.array(received_volume[:end_index], dtype=VOLUME_TYPE)])
+        })
 
     day_data.fix_errors(date)
 

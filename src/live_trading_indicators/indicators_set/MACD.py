@@ -3,10 +3,10 @@ from ..indicator_data import IndicatorData
 from ..calculator import ema_calculate, ma_calculate
 
 
-def get_indicator_out(indicators, symbol, timeframe, period_short, period_long, period_signal,
+def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short, period_long, period_signal,
                       relative_price=False, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe)
+    ohlcv = indicators.get_bar_data(symbol, timeframe, out_for_grow)
     source_values = ohlcv.data[value]
 
     ema_short = ema_calculate(source_values, 1.0 / (period_short + 1))

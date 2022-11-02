@@ -7,6 +7,7 @@ from ..cast_input_params import *
 from ..exceptions import *
 from ..timeframe import *
 from .. import datasources
+from ..indicator_data import OHLCV_data
 
 
 class IntervalMode(Enum):
@@ -133,11 +134,14 @@ class Indicators:
         if time_begin > now:
             raise LTIExceptionBadTimeParameter('Time begin later of the now time')
 
-        if self.with_incomplete_bar:
-            raise NotImplementedError()
-        else:
-            time_end = timeframe.begin_of_tf(now) - 1
-            self.time_end = time_end
+        # if self.with_incomplete_bar:
+        #     raise NotImplementedError()
+        # else:
+        #     time_end = timeframe.begin_of_tf(now) + TIME_UNITS_IN_ONE_DAY
+        #     self.time_end = time_end
+
+        time_end = timeframe.begin_of_tf(now) + TIME_UNITS_IN_ONE_DAY
+        self.time_end = time_end
 
         # time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - (0 if self.with_incomplete_bar else timeframe.value)
         # if self.time_end is None or self.time_end < time_end:
@@ -189,7 +193,7 @@ class Indicators:
         if out is None:
             return None, None
 
-        if out.first_bar_time != timeframe.begin_of_tf(self.time_begin):
+        if out.first_bar_time > timeframe.begin_of_tf(self.time_begin):
             return None, None
 
         if out.end_bar_time + timeframe.value <= time_end:
@@ -205,12 +209,12 @@ class Indicators:
                                                                       indicator_kwargs, use_time_begin, use_time_end)
         if out_valid is None:
 
-            if out_for_grow is not None:
-                out_for_grow.read_only = False
+            #if out_for_grow is not None:
+            #    out_for_grow.read_only = False
 
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
 
-            out_valid.read_only = True
+            #out_valid.read_only = True
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
 
         return out_valid[use_time_begin: use_time_end + timeframe.value]
@@ -233,19 +237,30 @@ class Indicators:
 
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 
-        time_start = timeframe.begin_of_tf(self.time_begin)
+        time_start_d = np.datetime64(self.time_begin, 'D')
         time_end = timeframe.begin_of_tf(self.time_end)
 
-        if bar_for_grow is None:
-            bar_data = self.source_data.get_bar_data(symbol, timeframe, time_start, time_end)
+        if bar_for_grow is None or len(bar_for_grow) < 2:
+            bar_data = self.source_data.get_bar_data(symbol, timeframe, time_start_d, time_end)
         else:
-            np.datetime64(bar_for_grow[-1], 'D')
-            time_start = timeframe.begin_of_tf(self.time_begin)
+
+            time_start_last_day_d = np.datetime64(bar_for_grow.time[-1], 'D')
+            time_start_last_day = np.datetime64(time_start_last_day_d, TIME_TYPE_UNIT)
             time_end = timeframe.begin_of_tf(self.time_end)
 
+            new_day_data = self.source_data.get_bar_data(symbol, timeframe,
+                                                     time_start_last_day_d, time_end,
+                                                     bar_for_grow[time_start_last_day:])
 
+            if bar_for_grow.time[0] == time_start_last_day:
+                bar_data = new_day_data
+            else:
+                bar_data = bar_for_grow[:time_start_last_day] + new_day_data
 
-        bar_data = bar_data[time_start : time_end + timeframe.value]
+        if self.interval_mode == IntervalMode.live:
+            time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
+
+        bar_data = bar_data[np.datetime64(time_start_d, TIME_TYPE_UNIT) : time_end + timeframe.value]
 
         self.check_bar_data(bar_data, symbol, self.time_begin, self.time_end)
 

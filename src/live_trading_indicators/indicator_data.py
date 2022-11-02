@@ -28,6 +28,9 @@ class TimeframeData:
 
     def __getitem__(self, item):
 
+        if type(item) != slice:
+            raise NotImplementedError()
+
         if item == slice(None, None, None):
             return self
 
@@ -46,19 +49,37 @@ class TimeframeData:
         if item.start is None and type(item.stop) == int and item.step is None:
             return self.slice_by_int(0, item.stop)
 
+        if item.start is None and type(item.stop) == np.datetime64 and item.step is None:
+            return self.slice_by_datetime64(None, item.stop)
+
         if type(item.start) == dt.datetime and type(item.stop) == dt.datetime and item.step is None:
             return self.slice_by_datetime(item.start, item.stop)
 
         if type(item.start) == dt.datetime and item.stop is None and item.step is None:
             return self.slice_by_datetime(item.start, item.stop)
 
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def __getattr__(self, item):
         return self.data[item]
 
     def __deepcopy__(self, memodict={}):
         return self.copy()
+
+    def __add__(self, other):
+
+        new_data = {}
+        for key, value in self.data.items():
+            if type(value) == np.ndarray:
+                new_data[key] = np.hstack((value, other.data[key]))
+            else:
+                if key not in ('symbol', 'name', 'timeframe'):
+                    continue
+                if value != other.data[key]:
+                    raise ValueError(f'Data types do not match ({value} != {other.data[key]})')
+                new_data[key] = value
+
+        return self.__class__(new_data)
 
     def str_period(self):
         return f'date: {self.time[0].astype("datetime64[s]")} - {self.time[-1].astype("datetime64[s]")} (length: {len(self.time)})'
@@ -114,7 +135,7 @@ class TimeframeData:
 
     def slice_by_datetime64(self, time_start, time_stop):
 
-        i_start = self.index_from_time64(time_start)
+        i_start = 0 if time_start is None else self.index_from_time64(time_start)
         i_stop = self.index_from_time64(time_stop) if time_stop is not None else len(self) + 1
 
         if i_start == 0 and i_stop == len(self):
@@ -210,7 +231,7 @@ class OHLCV_data(TimeframeData):
         self.first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
 
         self.data |= {
-            'time': np.array([self.first_bar_time + np.timedelta64(i, 's') * self.timeframe.value for i in range(n_bars)]),
+            'time': np.array([self.first_bar_time + self.timeframe.value * i for i in range(n_bars)]),
             'open': np.zeros(n_bars, dtype=PRICE_TYPE),
             'high': np.zeros(n_bars, dtype=PRICE_TYPE),
             'low': np.zeros(n_bars, dtype=PRICE_TYPE),
@@ -253,38 +274,6 @@ class OHLCV_data(TimeframeData):
         }
 
         return True
-
-    def fix_errors(self, date):
-
-        assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
-
-        if len(self.time) == 0:
-            self.clear_day(date)
-            return
-
-        first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
-        n_bars = TIME_UNITS_IN_ONE_DAY // self.timeframe.value
-        time_need = first_bar_time + np.arange(n_bars) * self.timeframe.value
-
-        if (len(self.time) != len(time_need) or (self.time != time_need).any()) and not self.fix_time(time_need):
-            self.clear_day(date)
-            return
-
-        bx_bad_bars = \
-            (self.open < 0) | \
-            (self.close < 0) | \
-            (self.high < self.open) | \
-            (self.high < self.close) | \
-            (self.low > self.open) | \
-            (self.low > self.close) | \
-            (self.volume < 0)
-
-        if bx_bad_bars.sum():
-            for value_name in ('open', 'high', 'low', 'close', 'volume'):
-                self.data[value_name][bx_bad_bars] = 0
-
-        self.first_bar_time = self.data['time'][0]
-        self.end_bar_time = self.data['time'][-1]
 
     def is_entire(self):
         return (self.close > 0).all()
@@ -388,13 +377,19 @@ class OHLCV_data(TimeframeData):
 
 class OHLCV_day(OHLCV_data):
 
+    def __init__(self, data_dict):
+        super().__init__(data_dict)
+
+        if 'is_live_day' not in self.data.keys():
+            self.data['is_live_day'] = False
+
     def check_day_data(self, symbol, timeframe, day_date):
 
         self.check_series()
 
         error = None
         first_time = self.time[0]
-        n_bars = TIME_UNITS_IN_ONE_DAY // timeframe.value
+        n_bars = self.expected_bars_count()
 
         if len(self.time) != n_bars:
             error = 'bad data length'
@@ -427,6 +422,45 @@ class OHLCV_day(OHLCV_data):
 
         if error:
             raise LTIException(f'Timeframe data error: {error}')
+
+
+    def expected_bars_count(self):
+
+        if self.is_live_day:
+            return (self.time[-1] - self.time[0]).astype(int) // self.timeframe.value + 1
+
+        return TIME_UNITS_IN_ONE_DAY // self.timeframe.value
+
+    def fix_errors(self, date):
+
+        assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
+
+        if len(self.time) == 0:
+            self.clear_day(date)
+            return
+
+        first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
+        time_need = first_bar_time + np.arange(self.expected_bars_count()) * self.timeframe.value
+
+        if (len(self.time) != len(time_need) or (self.time != time_need).any()) and not self.fix_time(time_need):
+            self.clear_day(date)
+            return
+
+        bx_bad_bars = \
+            (self.open < 0) | \
+            (self.close < 0) | \
+            (self.high < self.open) | \
+            (self.high < self.close) | \
+            (self.low > self.open) | \
+            (self.low > self.close) | \
+            (self.volume < 0)
+
+        if bx_bad_bars.sum():
+            for value_name in ('open', 'high', 'low', 'close', 'volume'):
+                self.data[value_name][bx_bad_bars] = 0
+
+        self.first_bar_time = self.data['time'][0]
+        self.end_bar_time = self.data['time'][-1]
 
     @staticmethod
     def empty_day(symbol, timeframe, date):
