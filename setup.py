@@ -9,7 +9,7 @@ requirements = [
 
 setuptools.setup(
     name='live_trading_indicators',
-    version='0.1.2',
+    version='0.1.3',
     author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
     description='A package for obtaining quotation data from various online sources and calculating the values of '
@@ -27,7 +27,7 @@ setuptools.setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3.10",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     install_requires=requirements,
