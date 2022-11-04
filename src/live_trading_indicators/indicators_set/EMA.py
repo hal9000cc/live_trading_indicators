@@ -1,11 +1,13 @@
-import numpy as np
+# live_trading_indicators
+# EMA(symbol, timeframe, period=?, value='close')
+
 from ..indicator_data import IndicatorData
 from ..calculator import ema_calculate
 
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe, out_for_grow)
+    ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     values = ohlcv.data[value]
 
     alpha = 1.0 / (period + 1)

@@ -1,3 +1,6 @@
+# live_trading_indicators
+# RSI(symbol, timeframe, period=?, value='close')
+
 import numpy as np
 from ..indicator_data import IndicatorData
 from ..constants import PRICE_TYPE
@@ -20,7 +23,7 @@ def rsi_calculate(source_values, period):
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe, out_for_grow)
+    ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
 
     if len(source_values) == 0:

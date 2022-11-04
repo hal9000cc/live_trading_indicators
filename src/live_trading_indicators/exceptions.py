@@ -63,7 +63,7 @@ class LTIExceptionIndicatorNotFound(LTIException):
 
 class LTIExceptionOutOfThePeriod(LTIException):
     def __init__(self):
-        super().__init__('Time out of the calculation period')
+        super().__init__('Time out of the work period')
 
 
 class LTIExceptionBadDatasource(LTIException):

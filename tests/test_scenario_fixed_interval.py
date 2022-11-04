@@ -2,6 +2,8 @@ import pytest
 import numpy as np
 from src import live_trading_indicators as lti
 from src.live_trading_indicators.cast_input_params import cast_time
+from src.live_trading_indicators.constants import TIME_TYPE_UNIT
+from src.live_trading_indicators.exceptions import *
 
 
 def test_fix_wo_time(clear_data, test_source, ohlcv_set):
@@ -80,3 +82,31 @@ def test_fix_wo_time_many_symbols(config_default, test_source, a_symbol):
 
     ohlcv = indicators.OHLCV(a_symbol, '1m')
 
+
+def fortest_fix_with_time_chec_boounds(config, source, symbol, timeframe):
+    indicators = lti.Indicators(source, 20220901, 20220905, **config if config else {})
+
+    ohlcv = indicators.OHLCV(symbol, timeframe)
+    assert ohlcv.time[0] == np.datetime64('2022-09-01')
+    assert ohlcv.time[-1] == timeframe.begin_of_tf(np.datetime64(np.datetime64('2022-09-05') + 1, TIME_TYPE_UNIT) - 1)
+
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    sma22 = indicators.SMA(symbol, timeframe, 20220902, 20220903, period=2)
+    assert indicators.source_data.count_file_load == count_file_load
+    assert indicators.source_data.count_datasource_get == count_datasource_get
+    assert sma22.time[0] == np.datetime64('2022-09-02')
+    assert sma22.time[-1] == timeframe.begin_of_tf(np.datetime64(np.datetime64('2022-09-03') + 1, TIME_TYPE_UNIT) - 1)
+
+    with pytest.raises(LTIExceptionOutOfThePeriod):
+        sma15 = indicators.SMA(symbol, timeframe, 20220902, 20221006, period=1)
+
+
+@pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
+def test_fix_with_time_chec_boounds_cl(clear_data, test_source, symbol, a_timeframe):
+    fortest_fix_with_time_chec_boounds(clear_data, test_source, symbol, a_timeframe)
+
+
+@pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
+def test_fix_with_time_chec_boounds_cf(config_default, test_source, symbol, a_timeframe):
+    fortest_fix_with_time_chec_boounds(config_default, test_source, symbol, a_timeframe)

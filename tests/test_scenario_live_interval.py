@@ -74,3 +74,4 @@ def test_live_3(config_default, test_source, a_symbol, timeframe):
     time.sleep(5)
     ohlcv1 = indicators.OHLCV(a_symbol, timeframe)
     assert ohlcv == ohlcv1[:-1]
+

@@ -1,10 +1,7 @@
-import datetime as dt
 import os
 import os.path as path
-import numpy as np
 import construct as cs
 import zlib
-from zipfile import ZipFile
 import logging
 from ..exceptions import *
 from ..indicator_data import *
@@ -50,7 +47,6 @@ class SourceData:
 
         filename = self.filename_day_data(symbol, timeframe, day_date)
         if path.isfile(filename):
-            #assert bar_for_grow is None
             self.count_file_load += 1
             bar_data = self.load_from_cash(filename, symbol, timeframe)
         else:
@@ -107,7 +103,7 @@ class SourceData:
         if CASH_FILE_VERSION == 1:
             return self.build_header_v1(day_data)
 
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @staticmethod
     def parse_header(file, file_version):
@@ -115,7 +111,7 @@ class SourceData:
         if file_version == 1:
             header_struct = __class__.get_header_struct_v1()
         else:
-            raise NotImplementedError
+            raise NotImplementedError()
 
         return header_struct.sizeof(), header_struct.parse(file)
 
@@ -162,7 +158,7 @@ class SourceData:
 
             signature_and_version = self.parse_signature_and_version(file)
             if signature_and_version.signature != CASH_FILE_SIGNATURE:
-                raise LTIException('Bad cash file')
+                raise LTIException('Bad data cash file')
 
             buf = zlib.decompress(file.read())
             header_len, header = self.parse_header(buf, signature_and_version.file_version)
@@ -188,9 +184,6 @@ class SourceData:
         if bar_data.is_live_day:
             return
 
-        # if (np.datetime64(now, TIME_TYPE_UNIT) - day_date).astype(int) - TIME_UNITS_IN_ONE_DAY < MAX_TIME_MISTAKE:
-        #     return
-
         if bar_data.is_empty():
             return
 
@@ -214,7 +207,6 @@ class SourceData:
             day_dates.append(day_date)
             day_date += 1
 
-        #assert day_for_grow is None or len(day_dates) == 1
         is_live = False
         for day_date in day_dates:
             day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)

@@ -1,3 +1,6 @@
+# live_trading_indicators
+# MA(symbol, timeframe, period=?, value='close', ma_type='sma')
+
 from .SMA import get_indicator_out as sma_get_indicator_out
 from .EMA import get_indicator_out as ema_get_indicator_out
 

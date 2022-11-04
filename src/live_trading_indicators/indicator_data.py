@@ -85,7 +85,9 @@ class TimeframeData:
         return self.__class__(new_data)
 
     def str_period(self):
-        return f'date: {self.time[0].astype("datetime64[s]")} - {self.time[-1].astype("datetime64[s]")} (length: {len(self.time)})'
+        str_live = ', real time' if self.data.get('is_live') else ''
+        return f'date: {self.time[0].astype("datetime64[m]")} - {self.time[-1].astype("datetime64[m]")} ' \
+               f'(length: {len(self.time)}{str_live}) '
 
     def str_values(self):
         return f'Values: {", ".join(self.data_keys())}'
@@ -428,7 +430,6 @@ class OHLCV_day(OHLCV_data):
 
         if error:
             raise LTIException(f'Timeframe data error: {error}')
-
 
     def expected_bars_count(self):
 

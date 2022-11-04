@@ -1,10 +1,12 @@
+# live_trading_indicators
+# SMA(symbol, timeframe, period=?, value='close')
 from ..calculator import ma_calculate
 from ..indicator_data import IndicatorData
 
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value='close'):
 
-    ohlcv = indicators.get_bar_data(symbol, timeframe, out_for_grow)
+    ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
 
     out = ma_calculate(source_values, period)

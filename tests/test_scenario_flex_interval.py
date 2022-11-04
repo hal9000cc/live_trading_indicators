@@ -131,3 +131,11 @@ def test_flex_4(clear_data, test_source, symbol, a_timeframe_short):
     assert ohlcv4.time[0] == date_b
     assert ohlcv4.time[-1] == a_timeframe_short.begin_of_tf(date + offset + TIME_UNITS_IN_ONE_DAY * 3) - a_timeframe_short
     assert ohlcv3 == ohlcv4[:len(ohlcv3)]
+
+
+@pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
+def test_flex_5(config_default, test_source, symbol, a_timeframe_short):
+
+    indicators = lti.Indicators('binance')
+    sma15 = indicators.SMA(symbol, '1h', 20220905, 20220915, period=15)
+

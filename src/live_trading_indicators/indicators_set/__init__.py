@@ -36,6 +36,7 @@ class Indicators:
     def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, **config_mod):
 
         self.indicators = {}
+        self.cache = {}
 
         self.config = config_load() | config_mod
         self.init_log()
@@ -76,17 +77,27 @@ class Indicators:
             else:
                 raise LTIExceptionBadTimeParameter(self.time_begin)
 
-        self.reset()
-
-        # self.set_time_interval(time_begin, time_end)
-
     def init_log(self):
 
-        if not self.config['print_log']: return
+        if not self.config['print_log']:
+            return
 
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s %(message)s',
                             handlers=[logging.StreamHandler()])
+
+    def __str__(self):
+
+        str_time_begin = self.time_begin if self.time_begin is None else self.time_begin.astype("datetime64[m]")
+        str_time_end = self.time_begin if self.time_end is None else self.time_end.astype("datetime64[m]")
+
+        str_list = [f'<Indicators> source: {self.datasource_name}',
+                    f'work period = {str_time_begin} : {str_time_end}']
+
+        return '\n'.join(str_list)
+
+    def __repr__(self):
+        return self.__str__()
 
     def check_call_time_intervals_fixed(self, time_begin, time_end):
 
@@ -95,9 +106,6 @@ class Indicators:
 
         if time_end is None:
             time_end = self.time_end
-
-        # if time_begin < self.time_begin or time_end > self.time_end:
-        #     raise LTIExceptionOutOfThePeriod()
 
         return time_begin, time_end
 
@@ -114,11 +122,9 @@ class Indicators:
 
         if self.time_begin is None or self.time_begin > time_begin:
             self.time_begin = time_begin
-            #self.reset()
 
         if self.time_end is None or self.time_end < time_end:
             self.time_end = time_end
-            #self.reset()
 
         return time_begin, time_end
 
@@ -134,22 +140,8 @@ class Indicators:
         if time_begin > now:
             raise LTIExceptionBadTimeParameter('Time begin later of the now time')
 
-        # if self.with_incomplete_bar:
-        #     raise NotImplementedError()
-        # else:
-        #     time_end = timeframe.begin_of_tf(now) + TIME_UNITS_IN_ONE_DAY
-        #     self.time_end = time_end
-
         time_end = timeframe.begin_of_tf(now) + TIME_UNITS_IN_ONE_DAY
         self.time_end = time_end
-
-        # time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - (0 if self.with_incomplete_bar else timeframe.value)
-        # if self.time_end is None or self.time_end < time_end:
-        #     self.time_end = time_end
-        #     self.reset(timeframe)
-
-        # if self.with_incomplete_bar:
-        #     self.reset()
 
         return time_begin, time_end
 
@@ -208,14 +200,12 @@ class Indicators:
         out_valid, out_for_grow = self.get_indicator_out_valid(indicator_name, symbols, timeframe,
                                                                       indicator_kwargs, use_time_begin, use_time_end)
         if out_valid is None:
-
-            #if out_for_grow is not None:
-            #    out_for_grow.read_only = False
-
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
-
-            #out_valid.read_only = True
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
+
+        if self.interval_mode != IntervalMode.live:
+            if use_time_begin < out_valid.time[0] or out_valid.time[-1] + timeframe.value < use_time_end:
+                raise LTIExceptionOutOfThePeriod()
 
         return out_valid[use_time_begin: use_time_end + timeframe.value]
 
@@ -246,7 +236,6 @@ class Indicators:
 
             time_start_last_day_d = np.datetime64(bar_for_grow.time[-1], 'D')
             time_start_last_day = np.datetime64(time_start_last_day_d, TIME_TYPE_UNIT)
-            #time_end = timeframe.begin_of_tf(self.time_end)
 
             new_day_data = self.source_data.get_bar_data(symbol, timeframe,
                                                      time_start_last_day_d, time_end,
@@ -256,12 +245,6 @@ class Indicators:
                 bar_data = new_day_data
             else:
                 bar_data = bar_for_grow[:time_start_last_day] + new_day_data
-
-        # time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
-        # if self.interval_mode == IntervalMode.live:
-        #     time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
-        # else:
-        #     time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - timeframe.value * 2
 
         if bar_data.is_live:
             time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
@@ -330,6 +313,14 @@ class IndicatorProxy:
 
         return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, use_timeframe,
                                                  kwargs, use_time_begin, use_time_end)
+
+    def full_data(self, symbols, timeframe,  **kwargs):
+
+        time_begin = np.datetime64(np.datetime64(self.indicators.time_begin, 'D'), TIME_TYPE_UNIT)
+        time_end = np.datetime64(np.datetime64(self.indicators.time_end, 'D') + 1, TIME_TYPE_UNIT) - 1
+
+        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, timeframe,
+                                                 kwargs, time_begin, time_end)
 
     def __del__(self):
         self.indicators = None
