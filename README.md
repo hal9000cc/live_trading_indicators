@@ -129,10 +129,10 @@ There are three strategies for specifying a time period:
 Indicator values can be obtained for any period within the interval specified for *Indicators*. When exiting the specified interval, an exception will be raised *LTIExceptionOutOfThePeriod*.
 ##### Example
 ```python
-indicators = lti.Indicators('binance', 20220901, 20220930) # базовый период
-ohlcv = indicators.OHLCV('um/ethusdt', '1h') # период не указан, используется базовый период
-sma22 = indicators.SMA('um/ethusdt', '1h', 20220905, 20220915, period=22) # период указан
-sma15 = indicators.SMA('um/ethusdt', '1h', 20220905, 20221015, period=15) # ОШИБКА, выход за границы базового периода
+indicators = lti.Indicators('binance', 20220901, 20220930) # the base period
+ohlcv = indicators.OHLCV('um/ethusdt', '1h') # the period is not specified, the base period is used
+sma22 = indicators.SMA('um/ethusdt', '1h', 20220905, 20220915, period=22) # the period is specified
+sma15 = indicators.SMA('um/ethusdt', '1h', 20220905, 20221015, period=15) # ERROR, going beyond the boundaries of the base period
 ```
 #### 2. The time period is not specified when creating Indicators
 In this variant, when getting indicator data, the period should always be specified. When the interval is extended, data may be updated, this may slow down the work.
