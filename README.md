@@ -122,23 +122,23 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
 There are three strategies for specifying a time period:
-#### 1. Период времени указывается при создании Indicators (базовый период)
-Значения индикаторов можно получить за любой период в пределах интервала, заданного для *Indicators*. При выходе за указанный интервал будет сгенерировано исключение *LTIExceptionOutOfThePeriod*.
-##### Пример
+#### 1. The time period is specified when creating Indicators (base period)
+Indicator values can be obtained for any period within the interval specified for *Indicators*. When exiting the specified interval, an exception will be raised *LTIExceptionOutOfThePeriod*.
+##### Example
 ```python
 indicators = lti.Indicators('binance', 20220901, 20220930) # базовый период
 ohlcv = indicators.OHLCV('um/ethusdt', '1h') # период не указан, используется базовый период
 sma22 = indicators.SMA('um/ethusdt', '1h', 20220905, 20220915, period=22) # период указан
 sma15 = indicators.SMA('um/ethusdt', '1h', 20220905, 20221015, period=15) # ОШИБКА, выход за границы базового периода
 ```
-#### 2. Период времени не указывается при создании Indicators
-В этом варианте, при получении данных индикатора, период надо указывать всегда. Период времени для расчета значений индикаторов определяется автоматически. При расширении интервала может происходить обновление данных, это может замедлять работу.
-##### Пример
+#### 2. The time period is not specified when creating Indicators
+In this variant, when getting indicator data, the period should always be specified. When the interval is extended, data may be updated, this may slow down the work.
+##### Example
 ```python
 indicators = lti.Indicators('binance') # период не указан
 ohlcv = indicators.OHLCV('um/ethusdt', '1h', 20220801, 20220815) # период указывать обязательно
 ma22 = indicators.SMA('um/ethusdt', '1h', 'close', 22, 20220905, 20220915) # период указывать обязательно
 ```
-#### 3. Режим реального времени
-В этом варианте при создании *Indicators* указывается только начальная дата. Данные всегда получаются по текущий момент.
-При создании Indicators можно указать with_incomplete_bar=True, тогда будут получены данные последнего, не завершенного бара. [Пример](/README_RUS.md#%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%B2-%D1%80%D0%B5%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5%D0%B4%D0%BD%D0%B8%D0%B5-3-%D0%BC%D0%B8%D0%BD%D1%83%D1%82%D1%8B-%D0%BD%D0%B0-%D1%82%D0%B0%D0%B9%D0%BC%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B5-1m-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B5%D0%BF%D0%BE%D0%BB%D0%BD%D0%BE%D0%B3%D0%BE-%D0%B1%D0%B0%D1%80%D0%B0)
+#### 3. Real-time mode
+In this variant, when creating *Indicators*, only the start date is specified. The data is always received up to the current moment.
+When creating Indicators, you can specify *with_incomplete_bar=True*, then the data of the last, incomplete bar will be received. [Example](/README_RUS.md#%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%B2-%D1%80%D0%B5%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5%D0%B4%D0%BD%D0%B8%D0%B5-3-%D0%BC%D0%B8%D0%BD%D1%83%D1%82%D1%8B-%D0%BD%D0%B0-%D1%82%D0%B0%D0%B9%D0%BC%D1%84%D1%80%D0%B5%D0%B9%D0%BC%D0%B5-1m-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B5%D0%BF%D0%BE%D0%BB%D0%BD%D0%BE%D0%B3%D0%BE-%D0%B1%D0%B0%D1%80%D0%B0)
