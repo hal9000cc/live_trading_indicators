@@ -67,6 +67,9 @@ def pytest_generate_tests(metafunc):
     if 'a_timeframe' in metafunc.fixturenames:
         return metafunc.parametrize("a_timeframe", test_timeframes())
 
+    if 'a_timeframe_short' in metafunc.fixturenames:
+        return metafunc.parametrize("a_timeframe_short", [Timeframe.t1m, Timeframe.t1h, Timeframe.t12h, Timeframe.t1d])
+
     if 'ohlcv_set' in metafunc.fixturenames:
         return metafunc.parametrize('ohlcv_set', [
 

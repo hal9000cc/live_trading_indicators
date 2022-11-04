@@ -246,7 +246,7 @@ class Indicators:
 
             time_start_last_day_d = np.datetime64(bar_for_grow.time[-1], 'D')
             time_start_last_day = np.datetime64(time_start_last_day_d, TIME_TYPE_UNIT)
-            time_end = timeframe.begin_of_tf(self.time_end)
+            #time_end = timeframe.begin_of_tf(self.time_end)
 
             new_day_data = self.source_data.get_bar_data(symbol, timeframe,
                                                      time_start_last_day_d, time_end,
@@ -257,26 +257,31 @@ class Indicators:
             else:
                 bar_data = bar_for_grow[:time_start_last_day] + new_day_data
 
-        if self.interval_mode == IntervalMode.live:
+        # time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
+        # if self.interval_mode == IntervalMode.live:
+        #     time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
+        # else:
+        #     time_end = timeframe.begin_of_tf(dt.datetime.utcnow()) - timeframe.value * 2
+
+        if bar_data.is_live:
             time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
+            bar_data = bar_data[: time_end + timeframe.value]
 
-        bar_data = bar_data[np.datetime64(time_start_d, TIME_TYPE_UNIT) : time_end + timeframe.value]
-
-        self.check_bar_data(bar_data, symbol, self.time_begin, self.time_end)
+        self.check_bar_data(bar_data)
 
         if self.config['restore_empty_bars']:
             bar_data.restore_bar_data()
         return bar_data
 
-    def check_bar_data(self, bar_data, symbol, date_begin, date_end):
+    def check_bar_data(self, bar_data):
 
         if self.config['endpoints_required']:
             if len(bar_data) == 0:
-                raise LTIExceptionSourceDataNotFound(symbol, date_begin)
+                raise LTIExceptionSourceDataNotFound(bar_data.symbol)
             if bar_data.close[0] == 0:
-                raise LTIExceptionSourceDataNotFound(symbol, date_begin)
+                raise LTIExceptionSourceDataNotFound(bar_data.symbol, bar_data.time[0])
             if bar_data.close[-1] == 0:
-                raise LTIExceptionSourceDataNotFound(symbol, date_end)
+                raise LTIExceptionSourceDataNotFound(bar_data.symbol, bar_data.close[-1])
 
         max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config[
             'max_empty_bars_consecutive']

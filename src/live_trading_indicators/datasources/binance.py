@@ -113,6 +113,8 @@ def exchange_info(symbol):
 def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
 
     assert date.dtype.name == 'datetime64[D]'
+    assert day_for_grow is None \
+           or (day_for_grow.time[0] == date and day_for_grow.time[-1] - day_for_grow.time[0] < TIME_UNITS_IN_ONE_DAY)
 
     if day_for_grow is None:
         query_time = np.datetime64(date, TIME_TYPE_UNIT)

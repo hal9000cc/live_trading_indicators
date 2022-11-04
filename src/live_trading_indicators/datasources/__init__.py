@@ -54,8 +54,14 @@ class SourceData:
             self.count_file_load += 1
             bar_data = self.load_from_cash(filename, symbol, timeframe)
         else:
+
             self.count_datasource_get += 1
-            bar_data = self.datasource_module.bars_of_day(symbol, timeframe, day_date, bar_for_grow)
+
+            bar_data = self.datasource_module.bars_of_day(
+                symbol, timeframe,
+                day_date,
+                bar_for_grow if bar_for_grow is not None and bar_for_grow.time[0] == day_date else None)
+
             bar_data.check_day_data(symbol, timeframe, day_date)
             self.save_to_cash_verified(filename, bar_data, day_date)
 
@@ -209,7 +215,7 @@ class SourceData:
             day_date += 1
 
         #assert day_for_grow is None or len(day_dates) == 1
-
+        is_live = False
         for day_date in day_dates:
             day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
             td_time.append(day_data.time)
@@ -219,10 +225,12 @@ class SourceData:
             td_close.append(day_data.close)
             td_volume.append(day_data.volume)
             if day_data.is_live_day:
+                is_live = True
                 break
 
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,
+                           'is_live': is_live,
                            'time': np.hstack(td_time),
                            'open': np.hstack(td_open),
                            'high': np.hstack(td_high),

@@ -73,6 +73,9 @@ class TimeframeData:
             if type(value) == np.ndarray:
                 new_data[key] = np.hstack((value, other.data[key]))
             else:
+                if key == 'is_live':
+                    new_data[key] = value or other.data[key]
+                    continue
                 if key not in ('symbol', 'name', 'timeframe'):
                     continue
                 if value != other.data[key]:
@@ -164,6 +167,9 @@ class TimeframeData:
         return new_indicator_data
 
     def __eq__(self, other):
+
+        if len(self) != len(other):
+            raise ValueError(f'The length of data does not match: {len(self)} != {len(other)}')
 
         for key, value in self.data.items():
             if type(value) == np.ndarray:
