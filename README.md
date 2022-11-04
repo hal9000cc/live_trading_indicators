@@ -46,7 +46,7 @@ print(dataframe.head())
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 print(macd.pandas().head())
 ```
-###### Результат:
+###### Result:
 ```
                  time      macd  macd_signal  macd_hist
 0 2022-07-01 00:00:00  0.000000     0.000000   0.000000
@@ -55,8 +55,8 @@ print(macd.pandas().head())
 3 2022-07-01 03:00:00 -1.105457    -0.286445  -0.819012
 4 2022-07-01 04:00:00 -2.146765    -0.658509  -1.488256
 ```
-### Получение данных в реальном времени (последние 3 минуты на таймфрейме 1m без неполного бара)
-Для получения данных в реальном времени необходимо не указывать конечную дату.
+### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
+To get real-time data, you do not need to specify an end date.
 ```python
 import datetime as dt
 import live_trading_indicators as lti
@@ -67,7 +67,7 @@ indicators = lti.Indicators('binance', utcnow - dt.timedelta(minutes=3))
 ohlcv = indicators.OHLCV('btcusdt', '1m')
 print(ohlcv.pandas())
 ```
-###### Результат:
+###### Result:
 ```
 Now is 2022-11-04 09:32:31.528230 UTC
                  time      open      high       low     close     volume
@@ -75,8 +75,8 @@ Now is 2022-11-04 09:32:31.528230 UTC
 1 2022-11-04 09:30:00  20592.38  20600.98  20591.75  20600.30  178.40869
 2 2022-11-04 09:31:00  20600.98  20623.93  20600.30  20621.45  431.11917
 ```
-### Получение данных в реальном времени (последние 3 минуты на таймфрейме 1m плюс неполный бар)
-Для получения последнего, незавершенного бара необходимо указать *with_incomplete_bar=True* при создании *Indicators*
+### Getting real-time data (the last 3 minutes on the 1m timeframe and an incomplete bar)
+To get data containing an incomplete bar, you must specify *with_incomplete_bar=True* when creating *Indicators*.
 ```python
 utcnow = dt.datetime.utcnow()
 print(f'Now is {utcnow} UTC')
@@ -84,7 +84,7 @@ indicators = lti.Indicators('binance', utcnow - dt.timedelta(minutes=3), with_in
 ohlcv = indicators.OHLCV('btcusdt', '1m')
 print(ohlcv.pandas())
 ```
-###### Результат:
+###### Result:
 ```
 Now is 2022-11-04 09:37:07.372986 UTC
 2022-11-04 12:37:07,374 Download using api symbol btcusdt timeframe 1m from 2022-11-04T00:00:00.000...
@@ -94,34 +94,34 @@ Now is 2022-11-04 09:37:07.372986 UTC
 2 2022-11-04 09:36:00  20615.69  20617.75  20609.74  20611.46  199.43313
 3 2022-11-04 09:37:00  20611.11  20611.89  20608.17  20609.02   15.15800
 ```
-## Подробнее
-Поддерживаются все типовые тамфреймы до 1 суток включительно: 1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
-По умолчанию сообщения лога выводятся в консоль, и вы увидите подобные сообщения:
+## Details
+All typical tamframes are supported up to 1 day inclusive: 1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
+By default, log messages are output to the console, and you will see similar messages:
 ```
 2022-11-04 12:32:31,528 Download using api symbol btcusdt timeframe 1m from 2022-11-04T00:00:00.000...
 ```
-Для их отключения нужно выполнить следующий код и перезапустить python.
+To disable these messages, run the following code and restart python.
 ```python
 import live_trading_indicators as lti
 lti.config(print_log=False)
 ```
-### Индикаторы
-При получении значений индикаторов превые два параметра symbol и timeframe. Далее опционально может быть указан период. Затем указываются параметры индикатора по именам.
-#### Примеры
+### Indicators
+When getting indicator values, the first two parameters should be symbol and timeframe. Further, the period can optionally be specified. Then the parameters of the indicator are specified by name.
+#### Examples
 ```python
 sma = indicators.MACD('ethusdt', '1h', period=9)
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 ```
-Реализованы следующие индикаторы (пропущены для краткости *symbol*, *timeframe*, *time_start*, *time_end*):
+The following indicators are implemented (the parameters *symbol*, *timeframe*, *time_start*, *time_end* are omitted for brevity):
 - EMA(period, value='close')
 - SMA(period, value='close')
 - MA(period, value='close', ma_type='sma')
 - MACD(period_short, period_long, period_signal)
 - RSI(period, value='close')
-### Указание периода
-Период может быть указан как при иницилизации *Indicators*, так и в параметрах индикатора. Тип данных при указании периода может быть *datetime.date*, *datetime.datetime*, *numpy.datetime64*, строка, или число в формате *YYYYMMDD*.
+### Specifying the period
+The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
-Существуют три стратегии указания периода времени.
+There are three strategies for specifying a time period:
 #### 1. Период времени указывается при создании Indicators (базовый период)
 Значения индикаторов можно получить за любой период в пределах интервала, заданного для *Indicators*. При выходе за указанный интервал будет сгенерировано исключение *LTIExceptionOutOfThePeriod*.
 ##### Пример
