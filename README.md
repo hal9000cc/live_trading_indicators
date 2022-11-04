@@ -144,7 +144,7 @@ ma22 = indicators.SMA('um/ethusdt', '1h', 'close', 22, 20220905, 20220915) # Ð¿Ð
 ```
 #### 3. Real-time mode
 In this variant, when creating *Indicators*, only the start date is specified. The data is always received up to the current moment.
-When creating Indicators, you can specify *with_incomplete_bar=True*, then the data of the last, incomplete bar will be received. [Example](/README.md#getting-real-time-data-the-last-3-minutes-on-the-1m-timeframe-without-an-incomplete-bar))
+When creating Indicators, you can specify *with_incomplete_bar=True*, then the data of the last, incomplete bar will be received. See the example above.
 ### Binance trading symbol codes
 - For the spot market, they completely coincide with the code on binance (*btcusdt*, *ethusdt*, etc.)
 - For the futures market **USD-M**, codes are prefixed with **um/** (*um/btcusdt*, *um/ethusdt*, etc.)
