@@ -169,7 +169,7 @@ class SourceData:
             'symbol': symbol,
             'timeframe': timeframe,
             'is_live_day': False,
-            'time': np.array(file_data.time, dtype=int).astype(TIME_TYPE),
+            'time': np.array(file_data.time, dtype=np.int64).astype(TIME_TYPE),
             'open': np.array(file_data.open, dtype=PRICE_TYPE),
             'high': np.array(file_data.high, dtype=PRICE_TYPE),
             'low': np.array(file_data.low, dtype=PRICE_TYPE),
