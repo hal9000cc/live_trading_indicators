@@ -149,7 +149,7 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
             received_volume.append(PRICE_TYPE(data_time_set[5]))
             received_time.append(int(data_time_set[0]))
 
-        expected_bars = (end_time - query_time).astype(int) // timeframe.value
+        expected_bars = (end_time - query_time).astype(np.int64) // timeframe.value
         if len(klines_data) < expected_bars and len(klines_data) < MINIMAL_BAR_LIMITS:
             is_live_day = True
             break
@@ -198,8 +198,8 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
 
 def bars_online_request(api_url, symbol, timeframe, start_time, end_time):
 
-    start_time_int = start_time.astype(int)
-    end_time_int = end_time.astype(int)
+    start_time_int = start_time.astype(np.int64)
+    end_time_int = end_time.astype(np.int64)
 
     request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
 

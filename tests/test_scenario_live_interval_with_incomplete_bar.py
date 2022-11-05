@@ -10,7 +10,7 @@ from src.live_trading_indicators.constants import TIME_TYPE, TIME_TYPE_UNIT
 def test_fix_live_with_incomplete_1(config_default, test_source, a_symbol, timeframe):
 
     next_time = timeframe.begin_of_tf(dt.datetime.utcnow()) + timeframe.value
-    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(int)
+    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
     if remain_time_sec < 10:
         time.sleep(remain_time_sec)
 
@@ -35,7 +35,7 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
     timeframe = lti.Timeframe.t1m
 
     next_time = timeframe.begin_of_tf(dt.datetime.utcnow()) + timeframe.value
-    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(int)
+    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
     if remain_time_sec < 10:
         time.sleep(remain_time_sec)
 
@@ -47,10 +47,10 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
 
     n_bars = len(ohlcv.time)
-    assert n_bars == (np.datetime64(now, 'm') - np.datetime64(time_begin, 'm')).astype(int) + 1
+    assert n_bars == (np.datetime64(now, 'm') - np.datetime64(time_begin, 'm')).astype(np.int64) + 1
 
     next_time = timeframe.begin_of_tf(now) + timeframe.value
-    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(int)
+    remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
 
     if remain_time_sec > 0:
         time.sleep(remain_time_sec)

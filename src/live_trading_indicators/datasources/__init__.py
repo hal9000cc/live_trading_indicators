@@ -134,7 +134,7 @@ class SourceData:
         data_struct = self.get_file_data_struct(n_bars)
         buf_data = [self.build_header(bar_data),
                     data_struct.build({
-                    'time': bar_data.time.astype(int),
+                    'time': bar_data.time.astype(np.int64),
                     'open': bar_data.open,
                     'high': bar_data.high,
                     'low': bar_data.low,
@@ -188,7 +188,7 @@ class SourceData:
             return
 
         if not bar_data.is_entire():
-            if (np.datetime64(now, 'D') - day_date).astype(int) < DAYS_WAIT_FOR_ENTIRE:
+            if (np.datetime64(now, 'D') - day_date).astype(np.int64) < DAYS_WAIT_FOR_ENTIRE:
                 return
 
         self.save_to_cash(filename, bar_data)

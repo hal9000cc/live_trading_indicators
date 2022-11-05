@@ -31,7 +31,7 @@ class Timeframe(IntEnum):
 
     def begin_of_tf(self, time):
         assert time is not None
-        return (np.datetime64(time, TIME_TYPE_UNIT).astype(int) // self.value * self.value).astype(TIME_TYPE)
+        return (np.datetime64(time, TIME_TYPE_UNIT).astype(np.int64) // self.value * self.value).astype(TIME_TYPE)
 
     @staticmethod
     def cast(value):

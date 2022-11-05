@@ -123,7 +123,7 @@ class TimeframeData:
     def index_from_time64(self, time):
         assert type(time) == np.datetime64 and time.dtype.name == TIME_TYPE
         if time is None: return None
-        return int((time - self.first_bar_time).astype(int) // self.timeframe.value)
+        return int((time - self.first_bar_time).astype(np.int64) // self.timeframe.value)
 
     def slice_by_datetime(self, time_start, time_stop):
 
@@ -434,7 +434,7 @@ class OHLCV_day(OHLCV_data):
     def expected_bars_count(self):
 
         if self.is_live_day:
-            return (self.time[-1] - self.time[0]).astype(int) // self.timeframe.value + 1
+            return (self.time[-1] - self.time[0]).astype(np.int64) // self.timeframe.value + 1
 
         return TIME_UNITS_IN_ONE_DAY // self.timeframe.value
 
@@ -491,7 +491,7 @@ class OHLCV_day(OHLCV_data):
 
         assert type(date) == dt.date
 
-        day_start_ms = np.datetime64(date).astype('datetime64[ms]').astype(int)
+        day_start_ms = np.datetime64(date).astype('datetime64[ms]').astype(np.int64)
         step_ms = timeframe.value * 1000
         n_candles = TIME_UNITS_IN_ONE_DAY // timeframe.value
 
