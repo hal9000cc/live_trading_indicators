@@ -364,7 +364,15 @@ class OHLCV_data(TimeframeData):
 
         name1 = self.name if 'name' in self.data.keys() else self.symbol.replace('/', '_')
         name2 = other.name if 'name' in other.data.keys() else other.symbol.replace('/', '_')
-        if set(self.data.keys()) & set(other.data.keys()) == {'time', 'timeframe'}:
+
+        common_keys = set(self.data.keys()) & set(other.data.keys())
+        if 'symbol' in common_keys and self.symbol == other.symbol:
+            common_keys -= {'symbol'}
+            symbol_info = {'symbol': self.symbol}
+        else:
+            symbol_info = {}
+
+        if common_keys == {'time', 'timeframe'}:
             pref1 = ''
             pref2 = ''
         else:
@@ -374,7 +382,7 @@ class OHLCV_data(TimeframeData):
                 pref2 += '1'
 
         result_data = \
-            {'time': self.time, 'timeframe': self.timeframe} |\
+            {'time': self.time, 'timeframe': self.timeframe} | symbol_info |\
             {f'{pref1}{key}': value for key, value in self.data.items() if key != 'time' and type(value) == np.ndarray} |\
             {f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray}
 
@@ -553,7 +561,10 @@ class IndicatorData(TimeframeData):
 
     def __str__(self):
 
-        info = [f'<IndicatorData> name: {self.name}, '
+        symbol = self.data.get('symbol')
+        symbol_info = f'symbol: {symbol}, '
+
+        info = [f'<IndicatorData> name: {self.name}, {symbol_info}'
                 f'timeframe: {self.timeframe}', self.str_period(),
                 self.str_values()]
 

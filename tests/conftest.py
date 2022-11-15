@@ -37,6 +37,15 @@ def test_timeframes():
     return timeframes
 
 
+def test_big_timeframes():
+
+    timeframes = []
+    for tf_str in ('1h', '2h', '4h', '6h', '8h', '12h', '1d'):
+        timeframes.append(Timeframe.cast(tf_str))
+
+    return timeframes
+
+
 def ohlcv_set(files, timeframe, symbol, date_start):
 
     dfs = []
@@ -66,6 +75,9 @@ def pytest_generate_tests(metafunc):
 
     if 'a_timeframe' in metafunc.fixturenames:
         return metafunc.parametrize("a_timeframe", test_timeframes())
+
+    if 'a_big_timeframe' in metafunc.fixturenames:
+        return metafunc.parametrize("a_big_timeframe", test_big_timeframes())
 
     if 'a_timeframe_short' in metafunc.fixturenames:
         return metafunc.parametrize("a_timeframe_short", [Timeframe.t1m, Timeframe.t1h, Timeframe.t12h, Timeframe.t1d])

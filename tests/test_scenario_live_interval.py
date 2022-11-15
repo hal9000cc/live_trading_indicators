@@ -71,7 +71,7 @@ def test_live_3(config_default, test_source, a_symbol, timeframe):
     remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
     time.sleep(remain_time_sec)
 
-    time.sleep(5)
+    time.sleep(10)
     ohlcv1 = indicators.OHLCV(a_symbol, timeframe)
     assert ohlcv == ohlcv1[:-1]
 

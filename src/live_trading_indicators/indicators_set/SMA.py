@@ -1,6 +1,4 @@
-# live_trading_indicators
-# SMA(symbol, timeframe, period=?, value='close')
-from ..calculator import ma_calculate
+from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 
 
@@ -9,12 +7,13 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
 
-    out = ma_calculate(source_values, period)
+    out = ma_calculate(source_values, period, MA_Type.sma)
 
     return IndicatorData({
         'name': 'SMA',
+        'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        f'sma_{value}': out
+        'sma': out
     })
 

@@ -1,28 +1,28 @@
-# live_trading_indicators
-# MACD(symbol, timeframe, period_short=?, period_long=?, period_signal=?, value='close')
-
 from ..indicator_data import IndicatorData
-from ..calculator import ema_calculate, ma_calculate
+from ..move_average import ma_calculate, MA_Type
 
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short, period_long, period_signal,
+                      ma_type='ema', ma_type_signal='sma',
                       relative_price=False, value='close'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
 
-    ema_short = ema_calculate(source_values, 1.0 / (period_short + 1))
-    ema_long = ema_calculate(source_values, 1.0 / (period_long + 1))
+    ma_type_enum = MA_Type.cast(ma_type)
+    ema_short = ma_calculate(source_values, period_short, ma_type_enum)
+    ema_long = ma_calculate(source_values, period_long, ma_type_enum)
 
     macd = ema_short - ema_long
     if relative_price: macd /= source_values / 1000.0
 
-    signal = ma_calculate(macd, period_signal)
+    signal = ma_calculate(macd, period_signal, MA_Type.cast(ma_type_signal))
 
     macd_hist = macd - signal
 
     return IndicatorData({
         'name': 'MACD',
+        'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'macd': macd,
