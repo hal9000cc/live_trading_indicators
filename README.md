@@ -119,8 +119,9 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - EMA(period, value='close')
 - SMA(period, value='close')
 - MA(period, value='close', ma_type='sma')
-- MACD(period_short, period_long, period_signal)
-- RSI(period, value='close')
+- MACD(period_short, period_long, period_signal, ma_type='ema', ma_type_signal='sma')
+- RSI(period, value='close', ma_type='ema')
+- Stochastic(period, period_d, smooth=3, ma_type='sma')
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
