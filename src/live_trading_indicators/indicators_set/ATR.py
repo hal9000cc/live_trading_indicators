@@ -21,8 +21,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'TR': tr,
-        'ATR': atr,
-        'ATRP': atrp
+        'tr': tr,
+        'atr': atr,
+        'atrp': atrp
     })
 

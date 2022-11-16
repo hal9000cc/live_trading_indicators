@@ -21,7 +21,7 @@ class MA_Type(Enum):
         raise ValueError(f'Unknown move average type: {str_value}')
 
 
-@nb.njit
+@nb.njit(cache=True)
 def ema_calculate(source_values, alpha):
 
     alpha_n = 1.0 - alpha

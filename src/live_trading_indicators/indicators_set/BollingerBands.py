@@ -1,8 +1,10 @@
 import numpy as np
+import numba as nb
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
 
+@nb.njit(cache=True)
 def calc_std_deviations(values, period):
 
     values_len = len(values)
@@ -32,7 +34,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
     down_line = mid_line - deviations
 
     z_score = (source_values - mid_line) / std_deviations
-    z_score[calc_std_deviations == 0] = 0
+    z_score[std_deviations == 0] = 0
 
     return IndicatorData({
         'name': 'BollingerBands',

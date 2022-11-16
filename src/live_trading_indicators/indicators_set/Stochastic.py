@@ -4,7 +4,7 @@ from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 
 
-@nb.njit
+@nb.njit(cache=True)
 def calc_k(high, low, close, period):
 
     value_k = np.empty(len(close), dtype=float)
