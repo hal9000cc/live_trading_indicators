@@ -7,11 +7,10 @@ The current version allows you to receive exchange data **Binance** (**spot**, *
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data is stored by default in the *.lti* folder of of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes.
-## Version 0.2.1
+## Version 0.3.0
 ### what's new
-- New indicator - ATR.
-- New indicator - OBV.
-- Fix some bugs.
+- Can use Pandas Dataframe as a source.
+- New indicator - BollingerBands.
 ## Installing
 ```python
 pip install live_trading_indicators
