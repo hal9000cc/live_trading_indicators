@@ -149,9 +149,9 @@ sma15 = indicators.SMA('um/ethusdt', '1h', 20220905, 20221015, period=15) # ERRO
 In this variant, when getting indicator data, the period should always be specified. When the interval is extended, data may be updated, this may slow down the work.
 ##### Example
 ```python
-indicators = lti.Indicators('binance') # период не указан
-ohlcv = indicators.OHLCV('um/ethusdt', '1h', 20220801, 20220815) # период указывать обязательно
-ma22 = indicators.SMA('um/ethusdt', '1h', 'close', 22, 20220905, 20220915) # период указывать обязательно
+indicators = lti.Indicators('binance') # period not specified
+ohlcv = indicators.OHLCV('um/ethusdt', '1h', 20220801, 20220815) # the period must be specified
+ma22 = indicators.SMA('um/ethusdt', '1h', 'close', 22, 20220905, 20220915) # the period must be specified
 ```
 #### 3. Real-time mode
 In this variant, when creating *Indicators*, only the start date is specified. The data is always received up to the current moment.
