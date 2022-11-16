@@ -554,10 +554,12 @@ class OHLCV_day(OHLCV_data):
 
 class IndicatorData(TimeframeData):
 
-    def __init__(self, data_dict):
+    def __init__(self, data_dict, allow_nan=False):
         super().__init__(data_dict)
         assert not {'timeframe', 'name'} - set(data_dict.keys())
-        self.check_series()
+
+        if not allow_nan:
+            self.check_series()
 
     def __str__(self):
 

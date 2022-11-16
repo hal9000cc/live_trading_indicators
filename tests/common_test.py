@@ -14,4 +14,4 @@ def stocks2numpy(stocks, variable):
     for item in stocks:
         res.append(item.__getattribute__(variable))
 
-    return np.array(res)
+    return np.array(res, dtype=float)

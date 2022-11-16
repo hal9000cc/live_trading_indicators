@@ -15,9 +15,9 @@ def test_obv(config_default, test_source, test_symbol, time_begin, time_end):
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     obv = indicators.OBV(test_symbol, timeframe)
 
-    stoch_ref_obv = si.get_obv(ohlcv2quote(ohlcv))
+    obv_ref = si.get_obv(ohlcv2quote(ohlcv))
 
-    ref_value_obv = stocks2numpy(stoch_ref_obv, 'obv')
+    ref_value_obv = stocks2numpy(obv_ref, 'obv')
 
     assert (obv.OBV - ref_value_obv < 1e-12).all()
 

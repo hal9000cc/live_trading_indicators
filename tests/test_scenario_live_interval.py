@@ -39,7 +39,7 @@ def test_live_2(config_default, test_source, a_symbol, timeframe):
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value * 2
     indicators = lti.Indicators(test_source, time_begin)
 
-    time.sleep(1)
+    time.sleep(5)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     assert len(ohlcv.time) == 2
 

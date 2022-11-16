@@ -15,11 +15,11 @@ def test_atr(config_default, test_source, test_symbol, time_begin, time_end, smo
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     atr = indicators.ATR(test_symbol, timeframe, smooth=smooth*2-1)
 
-    stoch_ref_atr = si.get_atr(ohlcv2quote(ohlcv), smooth)
+    atr_ref = si.get_atr(ohlcv2quote(ohlcv), smooth)
 
-    ref_value_atr = stocks2numpy(stoch_ref_atr, 'atr')
-    ref_value_tr = stocks2numpy(stoch_ref_atr, 'tr')
-    ref_value_atrp = stocks2numpy(stoch_ref_atr, 'atrp')
+    ref_value_atr = stocks2numpy(atr_ref, 'atr')
+    ref_value_tr = stocks2numpy(atr_ref, 'tr')
+    ref_value_atrp = stocks2numpy(atr_ref, 'atrp')
 
     assert (atr.TR - ref_value_tr < 1e-12).all()
     assert (atr.ATR[smooth*10:] - ref_value_atr[smooth*10:] < 1e-4).all()

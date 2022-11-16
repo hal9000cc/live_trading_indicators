@@ -75,12 +75,13 @@ def symbol_decode(symbol):
 
 def get_api_url(part):
 
-    if part == 'spot':
-        return SPOT_API_URL
-    if part == 'um':
-        return UM_API_URL
-    if part == 'cm':
-        return CM_API_URL
+    match part:
+        case 'spot':
+            return SPOT_API_URL
+        case 'um':
+            return UM_API_URL
+        case 'cm':
+            return CM_API_URL
 
     raise NotImplementedError(f'Unknown part: {part}')
 
