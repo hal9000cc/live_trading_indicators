@@ -11,6 +11,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 ### what's new
 - Can use Pandas Dataframe as a source.
 - New indicator - BollingerBands.
+- New indicator - CCI.
 ## Installing
 ```python
 pip install live_trading_indicators
@@ -132,6 +133,7 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - ATR(smooth=14, ma_type='ema')
 - OBV()
 - BollingerBands(period=20, deviation=2, ma_type='sma')
+- CCI(period)
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
