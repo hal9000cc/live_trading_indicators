@@ -131,6 +131,7 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - Stochastic(period, period_d, smooth=3, ma_type='sma')
 - ATR(smooth=14, ma_type='ema')
 - OBV()
+- BollingerBands(period=20, deviation=2, ma_type='sma')
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
