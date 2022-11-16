@@ -46,6 +46,9 @@ print(dataframe.head())
 ```
 ### Example of getting indicator data
 ```python
+import live_trading_indicators as lti
+
+indicators = lti.Indicators('binance')
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 print(macd.pandas().head())
 ```
