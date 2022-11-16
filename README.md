@@ -7,6 +7,11 @@ The current version allows you to receive exchange data **Binance** (**spot**, *
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data is stored by default in the *.lti* folder of of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes.
+## Version 0.2.1
+### what's new
+- New indicator - ATR.
+- New indicator - OBV.
+- Fix some bugs.
 ## Installing
 ```python
 pip install live_trading_indicators
@@ -125,6 +130,8 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - MACD(period_short, period_long, period_signal, ma_type='ema', ma_type_signal='sma')
 - RSI(period, value='close', ma_type='ema')
 - Stochastic(period, period_d, smooth=3, ma_type='sma')
+- ATR(smooth=14, ma_type='ema')
+- OBV()
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
