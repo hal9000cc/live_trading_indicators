@@ -223,7 +223,7 @@ class Indicators:
 
     @staticmethod
     def key_from_args(indicator, symbols, timeframe, kwargs):
-        return symbols, timeframe, tuple(kwargs.items())
+        return indicator, symbols, timeframe, tuple(kwargs.items())
 
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 
