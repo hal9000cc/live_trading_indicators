@@ -13,6 +13,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 - New indicator - BollingerBands.
 - New indicator - CCI.
 - New indicator - Supertrend.
+- Indicators can have nan values.
 ## Installing
 ```python
 pip install live_trading_indicators
