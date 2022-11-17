@@ -13,6 +13,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 - New indicator - BollingerBands.
 - New indicator - CCI.
 - New indicator - Supertrend.
+- New types of moving averages, now the moving average can be 'sma', 'ema', 'mma', 'ima' (this is ema initialized sma, as in the binance indicators).
 - Indicators can have nan values.
 ## Installing
 ```python
