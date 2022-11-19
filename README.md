@@ -158,7 +158,7 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - OBV()
 - BollingerBands(period=20, deviation=2, ma_type='sma')
 - CCI(period)
-- Supertrend(?)
+- Supertrend(period=10, multipler=3, ma_type='mma')
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
@@ -190,7 +190,7 @@ When creating Indicators, you can specify *with_incomplete_bar=True*, then the d
 ### Types of move average
 live-trading-indicators supports the following types of moving averages:
 - 'sma' - simple move average
-- 'ema' - classical exponential moving average with alpha = 2 / (n + 1) initialized by SMA (as in binance EMA)
+- 'ema' - classical exponential moving average with alpha = 2 / (n + 1), initialized by SMA (as in binance EMA)
 - 'ema0' - classical exponential moving average with alpha = 2 / (n + 1), initialized by the first value
 - 'mma' - Modified moving average with alpha = 1 / n, initialized by SMA (as in some binance indicators)
 - 'mma0' - Modified moving average с alpha = 1 / n, initialized by the first value
