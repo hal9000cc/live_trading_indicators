@@ -63,6 +63,10 @@ class TimeframeData:
     def __getattr__(self, item):
         return self.data[item]
 
+    @property
+    def allowed_nan(self):
+        return self.data.get('allowed_nan', False)
+
     def __deepcopy__(self, memodict={}):
         return self.copy()
 
@@ -92,7 +96,7 @@ class TimeframeData:
     def str_values(self):
         return f'Values: {", ".join(self.data_keys())}'
 
-    def check_series(self):
+    def check_series(self, allowed_nan=False):
 
         n_bars = len(self.time)
 
@@ -100,7 +104,7 @@ class TimeframeData:
             if type(value) == np.ndarray:
                 if len(value) != n_bars:
                     raise LTIException('Bad data length')
-                if np.isnan(value).any():
+                if not allowed_nan and np.isnan(value).any():
                     raise LTIException('Bad data value (nan)')
                 if np.isinf(value).any():
                     raise LTIException('Bad data value (inf)')
@@ -388,6 +392,7 @@ class OHLCV_data(TimeframeData):
 
         result_data['name'] = '_'.join([name1, name2])
 
+        result_data['allowed_nan'] = self.allowed_nan or other.allowed_nan
         return IndicatorData(result_data)
 
 
@@ -554,20 +559,22 @@ class OHLCV_day(OHLCV_data):
 
 class IndicatorData(TimeframeData):
 
-    def __init__(self, data_dict, allow_nan=False):
+    def __init__(self, data_dict):
+
         super().__init__(data_dict)
         assert not {'timeframe', 'name'} - set(data_dict.keys())
 
-        if not allow_nan:
-            self.check_series()
+        self.check_series(self.allowed_nan)
 
     def __str__(self):
 
         symbol = self.data.get('symbol')
-        symbol_info = f'symbol: {symbol}, '
+        symbol_info = f'symbol: {symbol}'
+        nan_info = 'allowed nan' if self.allowed_nan else 'not allowed nan'
 
-        info = [f'<IndicatorData> name: {self.name}, {symbol_info}'
-                f'timeframe: {self.timeframe}', self.str_period(),
+        info = [f'<IndicatorData> name: {self.name}, {symbol_info}, '
+                f'timeframe: {self.timeframe}, {nan_info}',
+                self.str_period(),
                 self.str_values()]
 
         return '\n'.join(info)

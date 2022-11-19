@@ -14,7 +14,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
     ema_long = ma_calculate(source_values, period_long, ma_type_enum)
 
     macd = ema_short - ema_long
-    if relative_price: macd /= source_values / 1000.0
+    if relative_price:
+        macd /= source_values / 1000.0
 
     signal = ma_calculate(macd, period_signal, MA_Type.cast(ma_type_signal))
 
@@ -26,7 +27,9 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'macd': macd,
-        'macd_signal': signal,
-        'macd_hist': macd_hist
+        'signal': signal,
+        'hist': macd_hist,
+        'allowed_nan': True
     })
+
 

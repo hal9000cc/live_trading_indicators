@@ -4,7 +4,7 @@ from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
 
-def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma_type='ema'):
+def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma_type='mma'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
 
@@ -23,6 +23,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
         'time': ohlcv.time,
         'tr': tr,
         'atr': atr,
-        'atrp': atrp
+        'atrp': atrp,
+        'allowed_nan': True
     })
 

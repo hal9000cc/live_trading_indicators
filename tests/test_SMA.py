@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import src.live_trading_indicators as lti
 
@@ -19,17 +20,13 @@ def test_sma(config_default, test_source, test_symbol, time_begin, time_end, per
 
     values = out.close
     values_sma = sma.sma
-    sum = 0
-    n = 0
     for i in range(len(values)):
 
-        sum += values[i]
-        if n < period:
-            n += 1
-        else:
-            sum -= values[i - period]
+        if i < period - 1:
+            assert np.isnan(values_sma[i])
+            continue
 
-        assert round(values_sma[i], 8) == round(sum / n, 8)
+        assert values_sma[i] - values[i - period + 1: i + 1].sum() / period < 1e-12
 
 
 @pytest.mark.parametrize('time_begin, time_end, period, timeframe', [

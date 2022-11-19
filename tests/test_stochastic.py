@@ -5,12 +5,21 @@ from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period, period_d, smooth', [
-    ('2022-07-01', '2022-07-10', 1, 5, 3),
     ('2022-07-01', '2022-07-22', 1, 5, 1),
+    ('2022-07-01', '2022-07-10', 1, 5, 3),
     ('2022-07-01', '2022-07-22', 1, 1, 1),
     ('2022-07-01', '2022-07-10', 2, 5, 3),
     ('2022-07-01', '2022-07-31', 22, 5, 3),
-    ('2022-07-01', '2022-07-22', 22, 5, 3)
+    ('2022-07-01', '2022-07-22', 21, 5, 3),
+    ('2022-07-01', '2022-07-22', 20, 5, 3),
+    ('2022-07-01', '2022-07-22', 19, 5, 3),
+    ('2022-07-01', '2022-07-22', 18, 5, 3),
+    ('2022-07-01', '2022-07-22', 17, 5, 3),
+    ('2022-07-01', '2022-07-22', 16, 5, 3),
+    ('2022-07-01', '2022-07-22', 15, 5, 3),
+    ('2022-07-01', '2022-07-22', 14, 5, 3),
+    ('2022-07-01', '2022-07-22', 13, 5, 3),
+    ('2022-07-01', '2022-07-22', 12, 5, 3)
 ])
 def test_stohastic(config_default, test_source, test_symbol, time_begin, time_end, period, period_d, smooth, a_big_timeframe):
 
@@ -25,7 +34,7 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
     value_k = stocks2numpy(stoch_ref, 'k')
     oscillator = stocks2numpy(stoch_ref, 'oscillator')
 
-    if smooth < 2:
-        assert (stochastic.oscillator - oscillator < 1e-10).all()
-    assert (stochastic.value_k[period + smooth - 2:] - value_k[period + smooth - 2:] < 1e-10).all()
-    assert (stochastic.value_d[period + period_d + smooth - 3:] - value_d[period + period_d + smooth - 3:] < 1e-10).all()
+    if smooth == 1:
+        assert compare_with_nan(stochastic.oscillator, oscillator)
+    assert compare_with_nan(stochastic.value_k, value_k)
+    assert compare_with_nan(stochastic.value_d, value_d)

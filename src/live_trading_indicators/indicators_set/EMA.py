@@ -14,6 +14,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'ema': out
+        'ema': out,
+        'allowed_nan': True
     })
+
 

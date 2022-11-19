@@ -19,5 +19,5 @@ def test_obv(config_default, test_source, test_symbol, time_begin, time_end):
 
     ref_value_obv = stocks2numpy(obv_ref, 'obv')
 
-    assert (obv.OBV - ref_value_obv < 1e-12).all()
+    assert compare_with_nan(obv.OBV, ref_value_obv)
 

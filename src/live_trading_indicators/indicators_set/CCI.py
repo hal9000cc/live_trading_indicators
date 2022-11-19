@@ -10,7 +10,7 @@ def calc_mad(typical_price, sma_typical_price, period):
     values_len = len(sma_typical_price)
 
     mad = np.empty(values_len)
-    mad[:period - 1] = np.nan
+    mad[:period - 1] = 0
     for i in range(period, values_len + 1):
         mad[i - 1] = np.abs(typical_price[i - period: i] - sma_typical_price[i - 1]).sum() / period
 
@@ -32,6 +32,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period):
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'cci': cci
-    }, allow_nan=True)
+        'cci': cci,
+        'allowed_nan': True
+    })
 

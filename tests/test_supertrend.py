@@ -10,19 +10,18 @@ from stock_indicators import indicators as si
     ('2022-07-01', '2022-07-10', 20),
     ('2022-07-01', '2022-07-10', 20)
 ])
-def test_cci(config_default, test_source, test_symbol, time_begin, time_end, period):
+def test_supertrend(config_default, test_source, test_symbol, time_begin, time_end, period):
 
     timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
-    cci = indicators.CCI(test_symbol, timeframe, period=period)
+    supertrend = indicators.Supertrend(test_symbol, timeframe, period=period)
 
-    cc_ref = si.get_cci(ohlcv2quote(ohlcv), period)
+    supertrend_ref = si.get_super_trend(ohlcv2quote(ohlcv), period)
 
-    ref_value_cci = stocks2numpy(cc_ref, 'cci')
+    ref_value_supertrend = stocks2numpy(supertrend_ref, 'super_trend')
 
-    ref_value_cci[np.isnan(ref_value_cci)] = 0
-    assert compare_with_nan(cci.cci, ref_value_cci, 1e-10)
+    assert compare_with_nan(supertrend.supertrend, ref_value_supertrend)
 
 

@@ -6,8 +6,8 @@ from ..move_average import ma_calculate, MA_Type
 
 def rsi_calculate(source_values, period, ma_type):
 
-    U = np.hstack((np.zeros(1, dtype=PRICE_TYPE) + 1e-10, np.diff(source_values)))
-    D = -U.copy()
+    U = np.diff(source_values)
+    D = -U
 
     U[U < 0] = 0
     D[D < 0] = 0
@@ -18,11 +18,11 @@ def rsi_calculate(source_values, period, ma_type):
     divider = U_smooth + D_smooth
     res = U_smooth / divider * 100
     res[divider == 0] = 100
-    assert not np.isnan(res).any()
-    return res
+
+    return np.hstack((np.nan, res))
 
 
-def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_type='ema', value='close'):
+def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_type='mma', value='close'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
@@ -37,6 +37,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'rsi': out
+        'rsi': out,
+        'allowed_nan': True
     })
 

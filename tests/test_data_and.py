@@ -1,4 +1,5 @@
 import pytest
+from common_test import *
 from src import live_trading_indicators as lti
 from src.live_trading_indicators.exceptions import *
 
@@ -58,5 +59,5 @@ def test_success(config_default, a_timeframe):
     assert (data.low == ohlcv.low).all()
     assert (data.close == ohlcv.close).all()
     assert (data.volume == ohlcv.volume).all()
-    assert (data.ema == ema.ema).all()
+    assert compare_with_nan(data.ema, ema.ema, 0)
     assert data.symbol == ohlcv.symbol
