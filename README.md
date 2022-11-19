@@ -74,8 +74,8 @@ print(macd.pandas().head())
 import pandas
 import live_trading_indicators as lti
 
-df = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
-indicators = lti.Indicators(df)
+dataframe = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
+indicators = lti.Indicators(dataframe)
 macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
 print(macd.pandas().head())
 ```
