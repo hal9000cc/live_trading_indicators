@@ -13,7 +13,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 - New indicator - BollingerBands.
 - New indicator - CCI.
 - New indicator - Supertrend.
-- New types of moving averages, now the moving average can be 'sma', 'ema', 'ema0', 'mma', 'mma0'. [Types of move average](https://github.com/hal9000cc/live_trading_indicators/edit/dev/README.md#types-of-move-average)
+- New types of moving averages, now the moving average can be 'sma', 'ema', 'ema0', 'mma', 'mma0' ([types of move average](https://github.com/hal9000cc/live_trading_indicators/edit/dev/README.md#types-of-move-average)).
 - Indicators can have nan values.
 ## Installing
 ```python
