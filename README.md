@@ -19,7 +19,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 ```python
 pip install live_trading_indicators
 ```
-## Usage examples
+## Quick start
 ### Getting quotes
 ```python
 import live_trading_indicators as lti
@@ -165,3 +165,10 @@ When creating Indicators, you can specify *with_incomplete_bar=True*, then the d
 - For the spot market, they completely coincide with the code on binance (*btcusdt*, *ethusdt*, etc.)
 - For the futures market **USD-M**, codes are prefixed with **um/** (*um/btcusdt*, *um/ethusdt*, etc.)
 - For the futures market **COIN-M**, codes are prefixed with **cm/** (*cm/btcusd_perp*, *cm/ethusd_perp*, etc.)
+### Types of move average
+live-trading-indicators supports the following types of moving averages:
+- 'sma' - simple move average
+- 'ema' - classical exponential moving average with alpha = 2 / (n + 1) initialized by SMA (as in binance EMA)
+- 'ema0' - classical exponential moving average with alpha = 2 / (n + 1), initialized by the first value
+- 'mma' - Modified moving average with alpha = 1 / n, initialized by SMA (as in some binance indicators)
+- 'mma0' - Modified moving average с alpha = 1 / n, initialized by the first value
