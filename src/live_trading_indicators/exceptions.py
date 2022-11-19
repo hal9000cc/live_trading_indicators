@@ -4,6 +4,11 @@ class LTIException(Exception):
     pass
 
 
+class LTIExceptionBadOfflineDataSource(Exception):
+    def __init__(self, reason):
+        super().__init__(f'Bad offline data source: {reason}')
+
+
 class LTIExceptionBadTimeParameter(LTIException):
     def __init__(self, value):
         self.value = value
@@ -70,3 +75,8 @@ class LTIExceptionBadDatasource(LTIException):
     def __init__(self, source):
         self.source = source
         super().__init__(f'Bad source: {source}')
+
+
+class LTIExceptionBadParameterValue(LTIException):
+    def __init__(self, reason):
+        super().__init__(f'Bad parameter value: {reason}')

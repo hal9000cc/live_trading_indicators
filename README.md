@@ -133,19 +133,19 @@ lti.config(print_log=False)
 ```
 ### Indicators
 When getting indicator values from **online** source, the first two parameters should be *symbol* and *timeframe*. Further, the period can optionally be specified. Then the parameters of the indicator are specified by name.
-When getting indicator values **offline** from Pandas DataFrame parameters *symbol*, *timeframe* and period are **not specified**. Only the parameters of the indicator are specified by name.
+When getting indicator values **offline** from Pandas DataFrame parameters *symbol* and *timeframe* are **not specified**. 
 #### Example (online)
 ```python
 indicators = lti.Indicators('binance', '2022-07-01', '2022-08-30')
-sma = indicators.MACD('ethusdt', '1h', period=9)
+sma = indicators.SMA('ethusdt', '1h', period=9)
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 ```
 #### Example (offline)
 ```python
 dataframe = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
 indicators = lti.Indicators(dataframe)
-sma = indicators.MACD('period=9)
 macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
+sma = indicators.SMA('2022-08-15T03:00', '2022-08-15T06:00', period=9)
 ```
 The following indicators are implemented (the parameters *symbol*, *timeframe*, *time_start*, *time_end* are omitted for brevity):
 - EMA(period, value='close')

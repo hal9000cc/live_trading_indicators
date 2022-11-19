@@ -40,7 +40,10 @@ class Timeframe(IntEnum):
             return value
 
         if type(value) == int:
-            return Timeframe(value)
+            try:
+                return Timeframe(value)
+            except Exception as exception:
+                raise LTIExceptionBadTimeframeValue(value) from exception
 
         if type(value) == str:
             if hasattr(Timeframe, f't{value}'):

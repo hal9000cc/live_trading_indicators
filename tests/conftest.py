@@ -65,7 +65,7 @@ def ohlcv_set(files, timeframe, symbol, date_start):
     low = pd_data[df.columns[3]].to_numpy(PRICE_TYPE)
     close = pd_data[df.columns[4]].to_numpy(PRICE_TYPE)
     volume = pd_data[df.columns[5]].to_numpy(VOLUME_TYPE)
-    return (symbol, use_timeframe, date_start, (time, open, high, low, close, volume))
+    return (symbol, use_timeframe, date_start, (time, open, high, low, close, volume), pd_data)
 
 
 def pytest_generate_tests(metafunc):

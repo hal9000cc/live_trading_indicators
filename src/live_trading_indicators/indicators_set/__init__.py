@@ -2,18 +2,21 @@ import logging
 import datetime as dt
 import importlib
 from enum import Enum
+from abc import ABC, abstractmethod
 from ..config import config_load
 from ..cast_input_params import *
 from ..exceptions import *
 from ..timeframe import *
 from .. import datasources
 from ..indicator_data import OHLCV_data
+from ..constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE, TIME_UNITS_IN_ONE_SECOND
 
 
-class IntervalMode(Enum):
+class IndicatorsMode(Enum):
     fixed = 1
     live = 2
     flex = 3
+    offline = 4
 
 
 class Indicators:
@@ -33,7 +36,7 @@ class Indicators:
             Configuration modification.
     """
 
-    def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, **config_mod):
+    def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, symbol=None, **config_mod):
 
         self.indicators = {}
         self.cache = {}
@@ -43,16 +46,71 @@ class Indicators:
 
         self.with_incomplete_bar = with_incomplete_bar
 
+        self.offline_timeframe = None
+        self.offline_symbol = symbol
+        self.time_begin = None
+        self.time_end = None
+        self.source_data = None
+        self.indicators_mode = None
+
         datasource_type = type(datasource)
         if datasource_type == str:
+
             try:
                 datasource_module = importlib.import_module(f'..datasources.{datasource}', __package__)
             except ModuleNotFoundError as error:
                 raise LTIExceptionBadDatasource(datasource) from error
+
+            self.init_online_source(datasource_module, time_begin, time_end)
+
         elif datasource_type.__name__ == 'module':
-            datasource_module = datasource
+            self.init_online_source(datasource, time_begin, time_end)
+        elif datasource_type.__name__ == 'DataFrame':
+            self.init_offline_source(datasource, time_begin, time_end, with_incomplete_bar)
         else:
             raise LTIExceptionBadDatasource(datasource)
+
+    def init_offline_source(self, datasource, time_begin, time_end, with_incomplete_bar):
+
+        if time_begin or time_end or with_incomplete_bar:
+            LTIExceptionBadParameterValue('cannot specify time_begin, time_end, with_incomplete_bar in offline mode')
+
+        if datasource.time.count() < 2:
+            LTIExceptionBadDatasource('dataframe is empty')
+
+        time_series = datasource.time.to_numpy(dtype=TIME_TYPE)
+
+        self.offline_timeframe = Timeframe.cast(int((time_series[1] - time_series[0]).astype(np.int64)))
+        self.time_begin = time_series[0]
+        self.time_end = Timeframe.begin_of_tf(self.offline_timeframe, time_series[-1])
+
+        not_found_columns = {'time', 'open', 'high', 'low', 'close', 'volume'} - set(datasource.columns)
+        if not_found_columns:
+            raise LTIExceptionBadOfflineDataSource(
+                f'columns not found: {not_found_columns}'
+            )
+
+        self.source_data = OHLCV_data({
+            'symbol': self.offline_symbol,
+            'timeframe': self.offline_timeframe,
+            'time': time_series,
+            'open': datasource.open.to_numpy(dtype=PRICE_TYPE),
+            'high': datasource.high.to_numpy(dtype=PRICE_TYPE),
+            'low': datasource.low.to_numpy(dtype=PRICE_TYPE),
+            'close': datasource.close.to_numpy(dtype=PRICE_TYPE),
+            'volume': datasource.volume.to_numpy(dtype=VOLUME_TYPE)
+        })
+
+        self.check_bar_data(self.source_data)
+
+        if self.config['restore_empty_bars']:
+            self.source_data.restore_bar_data()
+
+        self.source_data.read_only = True
+
+        self.indicators_mode = IndicatorsMode.offline
+
+    def init_online_source(self, datasource_module, time_begin, time_end):
 
         self.datasource_name = datasource_module.datasource_name()
         datasource_module.init(self.config)
@@ -67,13 +125,13 @@ class Indicators:
                 if self.time_begin > self.time_end:
                     raise LTIExceptionTimeBeginLaterTimeEnd(self.time_begin, self.time_end)
 
-                self.interval_mode = IntervalMode.fixed
+                self.indicators_mode = IndicatorsMode.fixed
 
             else:
-                self.interval_mode = IntervalMode.live
+                self.indicators_mode = IndicatorsMode.live
         else:
             if self.time_end is None:
-                self.interval_mode = IntervalMode.flex
+                self.indicators_mode = IndicatorsMode.flex
             else:
                 raise LTIExceptionBadTimeParameter(self.time_begin)
 
@@ -147,13 +205,17 @@ class Indicators:
 
     def check_call_time_intervals(self, time_begin, time_end, timeframe):
 
-        if self.interval_mode == IntervalMode.fixed:
-            return self.check_call_time_intervals_fixed(time_begin, time_end)
-        if self.interval_mode == IntervalMode.flex:
-            return self.check_call_time_intervals_flex(time_begin, time_end)
-        if self.interval_mode == IntervalMode.live:
-            return self.check_call_time_intervals_live(time_begin, time_end, timeframe)
-        raise NotImplementedError(self.interval_mode)
+        match self.indicators_mode:
+            case IndicatorsMode.fixed:
+                return self.check_call_time_intervals_fixed(time_begin, time_end)
+            case IndicatorsMode.flex:
+                return self.check_call_time_intervals_flex(time_begin, time_end)
+            case IndicatorsMode.live:
+                return self.check_call_time_intervals_live(time_begin, time_end, timeframe)
+            case IndicatorsMode.offline:
+                return self.check_call_time_intervals_fixed(time_begin, time_end)
+
+        raise NotImplementedError(self.indicators_mode)
 
     def __getattr__(self, item):
         return self.get_indicator(item)
@@ -162,7 +224,12 @@ class Indicators:
 
         indicator_proxy = self.indicators.get(indicator_name)
         if indicator_proxy is None:
-            indicator_proxy = IndicatorProxy(indicator_name, self)
+
+            if self.indicators_mode == IndicatorsMode.offline:
+                indicator_proxy = IndicatorProxyOffline(indicator_name, self)
+            else:
+                indicator_proxy = IndicatorProxyOnline(indicator_name, self)
+
             self.indicators[indicator_name] = indicator_proxy
 
         return indicator_proxy
@@ -203,7 +270,7 @@ class Indicators:
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
 
-        if self.interval_mode != IntervalMode.live:
+        if self.indicators_mode != IndicatorsMode.live and self.indicators_mode != IndicatorsMode.offline:
             if use_time_begin < out_valid.time[0] or out_valid.time[-1] + timeframe.value < use_time_end:
                 raise LTIExceptionOutOfThePeriod()
 
@@ -226,6 +293,16 @@ class Indicators:
         return indicator, symbols, timeframe, tuple(kwargs.items())
 
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
+
+        if self.indicators_mode == IndicatorsMode.offline:
+            return self.get_bar_data_offline()
+
+        return self.get_bar_data_online(symbol, timeframe, bar_for_grow)
+
+    def get_bar_data_offline(self):
+        return self.source_data
+
+    def get_bar_data_online(self, symbol, timeframe, bar_for_grow):
 
         time_start_d = np.datetime64(self.time_begin, 'D')
         time_end = timeframe.begin_of_tf(self.time_end)
@@ -254,9 +331,12 @@ class Indicators:
 
         if self.config['restore_empty_bars']:
             bar_data.restore_bar_data()
+
         return bar_data
 
     def check_bar_data(self, bar_data):
+
+        empty_bars_count, empty_bars_fraction, empty_bars_consecutive = None, None, None
 
         if self.config['endpoints_required']:
             if len(bar_data) == 0:
@@ -289,7 +369,7 @@ class Indicators:
         return empty_bars_count, empty_bars_fraction, empty_bars_consecutive
 
 
-class IndicatorProxy:
+class IndicatorProxy(ABC):
 
     def __init__(self, indicator_name, indicators):
 
@@ -303,16 +383,9 @@ class IndicatorProxy:
                 raise LTIExceptionIndicatorNotFound(indicator_name) from error
             raise
 
-    def __call__(self, symbols, timeframe, time_begin=None, time_end=None, **kwargs):
-
-        use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
-        use_timeframe = Timeframe.cast(timeframe)
-
-        if use_time_begin is not None and use_time_end is not None and use_time_begin > use_time_end:
-            raise LTIExceptionTimeBeginLaterTimeEnd(use_time_begin, use_time_end)
-
-        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, use_timeframe,
-                                                 kwargs, use_time_begin, use_time_end)
+    @abstractmethod
+    def __call__(self, *args, **kwargs):
+        pass
 
     def full_data(self, symbols, timeframe,  **kwargs):
 
@@ -324,4 +397,28 @@ class IndicatorProxy:
 
     def __del__(self):
         self.indicators = None
+
+
+class IndicatorProxyOnline(IndicatorProxy):
+
+    def __call__(self, symbols, timeframe, time_begin=None, time_end=None, **kwargs):
+
+        use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
+        use_timeframe = Timeframe.cast(timeframe)
+
+        if use_time_begin is not None and use_time_end is not None and use_time_begin > use_time_end:
+            raise LTIExceptionTimeBeginLaterTimeEnd(use_time_begin, use_time_end)
+
+        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, use_timeframe,
+                                                 kwargs, use_time_begin, use_time_end)
+
+
+class IndicatorProxyOffline(IndicatorProxy):
+
+    def __call__(self, time_begin=None, time_end=None, **kwargs):
+
+        use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
+
+        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, None, self.indicators.offline_timeframe,
+                                                 kwargs, time_begin, time_end)
 

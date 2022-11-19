@@ -159,11 +159,12 @@ class TimeframeData:
 
     def slice_by_int(self, i_start, i_stop):
 
+        copied_keys_not_series = {'symbol', 'timeframe'}
         new_data = {}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
                 new_data[key] = value[i_start : i_stop]
-            else:
+            elif key in copied_keys_not_series:
                 new_data[key] = value
 
         new_indicator_data = self.__class__(new_data)
@@ -177,12 +178,13 @@ class TimeframeData:
         if len(self) != len(other):
             raise ValueError(f'The length of data does not match: {len(self)} != {len(other)}')
 
+        verifiable_keys_not_series = {'timeframe'}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
                 if (other.data.get(key) != value).any():
                     return False
             else:
-                if other.data.get(key) != value:
+                if key in verifiable_keys_not_series and other.data.get(key) != value:
                     return False
 
         return True
