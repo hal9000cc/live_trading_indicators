@@ -368,6 +368,9 @@ class Indicators:
 
         return empty_bars_count, empty_bars_fraction, empty_bars_consecutive
 
+    def list(self):
+        pass
+
 
 class IndicatorProxy(ABC):
 

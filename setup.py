@@ -9,10 +9,10 @@ requirements = [
 
 setuptools.setup(
     name='live_trading_indicators',
-    version='0.2.1',
+    version='0.3.0',
     author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
-    description='A package for obtaining quotation data from various online sources and calculating the values of '
+    description='A package for obtaining quotation data from various online and offline sources and calculating the values of'
                 'technical indicators based on these quotations.',
 
     long_description=long_description,

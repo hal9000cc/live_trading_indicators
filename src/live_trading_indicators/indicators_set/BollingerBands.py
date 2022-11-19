@@ -1,3 +1,4 @@
+"""BollingerBands(period=20, deviation=2, ma_type='sma', value='close')"""
 import numpy as np
 import numba as nb
 from ..indicator_data import IndicatorData

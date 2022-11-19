@@ -1,3 +1,4 @@
+"""ATR1(smooth=14, ma_type='mma')"""
 import numpy as np
 from ..constants import PRICE_TYPE
 from ..indicator_data import IndicatorData
@@ -26,4 +27,3 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
         'atrp': atrp,
         'allowed_nan': True
     })
-

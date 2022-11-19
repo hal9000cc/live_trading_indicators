@@ -67,6 +67,10 @@ class TimeframeData:
     def allowed_nan(self):
         return self.data.get('allowed_nan', False)
 
+    @property
+    def is_live(self):
+        return self.data.get('is_live', False)
+
     def __deepcopy__(self, memodict={}):
         return self.copy()
 
@@ -77,14 +81,14 @@ class TimeframeData:
             if type(value) == np.ndarray:
                 new_data[key] = np.hstack((value, other.data[key]))
             else:
-                if key == 'is_live':
-                    new_data[key] = value or other.data[key]
-                    continue
                 if key not in ('symbol', 'name', 'timeframe'):
                     continue
                 if value != other.data[key]:
                     raise ValueError(f'Data types do not match ({value} != {other.data[key]})')
+
                 new_data[key] = value
+
+        new_data['is_live'] = other.is_live
 
         return self.__class__(new_data)
 
@@ -159,7 +163,7 @@ class TimeframeData:
 
     def slice_by_int(self, i_start, i_stop):
 
-        copied_keys_not_series = {'symbol', 'timeframe'}
+        copied_keys_not_series = {'symbol', 'timeframe', 'name'}
         new_data = {}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
