@@ -1,12 +1,12 @@
 # live_trading_indicators
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
-Data is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
+Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
 
 As a source of quotes, you can use DataFrame Pandas and also receive data from the exchange online. The current version allows you to receive exchange data **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
 
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
-Package data is stored by default in the *.lti* folder of of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes.
+Package data from online sources is stored by default in the *.lti* folder of of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
 ## Version 0.3.0
 ### what's new
 - Can use Pandas Dataframe as a source.
