@@ -133,7 +133,7 @@ lti.config(print_log=False)
 ```
 ### Indicators
 When getting indicator values from **online** source, the first two parameters should be *symbol* and *timeframe*. Further, the period can optionally be specified. Then the parameters of the indicator are specified by name.
-When getting indicator values **offline** from Pandas DataFrame *symbol*, *timeframe* and period are **not specified**. Only the parameters of the indicator are specified by name.
+When getting indicator values **offline** from Pandas DataFrame parameters *symbol*, *timeframe* and period are **not specified**. Only the parameters of the indicator are specified by name.
 #### Example (online)
 ```python
 indicators = lti.Indicators('binance', '2022-07-01', '2022-08-30')
