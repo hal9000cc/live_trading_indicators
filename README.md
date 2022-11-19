@@ -1,8 +1,8 @@
 # live_trading_indicators
-A package for obtaining quotation data from various online sources and calculating the values of technical indicators based on these quotations.
+A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
 Data is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
 
-The current version allows you to receive exchange data **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
+As a source of quotes, you can use DataFrame Pandas and also receive data from the exchange online. The current version allows you to receive exchange data **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
 
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
@@ -20,7 +20,7 @@ Package data is stored by default in the *.lti* folder of of the user's home dir
 pip install live_trading_indicators
 ```
 ## Quick start
-### Getting quotes
+### Getting quotes online
 ```python
 import live_trading_indicators as lti
 
@@ -38,7 +38,7 @@ Values: time, open, high, low, close, volume
 
 Now *ohlcv* contains quotes in *numpy array* (*ohlcv.time*, *ohlcv.open*, *ohlcv.high*, *ohlcv.low*, *ohlcv.close*, *ohlcv.volume*).
 
-### pandas dataframe
+### Export in pandas dataframe
 ```python
 dataframe = ohlcv.pandas()
 print(dataframe.head())
@@ -52,7 +52,7 @@ print(dataframe.head())
 3 2022-07-01 12:00:00  1050.21  1074.23  1043.00  1056.86  298465.0695
 4 2022-07-01 16:00:00  1056.86  1083.10  1054.82  1067.91  158796.2248
 ```
-### Example of getting indicator data
+### Example of getting indicator data from binance quotes online
 ```python
 import live_trading_indicators as lti
 
@@ -69,6 +69,18 @@ print(macd.pandas().head())
 3 2022-07-01 03:00:00 -1.105457    -0.286445  -0.819012
 4 2022-07-01 04:00:00 -2.146765    -0.658509  -1.488256
 ```
+### Example of getting indicator data from Pandas quotes
+```python
+import pandas
+import live_trading_indicators as lti
+
+df = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
+indicators = lti.Indicators(df)
+macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
+print(macd.pandas().head())
+```
+###### Result:
+???
 ### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
 To get real-time data, you do not need to specify an end date.
 ```python
@@ -120,11 +132,20 @@ import live_trading_indicators as lti
 lti.config(print_log=False)
 ```
 ### Indicators
-When getting indicator values, the first two parameters should be symbol and timeframe. Further, the period can optionally be specified. Then the parameters of the indicator are specified by name.
-#### Examples
+When getting indicator values from **online** source, the first two parameters should be *symbol* and *timeframe*. Further, the period can optionally be specified. Then the parameters of the indicator are specified by name.
+When getting indicator values **offline** from Pandas DataFrame *symbol*, *timeframe* and period are **not specified**. Only the parameters of the indicator are specified by name.
+#### Example (online)
 ```python
+indicators = lti.Indicators('binance', '2022-07-01', '2022-08-30')
 sma = indicators.MACD('ethusdt', '1h', period=9)
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
+```
+#### Example (offline)
+```python
+dataframe = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
+indicators = lti.Indicators(dataframe)
+sma = indicators.MACD('period=9)
+macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
 ```
 The following indicators are implemented (the parameters *symbol*, *timeframe*, *time_start*, *time_end* are omitted for brevity):
 - EMA(period, value='close')
@@ -137,6 +158,7 @@ The following indicators are implemented (the parameters *symbol*, *timeframe*, 
 - OBV()
 - BollingerBands(period=20, deviation=2, ma_type='sma')
 - CCI(period)
+- Supertrend(?)
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
