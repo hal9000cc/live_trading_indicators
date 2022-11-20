@@ -6,7 +6,7 @@ As a source of quotes, you can use DataFrame Pandas and also receive data from t
 
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
-Package data from online sources is stored by default in the *.lti* folder of of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
+Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
 ## Version 0.3.0
 ### what's new
 - Can use Pandas Dataframe as a source.
