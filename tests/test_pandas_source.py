@@ -30,3 +30,7 @@ def test_offline_source(config_default, test_source, ohlcv_set):
     ohlcv_online = indicators_online.OHLCV(symbol, timeframe, time_begin, time_end)
 
     assert ohlcv_online == ohlcv_offline
+
+    if len(ohlcv_offline) > 60:
+        macd = indicators_offline.MACD(period_short=15, period_long=26, period_signal=9)
+        print(macd[50:].pandas().head())

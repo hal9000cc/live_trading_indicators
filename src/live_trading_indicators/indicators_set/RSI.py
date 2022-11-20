@@ -1,3 +1,4 @@
+"""RSI(period=, ma_type='mma', value='close')"""
 import numpy as np
 from ..indicator_data import IndicatorData
 from ..constants import PRICE_TYPE

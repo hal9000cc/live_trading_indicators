@@ -1,3 +1,4 @@
+"""Stochastic.py(period=, period_d=, smooth=3, ma_type='sma')"""
 import numpy as np
 from numba import njit
 from ..move_average import ma_calculate, MA_Type
@@ -19,7 +20,6 @@ def calc_k(high, low, close, period):
 
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, period_d, smooth=3, ma_type='sma'):
-    """Stochastic.py(symbol, timeframe, period_k=, period_d=, value = 'close')"""
 
     ma_type_enum = MA_Type.cast(ma_type)
 

@@ -1,5 +1,5 @@
-# live_trading_indicators
-# OHLCV(symbol, timeframe')
+"""OHLCV()"""
+
 
 def get_indicator_out(indicators, symbols, timeframe, out_for_grow, **kwargs):
 

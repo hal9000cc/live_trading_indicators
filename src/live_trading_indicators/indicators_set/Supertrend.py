@@ -1,3 +1,4 @@
+"""Supertrend(period=10, multipler=3, ma_type='mma')"""
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData

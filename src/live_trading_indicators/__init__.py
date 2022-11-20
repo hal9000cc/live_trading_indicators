@@ -1,6 +1,6 @@
 from .exceptions import *
 from .indicator_data import *
-from .indicators_set import Indicators
+from .indicators_set import Indicators, help
 from .timeframe import Timeframe
 from .config import config_get_default, config_load, config_save
 from .constants import TIME_TYPE, \
@@ -27,4 +27,3 @@ def config(actions=None, **kwargs):
         config_save(config)
 
     return config
-

@@ -368,9 +368,6 @@ class Indicators:
 
         return empty_bars_count, empty_bars_fraction, empty_bars_consecutive
 
-    def list(self):
-        pass
-
 
 class IndicatorProxy(ABC):
 
@@ -424,4 +421,33 @@ class IndicatorProxyOffline(IndicatorProxy):
 
         return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, None, self.indicators.offline_timeframe,
                                                  kwargs, time_begin, time_end)
+
+
+def helo_append(help_list, doc_str):
+    help_list.append(f'- {doc_str}')
+
+
+def help():
+
+    import os.path as path
+    import glob
+
+    indicator_modules_path = path.split(__file__)[0]
+
+    file_indicators = [path.basename(file_name) for file_name in glob.glob(path.join(indicator_modules_path, '*.py'))]
+    file_indicators.sort()
+
+    help_list = []
+    for file in file_indicators:
+        module_name = path.splitext(file)[0]
+        if module_name[0] != '_':
+            module = importlib.import_module(f'.{module_name}', __package__)
+            if module.__doc__:
+                helo_append(help_list, module.__doc__)
+            else:
+                help_list.append(f'{module_name}(?)')
+
+    return '\n'.join(help_list)
+
+
 

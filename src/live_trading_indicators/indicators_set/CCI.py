@@ -1,4 +1,4 @@
-"""CCI(period=?)"""
+"""CCI(period=)"""
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData

@@ -1,5 +1,5 @@
 import pytest
-from src.live_trading_indicators import Timeframe
+from src.live_trading_indicators import Timeframe, help
 from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND
 from src.live_trading_indicators.exceptions import *
 
@@ -10,3 +10,7 @@ def test_timeframe_cast():
 
     with pytest.raises(LTIExceptionBadTimeframeValue):
         t = Timeframe.cast(None)
+
+
+def test_help():
+    print(help())

@@ -1,3 +1,4 @@
+"""SMA(period=, value='close')"""
 from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 

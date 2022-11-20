@@ -163,7 +163,7 @@ class TimeframeData:
 
     def slice_by_int(self, i_start, i_stop):
 
-        copied_keys_not_series = {'symbol', 'timeframe', 'name'}
+        copied_keys_not_series = {'symbol', 'timeframe', 'name', 'allowed_nan'}
         new_data = {}
         for key, value in self.data.items():
             if type(value) == np.ndarray:

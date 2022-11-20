@@ -1,10 +1,11 @@
+"""MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')"""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short, period_long, period_signal,
                       ma_type='ema', ma_type_signal='sma',
-                      relative_price=False, value='close'):
+                      value='close', relative_price=False,):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
