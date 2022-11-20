@@ -14,7 +14,7 @@ Package data from online sources is stored by default in the *.lti* folder of of
 - New indicator - CCI.
 - New indicator - Supertrend.
 - New types of moving averages, now the moving average can be 'sma', 'ema', 'ema0', 'mma', 'mma0' ([types of move average](https://github.com/hal9000cc/live_trading_indicators/blob/dev/README.md#types-of-move-average)).
-- Indicators can have nan values.
+- Indicators can have *nan* values.
 ## Installing
 ```python
 pip install live_trading_indicators
