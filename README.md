@@ -58,29 +58,37 @@ import live_trading_indicators as lti
 
 indicators = lti.Indicators('binance')
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
-print(macd.pandas().head())
+print(macd[40:].pandas().head())
 ```
 ###### Result:
 ```
-                 time      macd  macd_signal  macd_hist
-0 2022-07-01 00:00:00  0.000000     0.000000   0.000000
-1 2022-07-01 01:00:00  0.021389     0.010694   0.010694
-2 2022-07-01 02:00:00 -0.061712    -0.013441  -0.048271
-3 2022-07-01 03:00:00 -1.105457    -0.286445  -0.819012
-4 2022-07-01 04:00:00 -2.146765    -0.658509  -1.488256
+                 time      macd    signal      hist
+0 2022-07-02 16:00:00 -1.659356 -3.498261  1.838905
+1 2022-07-02 17:00:00 -0.981187 -3.111405  2.130218
+2 2022-07-02 18:00:00 -0.072798 -2.604397  2.531599
+3 2022-07-02 19:00:00  0.456062 -2.055381  2.511443
+4 2022-07-02 20:00:00  0.797304 -1.474812  2.272116
 ```
 ### Example of getting indicator data from Pandas quotes
 ```python
 import pandas
 import live_trading_indicators as lti
 
-dataframe = pandas.readcsv('ETHUSDT-1m-2022-08-15.zip')
+dataframe = pandas.read_csv('tests/data/ETHUSDT-1m-2022-08-15.zip', header=None)
+dataframe.rename(columns={0: 'time', 1: 'open', 2: 'high', 3: 'low', 4: 'close', 5: 'volume', }, inplace=True)
 indicators = lti.Indicators(dataframe)
 macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
-print(macd.pandas().head())
+print(macd[40:].pandas().head())
 ```
 ###### Result:
-???
+```
+                 time      macd    signal      hist
+0 2022-08-15 00:40:00  3.403958  2.320975  1.082984
+1 2022-08-15 00:41:00  3.540428  2.643593  0.896835
+2 2022-08-15 00:42:00  3.594786  2.930063  0.664722
+3 2022-08-15 00:43:00  3.684476  3.170449  0.514027
+4 2022-08-15 00:44:00  3.763257  3.354183  0.409074
+```
 ### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
 To get real-time data, you do not need to specify an end date.
 ```python
@@ -113,7 +121,6 @@ print(ohlcv.pandas())
 ###### Result:
 ```
 Now is 2022-11-04 09:37:07.372986 UTC
-2022-11-04 12:37:07,374 Download using api symbol btcusdt timeframe 1m from 2022-11-04T00:00:00.000...
                  time      open      high       low     close     volume
 0 2022-11-04 09:34:00  20614.55  20618.50  20610.76  20615.97  263.96754
 1 2022-11-04 09:35:00  20615.61  20624.00  20610.29  20616.53  258.53777
