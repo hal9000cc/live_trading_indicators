@@ -13,7 +13,7 @@ setuptools.setup(
     author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
     description='A package for obtaining quotation data from various online and offline sources and calculating the values of'
-                'technical indicators based on these quotations.',
+                ' technical indicators based on these quotations.',
 
     long_description=long_description,
     long_description_content_type='text/markdown',
