@@ -147,17 +147,21 @@ indicators = lti.Indicators(dataframe)
 macd = indicators.MACD(period_short=15, period_long=26, period_signal=9)
 sma = indicators.SMA('2022-08-15T03:00', '2022-08-15T06:00', period=9)
 ```
-The following indicators are implemented (the parameters *symbol*, *timeframe*, *time_start*, *time_end* are omitted for brevity):
-- EMA(period, value='close')
-- SMA(period, value='close')
-- MA(period, value='close', ma_type='sma')
-- MACD(period_short, period_long, period_signal, ma_type='ema', ma_type_signal='sma')
-- RSI(period, value='close', ma_type='ema')
-- Stochastic(period, period_d, smooth=3, ma_type='sma')
-- ATR(smooth=14, ma_type='ema')
+The list of supported indicators and their parameters can be obtained by calling lti.help(). Parameters *symbol*, *timeframe*, *time_start*, *time_end* are omitted for brevity.
+```python
+import live_trading_indicators as lti
+print(lti.help())
+```
+- BollingerBands(period=20, deviation=2, ma_type='sma', value='close')
+- CCI(period=)
+- EMA(period=, value='close')
+- EMA(period=, value='close', ma_type='sme')
+- MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')
 - OBV()
-- BollingerBands(period=20, deviation=2, ma_type='sma')
-- CCI(period)
+- OHLCV()
+- RSI(period=, ma_type='mma', value='close')
+- SMA(period=, value='close')
+- Stochastic.py(period=, period_d=, smooth=3, ma_type='sma')
 - Supertrend(period=10, multipler=3, ma_type='mma')
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
