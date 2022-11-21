@@ -4,6 +4,7 @@ from numba import njit
 from ..indicator_data import IndicatorData
 
 
+@njit(cache=True)
 def calc_supertrend(close, high, low, atr, multiplier, period):
 
     start_calculation = period - 1

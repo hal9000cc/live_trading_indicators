@@ -7,8 +7,11 @@ As a source of quotes, you can use DataFrame Pandas and also receive data from t
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.3.0
+## Version 0.3.1
 ### what's new
+#### 0.3.1
+- New indicator - Parabolic SAR
+#### 0.3.0
 - Can use Pandas Dataframe as a source.
 - New indicator - BollingerBands.
 - New indicator - CCI.
@@ -162,10 +165,11 @@ print(lti.help())
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close')
 - CCI(period=)
 - EMA(period=, value='close')
-- EMA(period=, value='close', ma_type='sme')
+- MA(period=, value='close', ma_type='sma')
 - MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')
 - OBV()
 - OHLCV()
+- ParabolicSAR(start=0.02, maximum=0.2, increment=0.02)
 - RSI(period=, ma_type='mma', value='close')
 - SMA(period=, value='close')
 - Stochastic.py(period=, period_d=, smooth=3, ma_type='sma')

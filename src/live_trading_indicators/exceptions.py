@@ -80,3 +80,8 @@ class LTIExceptionBadDatasource(LTIException):
 class LTIExceptionBadParameterValue(LTIException):
     def __init__(self, reason):
         super().__init__(f'Bad parameter value: {reason}')
+
+
+class LTIExceptionTooLittleData(LTIException):
+    def __int__(self, reason):
+        super().__int__(f'Too little data: {reason}')

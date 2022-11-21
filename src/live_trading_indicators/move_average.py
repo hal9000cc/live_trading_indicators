@@ -2,6 +2,7 @@ import numpy as np
 from numba import njit
 from enum import Enum
 from .constants import PRICE_TYPE
+from .exceptions import *
 
 
 class MA_Type(Enum):
@@ -75,7 +76,7 @@ def sma_calculate(source_values, period):
 
     data_len = len(source_values)
     if data_len < period:
-        raise ValueError(f'Period SMA more then data size ({data_len} < {period})')
+        raise LTIExceptionTooLittleData(f'data length {data_len} < {period}')
 
     weights = np.ones(period, dtype=source_values.dtype) / period
 
@@ -91,7 +92,7 @@ def iema_calculate(source_values, period, alpha):
 
     data_len = len(source_values)
     if data_len < start + period:
-        raise ValueError(f'Period EMA/MMA more then data size ({data_len} < {start + period})')
+        raise LTIExceptionTooLittleData(f'data length {data_len} < {start + period}')
 
     first_value = source_values[start: start + period].sum() / period
     return ema_calculate(source_values, alpha, first_value, start + period - 1)
