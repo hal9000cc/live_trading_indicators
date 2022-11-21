@@ -10,7 +10,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ## Version 0.3.1
 ### what's new
 #### 0.3.1
-- New indicator - Parabolic SAR
+- New indicator - Parabolic SAR.
 #### 0.3.0
 - Can use Pandas Dataframe as a source.
 - New indicator - BollingerBands.
