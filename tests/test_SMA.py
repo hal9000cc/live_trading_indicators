@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import src.live_trading_indicators as lti
+from src.live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -33,7 +34,7 @@ def test_sma(config_default, test_source, test_symbol, time_begin, time_end, per
     ('2022-07-01', '2022-07-10', 22, lti.Timeframe.t1d),
     ('2022-07-01', '2022-07-21', 22, lti.Timeframe.t1d),
     ('2022-07-01', '2022-07-10', 241, lti.Timeframe.t1d),
-    ('2022-07-01', '2022-07-10', 0, lti.Timeframe.t1d)
+    #('2022-07-01', '2022-07-10', 0, lti.Timeframe.t1d)
 ])
 def test_sma_value_error(config_default, test_source, time_begin, time_end, period, timeframe):
 
@@ -41,5 +42,6 @@ def test_sma_value_error(config_default, test_source, time_begin, time_end, peri
 
     indicators = lti.Indicators(test_source)
     out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
-    with pytest.raises(ValueError):
+    with pytest.raises(LTIExceptionTooLittleData):
         sma = indicators.SMA(symbol, timeframe, time_begin, time_end, period=period)
+
