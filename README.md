@@ -172,7 +172,7 @@ print(lti.help())
 - ParabolicSAR(start=0.02, maximum=0.2, increment=0.02)
 - RSI(period=, ma_type='mma', value='close')
 - SMA(period=, value='close')
-- Stochastic.py(period=, period_d=, smooth=3, ma_type='sma')
+- Stochastic(period=, period_d=, smooth=3, ma_type='sma')
 - Supertrend(period=10, multipler=3, ma_type='mma')
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.

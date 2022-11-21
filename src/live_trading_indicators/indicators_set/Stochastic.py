@@ -1,4 +1,4 @@
-"""Stochastic.py(period=, period_d=, smooth=3, ma_type='sma')"""
+"""Stochastic(period=, period_d=, smooth=3, ma_type='sma')"""
 import numpy as np
 from numba import njit
 from ..move_average import ma_calculate, MA_Type
