@@ -11,7 +11,7 @@ from ..constants import PRICE_TYPE
 def calc_paraboic(highs, lows, start, maximum, increment):
 
     sars = np.empty(len(highs), dtype=PRICE_TYPE)
-    sars[0] = np.nan
+    #sars[0] = np.nan
     signals = np.zeros(len(highs), dtype=np.int8)
 
     is_bullish = True
