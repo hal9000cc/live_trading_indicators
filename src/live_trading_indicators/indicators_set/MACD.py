@@ -1,4 +1,5 @@
-"""MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')"""
+"""MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')
+Moving Average Convergence/Divergence."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 

@@ -1,4 +1,5 @@
-"""CCI(period=)"""
+"""CCI(period=)
+Commodity channel index."""
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData

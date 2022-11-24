@@ -1,4 +1,5 @@
-"""ParabolicSAR(start=0.02, maximum=0.2, increment=0.02)"""
+"""ParabolicSAR(start=0.02, maximum=0.2, increment=0.02)
+Parabolic SAR."""
 
 import numpy as np
 from numba import njit

@@ -1,11 +1,11 @@
-"""ADX(period=, ma_type='mma')"""
-import numpy as np
+"""ADX(period=14, smooth=14, ma_type='mma')
+Average directional movement index.
+"""
 from ..indicator_data import IndicatorData
-from ..exceptions import *
 from ..move_average import *
 
 
-def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_type='mma'):
+def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, smooth=14, ma_type='mma'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
 
@@ -18,26 +18,19 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
     high = ohlcv.high
     low = ohlcv.low
 
-    plus_m = high[1:] - high[:-1]
-    minus_m = low[:-1] - low[1:]
+    p_dm = np.hstack([np.nan, np.diff(high)])
+    m_dm = np.hstack([np.nan, -np.diff(low)])
 
-    plus_dm = np.zeros(data_len - 1, dtype=float)
-    minus_dm = np.zeros(data_len - 1, dtype=float)
+    p_dm[(p_dm <= m_dm) | (p_dm < 0)] = 0
+    m_dm[(m_dm <= p_dm) | (m_dm < 0)] = 0
 
-    bx_update_plus_dm = (plus_m > minus_m) & (plus_m > 0)
-    plus_dm[bx_update_plus_dm] = plus_m[bx_update_plus_dm]
+    p_di = ma_calculate(p_dm, period, ma_type_enum)
+    m_di = ma_calculate(m_dm, period, ma_type_enum)
 
-    bx_update_minus_dm = (minus_m > plus_m) & (minus_m > 0)
-    minus_dm[bx_update_minus_dm] = minus_m[bx_update_minus_dm]
+    dxi = 100 * abs(p_di - m_di) / (p_di + m_di)
+    dxi[p_di + m_di == 0] = 0
 
-    atr = indicators.ATR.full_data(symbol, timeframe, smooth=period, ma_type=ma_type).atr
-
-    plus_di = ma_calculate(plus_dm / atr[1:], period, ma_type_enum)[period - 1:]
-    minus_di = ma_calculate(minus_dm / atr[1:], period, ma_type_enum)[period - 1:]
-
-    adx = 100 * ma_calculate((plus_di - minus_di) / (plus_di + minus_di), period, ma_type_enum)
-    adx = np.hstack([np.empty(period, dtype=adx.dtype), adx])
-    adx[:period] = np.nan
+    adx = ma_calculate(dxi, smooth, ma_type_enum)
 
     return IndicatorData({
         'name': 'ADX',
@@ -45,6 +38,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
         'timeframe': timeframe,
         'time': ohlcv.time,
         'adx': adx,
+        'p_di': p_di,
+        'm_di': m_di,
         'allowed_nan': True
     })
 

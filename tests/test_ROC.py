@@ -5,7 +5,6 @@ from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
-    #('2022-10-01', '2022-11-22', 2),
     ('2022-07-01', '2022-07-10', 2),
     ('2022-07-01', '2022-07-10', 14)
 ])
@@ -15,10 +14,12 @@ def test_adx(config_default, test_source, test_symbol, time_begin, time_end, per
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
-    adx = indicators.ADX(test_symbol, timeframe, period=period, smooth=period)
+    roc = indicators.ROC(test_symbol, timeframe, period=period)
 
-    vadx_ref = si.get_adx(ohlcv2quote(ohlcv), period)
+    roc_ref = si.get_roc(ohlcv2quote(ohlcv), period, 14)
 
-    ref_value_adx = stocks2numpy(vadx_ref, 'adx')
+    ref_value_roc = stocks2numpy(roc_ref, 'roc')
+    ref_value_roc_sma = stocks2numpy(roc_ref, 'roc_sma')
 
-    assert compare_with_nan(adx.adx, ref_value_adx)
+    assert compare_with_nan(roc.roc * 100, ref_value_roc)
+    assert compare_with_nan(roc.smooth_roc * 100, ref_value_roc_sma)

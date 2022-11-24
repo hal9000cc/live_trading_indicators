@@ -1,4 +1,5 @@
-"""Supertrend(period=10, multipler=3, ma_type='mma')"""
+"""Supertrend(period=10, multipler=3, ma_type='mma')
+Supertrend indicator."""
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData

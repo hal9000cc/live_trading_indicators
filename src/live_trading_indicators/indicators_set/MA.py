@@ -1,4 +1,5 @@
-"""MA(period=, value='close', ma_type='sma')"""
+"""MA(period=, value='close', ma_type='sma')
+Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'"""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 

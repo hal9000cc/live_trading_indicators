@@ -1,4 +1,5 @@
-"""ATR1(smooth=14, ma_type='mma')"""
+"""ATR(smooth=14, ma_type='mma')
+Average true range."""
 import numpy as np
 from ..constants import PRICE_TYPE
 from ..indicator_data import IndicatorData

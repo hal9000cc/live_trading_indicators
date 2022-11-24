@@ -1,4 +1,5 @@
-"""VWMA(period=, value='close')"""
+"""VWMA(period=, value='close')
+Volume Weighted Moving Average."""
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData
