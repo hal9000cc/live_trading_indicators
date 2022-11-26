@@ -204,7 +204,9 @@ def bars_online_request(api_url, symbol, timeframe, start_time, end_time):
 
     request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
 
-    return urllib.request.urlopen(request_url).read()
+    response = urllib.request.urlopen(request_url)
+    #used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
+    return response.read()
 
 
 def bars_online_request_to_end_day(symbol, timeframe, start_time, end_time):

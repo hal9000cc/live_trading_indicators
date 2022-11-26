@@ -11,13 +11,13 @@ from src.live_trading_indicators.exceptions import *
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22)
 ])
-def test_sma(config_default, test_source, test_symbol, time_begin, time_end, period, a_timeframe):
+def test_sma(config_default, test_source, time_begin, time_end, period, a_big_timeframe):
 
     test_symbol = 'um/ethusdt'
 
     indicators = lti.Indicators(test_source)
-    out = indicators.OHLCV(test_symbol, a_timeframe, time_begin, time_end)
-    sma = indicators.SMA(test_symbol, a_timeframe, time_begin, time_end, period=period)
+    out = indicators.OHLCV(test_symbol, a_big_timeframe, time_begin, time_end)
+    sma = indicators.SMA(test_symbol, a_big_timeframe, time_begin, time_end, period=period)
 
     values = out.close
     values_sma = sma.sma
@@ -33,15 +33,12 @@ def test_sma(config_default, test_source, test_symbol, time_begin, time_end, per
 @pytest.mark.parametrize('time_begin, time_end, period, timeframe', [
     ('2022-07-01', '2022-07-10', 22, lti.Timeframe.t1d),
     ('2022-07-01', '2022-07-21', 22, lti.Timeframe.t1d),
-    ('2022-07-01', '2022-07-10', 241, lti.Timeframe.t1d),
-    #('2022-07-01', '2022-07-10', 0, lti.Timeframe.t1d)
+    ('2022-07-01', '2022-07-10', 241, lti.Timeframe.t1d)
 ])
-def test_sma_value_error(config_default, test_source, time_begin, time_end, period, timeframe):
-
-    symbol = 'btcusdt'
+def test_sma_value_error(config_default, test_source, test_symbol, time_begin, time_end, period, timeframe):
 
     indicators = lti.Indicators(test_source)
-    out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    out = indicators.OHLCV(test_symbol, timeframe, time_begin, time_end)
     with pytest.raises(LTIExceptionTooLittleData):
-        sma = indicators.SMA(symbol, timeframe, time_begin, time_end, period=period)
+        sma = indicators.SMA(test_symbol, timeframe, time_begin, time_end, period=period)
 

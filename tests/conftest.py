@@ -19,12 +19,25 @@ def test_symbol():
     return 'um/ethusdt'
 
 
+def all_symbols():
+
+    symbols = []
+    for part in ('um', 'cm', 'spot'):
+        binance.download_exchange_info_part(part)
+        for symbol_name in binance.exchange_info_data[part]['symbols'].keys():
+            symbol = ('' if part == 'spot' else part + '/') + symbol_name
+            symbols.append(symbol)
+
+    return symbols
+
+
 def test_symbols():
 
     symbols = []
     for symbol in ('btcusd', 'ethusd', 'etcusd'):
         symbols += [f'{symbol}t', f'um/{symbol}t', f'cm/{symbol}_perp']
 
+    symbols.append('um/stmxusdt')
     return symbols
 
 
@@ -71,19 +84,19 @@ def ohlcv_set(files, timeframe, symbol, date_start):
 def pytest_generate_tests(metafunc):
 
     if 'a_symbol' in metafunc.fixturenames:
-        return metafunc.parametrize('a_symbol', test_symbols())
+        metafunc.parametrize('a_symbol', test_symbols())
 
     if 'a_timeframe' in metafunc.fixturenames:
-        return metafunc.parametrize("a_timeframe", test_timeframes())
+        metafunc.parametrize("a_timeframe", test_timeframes())
 
     if 'a_big_timeframe' in metafunc.fixturenames:
-        return metafunc.parametrize("a_big_timeframe", test_big_timeframes())
+        metafunc.parametrize("a_big_timeframe", test_big_timeframes())
 
     if 'a_timeframe_short' in metafunc.fixturenames:
-        return metafunc.parametrize("a_timeframe_short", [Timeframe.t1m, Timeframe.t1h, Timeframe.t12h, Timeframe.t1d])
+        metafunc.parametrize("a_timeframe_short", [Timeframe.t1m, Timeframe.t1h, Timeframe.t12h, Timeframe.t1d])
 
     if 'ohlcv_set' in metafunc.fixturenames:
-        return metafunc.parametrize('ohlcv_set', [
+        metafunc.parametrize('ohlcv_set', [
 
                 ohlcv_set(['BTCUSDT-1m-2022-09-05.zip'], '1m', 'um/btcusdt', '2022-09-05'),
                 ohlcv_set(['BTCUSDT-1m-2022-09-06.zip'], '1m', 'um/btcusdt', '2022-09-06'),

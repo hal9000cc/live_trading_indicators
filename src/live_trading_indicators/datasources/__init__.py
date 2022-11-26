@@ -58,6 +58,9 @@ class SourceData:
                 day_date,
                 bar_for_grow if bar_for_grow is not None and bar_for_grow.time[0] == day_date else None)
 
+            if bar_data is None:
+                return None
+
             bar_data.check_day_data(symbol, timeframe, day_date)
             self.save_to_cash_verified(filename, bar_data, day_date)
 
@@ -209,7 +212,11 @@ class SourceData:
 
         is_live = False
         for day_date in day_dates:
+
             day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
+            if day_data is None:
+                break
+
             td_time.append(day_data.time)
             td_open.append(day_data.open)
             td_high.append(day_data.high)
@@ -219,6 +226,9 @@ class SourceData:
             if day_data.is_live_day:
                 is_live = True
                 break
+
+        if len(td_time) == 0:
+            raise LTIExceptionEmptyBarData()
 
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,

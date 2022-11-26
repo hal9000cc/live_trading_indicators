@@ -17,7 +17,7 @@ def stocks2numpy(stocks, variable):
     return np.array(res, dtype=float)
 
 
-def compare_with_nan(value1, value2, accuracy=1e-11):
+def compare_with_nan(value1, value2, accuracy=1e-09):
 
     ixb_nan1 = np.isnan(value1)
     ixb_nan2 = np.isnan(value2)

@@ -8,7 +8,7 @@ from stock_indicators import indicators as si
     ('2022-07-01', '2022-07-10', 2),
     ('2022-07-01', '2022-07-10', 14)
 ])
-def test_adx(config_default, test_source, test_symbol, time_begin, time_end, period):
+def test_roc(config_default, test_source, test_symbol, time_begin, time_end, period):
 
     timeframe = '5m'
 

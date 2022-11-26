@@ -10,7 +10,7 @@ from stock_indicators import indicators as si
 ])
 def test_atr(config_default, test_source, test_symbol, time_begin, time_end, smooth):
 
-    timeframe = '1m'
+    timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)

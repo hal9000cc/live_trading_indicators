@@ -23,8 +23,6 @@ from stock_indicators import indicators as si
 ])
 def test_stohastic(config_default, test_source, test_symbol, time_begin, time_end, period, period_d, smooth, a_big_timeframe):
 
-    test_symbol = 'um/ethusdt'
-
     indicators = lti.Indicators(test_source)
     ohlcv = indicators.OHLCV(test_symbol, a_big_timeframe, time_begin, time_end)
     stochastic = indicators.Stochastic(test_symbol, a_big_timeframe, time_begin, time_end, period=period, period_d=period_d, smooth=smooth)

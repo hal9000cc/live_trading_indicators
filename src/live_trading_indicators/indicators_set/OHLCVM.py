@@ -28,7 +28,10 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
     hist_volumes, hist_prices = volume_hist(ohlcv_low.low, ohlcv_low.high, ohlcv_low.close, ohlcv_low.volume, n_bins, timeframe_multiple)
 
     ix_max_volumes = hist_volumes.argmax(1)
-    mv_price = (hist_prices[ix_max_volumes] + hist_prices[ix_max_volumes + 1]) / 2
+
+    ix_max_volumes_wdims = np.expand_dims(ix_max_volumes, axis=1)
+    mv_price = (np.take_along_axis(hist_prices, ix_max_volumes_wdims, 1)
+                + np.take_along_axis(hist_prices, ix_max_volumes_wdims + 1, 1)) / 2
 
     return IndicatorData({
         'name': 'OHLCVM',

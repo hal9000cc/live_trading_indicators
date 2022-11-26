@@ -9,11 +9,13 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22)
 ])
-def test_ema0(config_default, test_source, test_symbol, time_begin, time_end, period, a_timeframe):
+def test_ema0(config_default, test_source, test_symbol, time_begin, time_end, period):
+
+    timeframe = '1h'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
-    ohlcv = indicators.OHLCV(test_symbol, a_timeframe)
-    ema0 = indicators.MA(test_symbol, a_timeframe, period=period, ma_type='ema0')
+    ohlcv = indicators.OHLCV(test_symbol, timeframe)
+    ema0 = indicators.MA(test_symbol, timeframe, period=period, ma_type='ema0')
 
     source_values = ohlcv.close
     values_ema1 = ema0.move_average

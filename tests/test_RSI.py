@@ -13,11 +13,11 @@ from stock_indicators import indicators as si
 ])
 def test_rsi(config_default, test_source, test_symbol, time_begin, time_end, period):
 
-    a_big_timeframe = '1m'
+    timeframe = '1m'
 
     indicators = lti.Indicators(test_source)
-    ohlcv = indicators.OHLCV(test_symbol, a_big_timeframe, time_begin, time_end)
-    rsi = indicators.RSI(test_symbol, a_big_timeframe, time_begin, time_end, period=period)
+    ohlcv = indicators.OHLCV(test_symbol, timeframe, time_begin, time_end)
+    rsi = indicators.RSI(test_symbol, timeframe, time_begin, time_end, period=period)
 
     rsi_ref = si.get_rsi(ohlcv2quote(ohlcv), period)
     rsi_ref_values = stocks2numpy(rsi_ref, 'rsi')

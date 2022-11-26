@@ -21,16 +21,20 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
     p_dm = np.hstack([np.nan, np.diff(high)])
     m_dm = np.hstack([np.nan, -np.diff(low)])
 
-    p_dm[(p_dm <= m_dm) | (p_dm < 0)] = 0
-    m_dm[(m_dm <= p_dm) | (m_dm < 0)] = 0
+    bx_zero_p_dm = (p_dm <= m_dm) | (p_dm < 0)
+    bx_zero_m_dm = (m_dm <= p_dm) | (m_dm < 0)
+    p_dm[bx_zero_p_dm] = 0
+    m_dm[bx_zero_m_dm] = 0
 
-    p_di = ma_calculate(p_dm, period, ma_type_enum)
-    m_di = ma_calculate(m_dm, period, ma_type_enum)
+    atr = indicators.ATR.full_data(symbol, timeframe, smooth=period)
+
+    p_di = 100 * ma_calculate(p_dm, period, ma_type_enum) / atr.atr
+    m_di = 100 * ma_calculate(m_dm, period, ma_type_enum) / atr.atr
 
     dxi = 100 * abs(p_di - m_di) / (p_di + m_di)
     dxi[p_di + m_di == 0] = 0
 
-    adx = ma_calculate(dxi, smooth, ma_type_enum)
+    adx = ma_calculate(dxi, period, ma_type_enum)
 
     return IndicatorData({
         'name': 'ADX',

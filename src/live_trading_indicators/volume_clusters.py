@@ -8,27 +8,30 @@ def histogram(values, bins, weights):
 
     v_min = values.min()
     v_max = values.max()
-    step = v_max - v_min
-    #levels = np.array([v_min + i * step for i in range(bins)])
+
+    step = (v_max - v_min) / bins
     levels = np.empty(bins + 1, dtype=values.dtype)
     hist = np.empty(bins, dtype=weights.dtype)
 
-    for i_level in range(bins - 1):
-        level_down = v_min + step * i_level
-        level_up = level_down + step
+    level_down = v_min
+    for i_level in range(bins):
+
+        level_up = v_min + (i_level + 1) * step
         levels[i_level] = level_down
-        hist[i_level] = weights[(values >= level_down) & (values < level_up)].sum()
 
-    level_down = v_min + step * (bins - 1)
-    levels[bins - 1] = level_down
-    hist[bins - 1] = weights[values >= level_down].sum()
+        if i_level == bins - 1:
+            hist[i_level] = weights[values >= level_down].sum()
+        else:
+            hist[i_level] = weights[(values >= level_down) & (values < level_up)].sum()
 
-    levels[bins] = v_max
+        level_down = level_up
+
+    levels[bins] = level_down
     return hist, levels
 
 
 @njit(cache=True)
-def volume_hist(high, low, close, volume, n_bins, timeframe_multiple):
+def volume_hist(low, high, close, volume, n_bins, timeframe_multiple):
 
     len_work_timeframe = len(high) // timeframe_multiple
 
