@@ -1,6 +1,5 @@
 """VolumeClusters(timeframe_low='1m', bars_on_bins=6)
-Quotes and maximum volume price: open, high, low, close, volume, mv_price.
-The price of the maximum volume is determined by the lower timeframe."""
+OHLCVM and volume clusters is determined by the lower timeframe."""
 import numpy as np
 from ..indicator_data import IndicatorData
 from ..timeframe import Timeframe

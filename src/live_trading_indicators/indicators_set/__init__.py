@@ -427,10 +427,22 @@ def helo_append(help_list, doc_str):
     help_list.append(f'- {doc_str}')
 
 
-def help():
+def help(mode=0):
 
     import os.path as path
     import glob
+
+    class Help:
+
+        def __init__(self, content):
+            self.content = content
+
+        def __str__(self):
+            return self.content
+
+        def __repr__(self):
+            return self.content
+
 
     indicator_modules_path = path.split(__file__)[0]
 
@@ -443,11 +455,19 @@ def help():
         if module_name[0] != '_':
             module = importlib.import_module(f'.{module_name}', __package__)
             if module.__doc__:
-                helo_append(help_list, module.__doc__)
+                if mode == 0:
+                    helo_append(help_list, module.__doc__)
+                else:
+                    doc = module.__doc__.splitlines()
+                    first_line = f'{doc[0]} - {doc[1]}'
+                    doc.pop(0)
+                    doc[0] = first_line
+                    helo_append(help_list, '\n'.join(doc))
             else:
                 help_list.append(f'{module_name}(?)')
 
-    return '\n'.join(help_list)
+    return Help('\n'.join(help_list))
+
 
 
 

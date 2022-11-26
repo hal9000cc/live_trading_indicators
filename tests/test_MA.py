@@ -11,13 +11,13 @@ from stock_indicators import indicators as si
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22)
 ])
-def test_mma(config_default, test_source, a_symbol, time_begin, time_end, period):
+def test_mma(config_default, test_source, test_symbol, time_begin, time_end, period):
 
     timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
-    ohlcv = indicators.OHLCV(a_symbol, timeframe)
-    ema = indicators.MA(a_symbol, timeframe, period=period, ma_type='mma0')
+    ohlcv = indicators.OHLCV(test_symbol, timeframe)
+    ema = indicators.MA(test_symbol, timeframe, period=period, ma_type='mma0')
 
     source_values = ohlcv.close
     values_ema = ema.move_average

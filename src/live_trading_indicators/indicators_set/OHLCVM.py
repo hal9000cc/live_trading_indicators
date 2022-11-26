@@ -1,5 +1,5 @@
 """OHLCVM(timeframe_low='1m', bars_on_bins=6)
-Quotes and maximum volume price: open, high, low, close, volume, mv_price.
+Quotes and the price of the maximum volume: open, high, low, close, volume, mv_price.
 The price of the maximum volume is determined by the lower timeframe (default 1m)."""
 import numpy as np
 from ..indicator_data import IndicatorData

@@ -1,6 +1,5 @@
 """ADX(period=14, smooth=14, ma_type='mma')
-Average directional movement index.
-"""
+Average directional movement index."""
 from ..indicator_data import IndicatorData
 from ..move_average import *
 
