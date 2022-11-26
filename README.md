@@ -7,8 +7,16 @@ As a source of quotes, you can use DataFrame Pandas and also receive data from t
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.3.1
+## Version 0.3.2
 ### what's new
+#### 0.3.2
+- New indicator - OHLCVM (quotes with the price of the maximum volume of the bar)
+- New indicator - VolumeClusters (OHLCVM and volume clusters is determined by the lower timeframe)
+- New indicator - ROC
+- New indicator - TEMA
+- New indicator - TRIX
+- New indicator - ADX
+- New indicator - VWMA
 #### 0.3.1
 - New indicator - Parabolic SAR.
 #### 0.3.0
