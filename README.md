@@ -31,8 +31,8 @@ Package data from online sources is stored by default in the *.lti* folder of th
 pip install live_trading_indicators
 ```
 ## Feedback
-#### [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
-#### [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
+- [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
+- [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
 ## Quick start
 ### Getting quotes online
 ```python
