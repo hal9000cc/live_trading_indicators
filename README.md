@@ -173,27 +173,47 @@ The list of supported indicators and their parameters can be obtained by calling
 import live_trading_indicators as lti
 print(lti.help())
 ```
-- ADX(period=14, smooth=14, ma_type='mma') - Average directional movement index.
-- ATR(smooth=14, ma_type='mma') - Average true range.
-- BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
-- CCI(period=) - Commodity channel index.
-- EMA(period=, value='close') - Exponential moving average.
-- MA(period=, value='close', ma_type='sma') - Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
-- MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close') - Moving Average Convergence/Divergence.
-- OBV() - On Balance Volume.
-- OHLCV() - Quotes: open, high, low, close, volume.
-- OHLCVM(timeframe_low='1m', bars_on_bins=6) - Quotes and maximum volume price: open, high, low, close, volume, mv_price.
+- ADX(period=14, smooth=14, ma_type='mma')
+Average directional movement index.
+- ATR(smooth=14, ma_type='mma')
+Average true range.
+- BollingerBands(period=20, deviation=2, ma_type='sma', value='close')
+Bollinger bands.
+- CCI(period=)
+Commodity channel index.
+- EMA(period=, value='close')
+Exponential moving average.
+- MA(period=, value='close', ma_type='sma')
+Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
+- MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close')
+Moving Average Convergence/Divergence.
+- OBV()
+On Balance Volume.
+- OHLCV()
+Quotes: open, high, low, close, volume.
+- OHLCVM(timeframe_low='1m', bars_on_bins=6)
+Quotes and the price of the maximum volume: open, high, low, close, volume, mv_price.
 The price of the maximum volume is determined by the lower timeframe (default 1m).
-- ParabolicSAR(start=0.02, maximum=0.2, increment=0.02) - Parabolic SAR.
-- ROC(period=14, ma_period=14, ma_type='sma', value='close') - Rate of Change.
-- RSI(period=, ma_type='mma', value='close') - Relative strength index.
-- SMA(period=, value='close') - Simple moving average.
-- Stochastic(period=, period_d=, smooth=3, ma_type='sma') - Stochastic oscillator.
-- Supertrend(period=10, multipler=3, ma_type='mma') - Supertrend indicator.
-- TEMA(period=, value='close') - Triple exponential moving average.
-- TRIX(period=, value='close') - TRIX oscillator.
-- VWMA(period=, value='close') - Volume Weighted Moving Average.
-- VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
+- ParabolicSAR(start=0.02, maximum=0.2, increment=0.02)
+Parabolic SAR.
+- ROC(period=14, ma_period=14, ma_type='sma', value='close')
+Rate of Change.
+- RSI(period=, ma_type='mma', value='close')
+Relative strength index.
+- SMA(period=, value='close')
+Simple moving average.
+- Stochastic(period=, period_d=, smooth=3, ma_type='sma')
+Stochastic oscillator.
+- Supertrend(period=10, multipler=3, ma_type='mma')
+Supertrend indicator.
+- TEMA(period=, value='close')
+Triple exponential moving average.
+- TRIX(period=, value='close')
+TRIX oscillator.
+- VWMA(period=, value='close')
+Volume Weighted Moving Average.
+- VolumeClusters(timeframe_low='1m', bars_on_bins=6)
+OHLCVM and volume clusters is determined by the lower timeframe.
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
