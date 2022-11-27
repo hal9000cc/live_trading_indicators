@@ -407,8 +407,8 @@ class OHLCV_day(OHLCV_data):
     def __init__(self, data_dict):
         super().__init__(data_dict)
 
-        if 'is_live_day' not in self.data.keys():
-            self.data['is_live_day'] = False
+        if 'is_incomplete_day' not in self.data.keys():
+            self.data['is_incomplete_day'] = False
 
     def check_day_data(self, symbol, timeframe, day_date):
 
@@ -452,7 +452,7 @@ class OHLCV_day(OHLCV_data):
 
     def expected_bars_count(self):
 
-        if self.is_live_day:
+        if self.is_incomplete_day:
             return (self.time[-1] - self.time[0]).astype(np.int64) // self.timeframe.value + 1
 
         return TIME_UNITS_IN_ONE_DAY // self.timeframe.value
@@ -489,14 +489,15 @@ class OHLCV_day(OHLCV_data):
         self.end_bar_time = self.data['time'][-1]
 
     @staticmethod
-    def empty_day(symbol, timeframe, date):
-        assert type(date) == dt.date
+    def empty_day(symbol, timeframe, date, is_incomplete_day):
+        assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
         n_bars = TIME_UNITS_IN_ONE_DAY // timeframe.value
         first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
 
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
+            'is_incomplete_day': is_incomplete_day,
             'time': np.array([first_bar_time + np.timedelta64(i, TIME_TYPE_UNIT) * timeframe.value for i in range(n_bars)]),
             'open': np.zeros(n_bars, dtype=PRICE_TYPE),
             'high': np.zeros(n_bars, dtype=PRICE_TYPE),

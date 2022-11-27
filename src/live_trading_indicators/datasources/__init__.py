@@ -58,8 +58,8 @@ class SourceData:
                 day_date,
                 bar_for_grow if bar_for_grow is not None and bar_for_grow.time[0] == day_date else None)
 
-            if bar_data is None:
-                return None
+            # if bar_data is None:
+            #     return None
 
             bar_data.check_day_data(symbol, timeframe, day_date)
             self.save_to_cash_verified(filename, bar_data, day_date)
@@ -171,7 +171,7 @@ class SourceData:
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
-            'is_live_day': False,
+            'is_incomplete_day': False,
             'time': np.array(file_data.time, dtype=np.int64).astype(TIME_TYPE),
             'open': np.array(file_data.open, dtype=PRICE_TYPE),
             'high': np.array(file_data.high, dtype=PRICE_TYPE),
@@ -184,7 +184,7 @@ class SourceData:
 
         now = dt.datetime.now()
 
-        if bar_data.is_live_day:
+        if bar_data.is_incomplete_day:
             return
 
         if bar_data.is_empty():
@@ -214,8 +214,6 @@ class SourceData:
         for day_date in day_dates:
 
             day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
-            if day_data is None:
-                break
 
             td_time.append(day_data.time)
             td_open.append(day_data.open)
@@ -223,7 +221,7 @@ class SourceData:
             td_low.append(day_data.low)
             td_close.append(day_data.close)
             td_volume.append(day_data.volume)
-            if day_data.is_live_day:
+            if day_data.is_incomplete_day:
                 is_live = True
                 break
 

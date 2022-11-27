@@ -295,7 +295,7 @@ class Indicators:
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 
         if self.indicators_mode == IndicatorsMode.offline:
-            return self.get_bar_data_offline()
+            return self.get_bar_data_offline() # from pandas
 
         return self.get_bar_data_online(symbol, timeframe, bar_for_grow)
 

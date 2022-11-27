@@ -133,13 +133,13 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
 
     end_time = np.datetime64(date + 1, TIME_TYPE_UNIT)
 
-    is_live_day = False
+    is_incomplete_day = False
     while query_time < end_time:
 
         klines_data = bars_online_request_to_end_day(symbol, timeframe, query_time, end_time)
 
         if len(klines_data) == 0:
-            is_live_day = True
+            is_incomplete_day = True
             break
 
         for data_time_set in klines_data:
@@ -150,9 +150,9 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
             received_volume.append(PRICE_TYPE(data_time_set[5]))
             received_time.append(int(data_time_set[0]))
 
-        expected_bars = (end_time - query_time).astype(np.int64) // timeframe.value
+        expected_bars = (end_time - query_time).astype(np.int64) // timeframe.value + 1
         if len(klines_data) < expected_bars and len(klines_data) < MINIMAL_BAR_LIMITS:
-            is_live_day = True
+            is_incomplete_day = True
             break
 
         first_received_bar = np.datetime64(np.datetime64(int(klines_data[0][0]), BINANCE_TIME_TYPE_UNIT), TIME_TYPE_UNIT)
@@ -163,15 +163,15 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
         query_time = last_received_bar + timeframe.value
 
     if len(received_time) == 0:
-        return None
+        return OHLCV_day.empty_day(symbol, timeframe, date, is_incomplete_day)
 
-    end_index = None if is_live_day else -1
+    end_index = None if is_incomplete_day else -1
 
     if day_for_grow is None:
         day_data = OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
-            'is_live_day': is_live_day,
+            'is_incomplete_day': is_incomplete_day,
             'time': np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE),
             'open': np.array(received_open[:end_index], dtype=PRICE_TYPE),
             'high': np.array(received_high[:end_index], dtype=PRICE_TYPE),
@@ -183,7 +183,7 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
         day_data = OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
-            'is_live_day': is_live_day,
+            'is_incomplete_day': is_incomplete_day,
             'time': np.hstack([day_for_grow.time[:-1], np.array(received_time[:end_index], dtype=BINANCE_TIME_TYPE).astype(TIME_TYPE)]),
             'open': np.hstack([day_for_grow.open[:-1], np.array(received_open[:end_index], dtype=PRICE_TYPE)]),
             'high': np.hstack([day_for_grow.high[:-1], np.array(received_high[:end_index], dtype=PRICE_TYPE)]),
