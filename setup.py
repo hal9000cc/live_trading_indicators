@@ -29,6 +29,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "DEVELOPMENT STATUS :: 4 - BETA",
+        "TOPIC :: OFFICE/BUSINESS :: FINANCIAL :: INVESTMENT"
     ],
     install_requires=requirements,
     python_requires='>=3.10',
