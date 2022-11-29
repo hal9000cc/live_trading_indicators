@@ -7,8 +7,11 @@ As a source of quotes, you can use DataFrame Pandas and also receive data from t
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.3.2
+## Version 0.3.3
 ### what's new
+#### 0.3.3
+- New indicator - Keltner
+- Fixed bug that occurs at the end of the day in live mode
 #### 0.3.2
 - New indicator - OHLCVM (quotes with the price of the maximum volume of the bar)
 - New indicator - VolumeClusters (OHLCVM and volume clusters is determined by the lower timeframe)
@@ -178,6 +181,7 @@ print(lti.help())
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
 - CCI(period=) - Commodity channel index.
 - EMA(period=, value='close') - Exponential moving average.
+- Keltner(period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma') - Keltner channel.
 - MA(period=, value='close', ma_type='sma') - Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
 - MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close') - Moving Average Convergence/Divergence.
 - OBV() - On Balance Volume.
