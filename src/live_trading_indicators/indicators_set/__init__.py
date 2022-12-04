@@ -144,6 +144,10 @@ class Indicators:
                             format='%(asctime)s %(message)s',
                             handlers=[logging.StreamHandler()])
 
+    def __del__(self):
+        del self.source_data
+        self.indicators = None
+
     def __str__(self):
 
         str_time_begin = self.time_begin if self.time_begin is None else self.time_begin.astype("datetime64[m]")
@@ -394,10 +398,6 @@ class IndicatorProxy(ABC):
 
         return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, timeframe,
                                                  kwargs, time_begin, time_end)
-
-    def __del__(self):
-        del self.source_data
-        self.indicators = None
 
 
 class IndicatorProxyOnline(IndicatorProxy):
