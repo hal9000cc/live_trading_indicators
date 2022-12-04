@@ -176,8 +176,10 @@ The list of supported indicators and their parameters can be obtained by calling
 import live_trading_indicators as lti
 print(lti.help())
 ```
+- ADL(ma_period=None, ma_type='sma') - Accumulation/distribution line.
 - ADX(period=14, smooth=14, ma_type='mma') - Average directional movement index.
 - ATR(smooth=14, ma_type='mma') - Average true range.
+- Awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False) - Awesome oscillator.
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
 - CCI(period=) - Commodity channel index.
 - EMA(period=, value='close') - Exponential moving average.
@@ -196,6 +198,7 @@ The price of the maximum volume is determined by the lower timeframe (default 1m
 - Supertrend(period=10, multipler=3, ma_type='mma') - Supertrend indicator.
 - TEMA(period=, value='close') - Triple exponential moving average.
 - TRIX(period=, value='close') - TRIX oscillator.
+- VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
 ### Specifying the period
