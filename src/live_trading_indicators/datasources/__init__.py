@@ -37,6 +37,9 @@ class SourceData:
 
         self.bars_cache = BarsCache()
 
+    def __del__(self):
+        del self.bars_cache
+
     def filename_day_data(self, symbol, timeframe, day_date):
         assert type(day_date) == np.datetime64 and day_date.dtype.name == 'datetime64[D]'
 

@@ -396,6 +396,7 @@ class IndicatorProxy(ABC):
                                                  kwargs, time_begin, time_end)
 
     def __del__(self):
+        del self.source_data
         self.indicators = None
 
 
