@@ -36,14 +36,13 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
 
     next_time = timeframe.begin_of_tf(dt.datetime.utcnow()) + timeframe.value
     remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
-    if remain_time_sec < 10:
-        time.sleep(remain_time_sec)
+    if remain_time_sec < 30:
+        time.sleep(remain_time_sec + 10)
 
     now = dt.datetime.utcnow()
     time_begin = np.datetime64(now, 'D')
     indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True)
 
-    time.sleep(3)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
 
     n_bars = len(ohlcv.time)
@@ -57,7 +56,7 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     assert len(ohlcv.time) == n_bars or len(ohlcv.time) == n_bars + 1
 
-    time.sleep(5)
+    time.sleep(10)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     assert len(ohlcv.time) == n_bars + 1
 
