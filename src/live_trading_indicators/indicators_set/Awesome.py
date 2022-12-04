@@ -1,4 +1,4 @@
-"""awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False)
+"""Awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False)
 Awesome oscillator."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type

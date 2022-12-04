@@ -15,7 +15,7 @@ def test_awesome(config_default, test_source, test_symbol, time_begin, time_end,
     timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
-    awesome = indicators.awesome(test_symbol, timeframe, period_fast=period_fast, period_slow=period_slow)
+    awesome = indicators.Awesome(test_symbol, timeframe, period_fast=period_fast, period_slow=period_slow)
 
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     awesome_ref = si.get_awesome(ohlcv2quote(ohlcv), period_fast, period_slow)
