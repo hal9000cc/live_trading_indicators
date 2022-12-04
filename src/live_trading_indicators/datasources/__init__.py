@@ -8,9 +8,9 @@ from ..indicator_data import *
 from ..constants import PRICE_TYPE, VOLUME_TYPE
 
 
-CASH_FILE_SIGNATURE = b'LTI'
-CASH_FILE_EXT = 'lti'
-CASH_FILE_VERSION = 1
+BLOCK_FILE_SIGNATURE = b'LTI'
+BLOCK_FILE_EXT = 'lti'
+BLOCK_FILE_VERSION = 1
 
 DAYS_WAIT_FOR_ENTIRE = 30
 
@@ -19,7 +19,7 @@ class SourceData:
 
     def __init__(self, datasource_module, config):
 
-        self.config = config # config_load()
+        self.config = config
         self.cash_folder = path.join(self.config['cash_folder'], datasource_module.datasource_name())
 
         self.datasource_module = datasource_module
@@ -40,7 +40,7 @@ class SourceData:
         if len(symbol_parts) < 2:
             symbol_parts = [self.default_symbol_part_for_path] + symbol_parts
 
-        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.{CASH_FILE_EXT}'
+        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.{BLOCK_FILE_EXT}'
         return path.join(self.cash_folder, *symbol_parts[:-1], filename)
 
     def bars_of_day(self, symbol, timeframe, day_date, bar_for_grow=None):
@@ -76,11 +76,11 @@ class SourceData:
 
     @staticmethod
     def get_file_signature_struct():
-        return cs.Struct('signature' / cs.Const(CASH_FILE_SIGNATURE), 'file_version' / cs.Int16ub)
+        return cs.Struct('signature' / cs.Const(BLOCK_FILE_SIGNATURE), 'file_version' / cs.Int16ub)
 
     @staticmethod
     def build_signature_and_version():
-        return __class__.get_file_signature_struct().build({'file_version': CASH_FILE_VERSION})
+        return __class__.get_file_signature_struct().build({'file_version': BLOCK_FILE_VERSION})
 
     @staticmethod
     def parse_signature_and_version(stream):
@@ -103,7 +103,7 @@ class SourceData:
 
     def build_header(self, day_data):
 
-        if CASH_FILE_VERSION == 1:
+        if BLOCK_FILE_VERSION == 1:
             return self.build_header_v1(day_data)
 
         raise NotImplementedError()
@@ -160,7 +160,7 @@ class SourceData:
         with open(file_name, 'rb') as file:
 
             signature_and_version = self.parse_signature_and_version(file)
-            if signature_and_version.signature != CASH_FILE_SIGNATURE:
+            if signature_and_version.signature != BLOCK_FILE_SIGNATURE:
                 raise LTIException('Bad data cash file')
 
             buf = zlib.decompress(file.read())

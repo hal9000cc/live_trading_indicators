@@ -85,3 +85,8 @@ class LTIExceptionBadParameterValue(LTIException):
 class LTIExceptionTooLittleData(LTIException):
     def __int__(self, reason):
         super().__int__(f'Too little data: {reason}')
+
+
+class LTIExceptionBadDataCachFile:
+    def __init__(self):
+        super().__init__('Bad data cach file')

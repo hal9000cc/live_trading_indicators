@@ -137,6 +137,14 @@ def clear_data():  # source_type: ticks
 
 
 @pytest.fixture
+def empty_test_folder():
+    test_folder = path.join('test_data', 'empty_folder')
+    shutil.rmtree(test_folder, ignore_errors=True)
+    yield test_folder
+    shutil.rmtree(test_folder, ignore_errors=True)
+
+
+@pytest.fixture
 def config_default():
     lti.config('set_default')
 
