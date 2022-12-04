@@ -40,7 +40,7 @@ def test_fix_wo_time(clear_data, test_source, ohlcv_set):
     ohlcv = indicators.OHLCV(symbol, timeframe)
     assert count_file_load == indicators.source_data.count_file_load
     assert count_datasource_get == indicators.source_data.count_datasource_get
-    del indicators
+    #del indicators
 
     # Load, no get
     indicators = lti.Indicators(test_source, time_begin, time_end, **clear_data)
@@ -49,7 +49,7 @@ def test_fix_wo_time(clear_data, test_source, ohlcv_set):
     ohlcv = indicators.OHLCV(symbol, timeframe)
     assert count_file_load != indicators.source_data.count_file_load
     assert count_datasource_get == indicators.source_data.count_datasource_get
-    del indicators
+    #del indicators
 
 
 def test_fix_with_time(clear_data, test_source, ohlcv_set):

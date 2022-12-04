@@ -318,6 +318,8 @@ class SourceData:
         if len(td_time) == 0:
             raise LTIExceptionEmptyBarData()
 
+        self.bars_cache.close_block_file()
+
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,
                            'is_live': is_live,
