@@ -264,21 +264,32 @@ class Indicators:
 
         return out, None
 
-    def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
-
-        use_time_begin, use_time_end = self.check_call_time_intervals(time_begin, time_end, timeframe)
+    def get_indicator_out_cached(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
 
         out_valid, out_for_grow = self.get_indicator_out_valid(indicator_name, symbols, timeframe,
-                                                                      indicator_kwargs, use_time_begin, use_time_end)
+                                                                      indicator_kwargs, time_begin, time_end)
         if out_valid is None:
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
 
         if self.indicators_mode != IndicatorsMode.live and self.indicators_mode != IndicatorsMode.offline:
-            if use_time_begin < out_valid.time[0] or out_valid.time[-1] + timeframe.value < use_time_end:
+            if time_begin < out_valid.time[0] or out_valid.time[-1] + timeframe.value < time_end:
                 raise LTIExceptionOutOfThePeriod()
 
-        return out_valid[use_time_begin: use_time_end + timeframe.value]
+        return out_valid[time_begin: time_end + timeframe.value]
+
+    def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
+
+        use_time_begin, use_time_end = self.check_call_time_intervals(time_begin, time_end, timeframe)
+
+        no_cached = hasattr(indicator_module, 'no_cached') and indicator_module.no_cached
+
+        if no_cached:
+            out = indicator_module.get_indicator_out(self, symbols, timeframe, use_time_begin, use_time_end, **indicator_kwargs)
+        else:
+            out = self.get_indicator_out_cached(indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, use_time_begin, use_time_end)
+
+        return out
 
     def reset(self, timeframe=None):
 

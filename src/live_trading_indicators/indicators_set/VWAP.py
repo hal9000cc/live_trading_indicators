@@ -1,9 +1,7 @@
-"""OBV()
-On Balance Volume."""
+"""VWAP()
+Volume-weighted average price."""
 import numpy as np
-from ..constants import PRICE_TYPE
 from ..indicator_data import IndicatorData
-from ..move_average import ma_calculate, MA_Type
 
 no_cached = True
 
@@ -12,15 +10,15 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
 
-    signs = np.hstack((0, np.sign(ohlcv.close[1:] - ohlcv.close[:-1])))
-    sign_volume = ohlcv.volume * signs
-    obv = np.cumsum(sign_volume)
+    typical_price = (ohlcv.close + ohlcv.high + ohlcv.low) / 3
+    volume_sum = np.cumsum(ohlcv.volume)
+    vwap = np.cumsum(typical_price * ohlcv.volume) / volume_sum
 
     return IndicatorData({
-        'name': 'OBV',
+        'name': 'VWAP',
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
-        'OBV': obv
+        'vwap': vwap,
+        'allowed_nan': True
     })
-
