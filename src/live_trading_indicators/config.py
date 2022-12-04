@@ -14,7 +14,7 @@ def config_get_default():
     home_folder = get_home_folder()
 
     return {
-        'cash_folder': path.join(home_folder, 'data', 'timeframe_data'),
+        'cache_folder': path.join(home_folder, 'data', 'timeframe_data'),
         'sources_folder': path.join(home_folder, 'data', 'sources'),
         'source_type': 'online',
         'endpoints_required': True,

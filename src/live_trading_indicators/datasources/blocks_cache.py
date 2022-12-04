@@ -8,10 +8,11 @@ from ..exceptions import *
 FILE_VERSION = 2
 
 
-class BlockCash:
+class BlockCache:
 
     def __init__(self, file_signature):
 
+        assert type(file_signature) == bytes
         self.file_signature = file_signature
 
         self.open_file = None
@@ -21,37 +22,47 @@ class BlockCash:
         self.open_file_block_length = None
 
     def get_header_struct(self):
-        header_struct = cs.Struct(
+        return cs.Struct(
             'signature' / cs.Const(self.file_signature),
             'file_version' / cs.Int16ub,
-            'n_blocks' / cs.Int16ub,
-            'block_offset' / cs.Int32sb[self.open_file_n_blocks],
-            'block_length' / cs.Int32sb[self.open_file_n_blocks]
+            'n_blocks' / cs.Int16ub
         )
-        return header_struct
+
+    @staticmethod
+    def get_allocate_table_struct(n_blocks):
+        assert type(n_blocks) == int
+        return cs.Struct(
+            'block_offset' / cs.Int32sb[n_blocks],
+            'block_length' / cs.Int32sb[n_blocks]
+        )
 
     def build_header(self):
 
         header = {
             'file_version': FILE_VERSION,
-            'n_blocks': self.open_file_n_blocks,
-            'block_offset': self.open_file_block_offset,
-            'block_length': self.open_file_block_length
+            'n_blocks': self.open_file_n_blocks
         }
 
         return self.get_header_struct().build(header)
+
+    def build_allocate_table(self):
+        return self.get_allocate_table_struct(self.open_file_n_blocks).build({
+            'block_offset': self.open_file_block_offset,
+            'block_length': self.open_file_block_length
+        })
 
     def flush_headers(self):
         assert self.open_file is not None
 
         self.open_file.seek(0)
 
-        header_data = self.build_header()
-        self.open_file.write(header_data)
+        self.open_file.write(self.build_header())
+        self.open_file.write(self.build_allocate_table())
 
         self.open_file.flush()
 
     def create_new_file(self, file_name, n_blocks):
+        assert type(n_blocks) == int
 
         file_folder = path.split(file_name)[0]
         if not path.isdir(file_folder):
@@ -93,8 +104,12 @@ class BlockCash:
                 raise LTIExceptionBadDataCachFile()
 
             self.open_file_n_blocks = header.n_blocks
-            self.open_file_block_offset = header.block_offset
-            self.open_file_block_length = header.block_length
+
+            allocate_table_struct = self.get_allocate_table_struct(header.n_blocks)
+            allocate_table = allocate_table_struct.parse(open_file.read(allocate_table_struct.sizeof()))
+
+            self.open_file_block_offset = allocate_table.block_offset
+            self.open_file_block_length = allocate_table.block_length
             self.open_file_name = file_name
             self.open_file = open_file
 

@@ -123,14 +123,14 @@ def pytest_generate_tests(metafunc):
 def clear_data():  # source_type: ticks
 
     data_path = 'test_data'
-    cash_folder = path.join(data_path, 'timeframe_data')
+    cache_folder = path.join(data_path, 'timeframe_data')
     sources_folder = path.join(data_path, 'sources')
 
     lti.config('set_default')
 
     shutil.rmtree(data_path, ignore_errors=True)
     yield {
-        'cash_folder' : cash_folder,
+        'cache_folder' : cache_folder,
         'sources_folder': sources_folder
     }
     shutil.rmtree(data_path, ignore_errors=True)
