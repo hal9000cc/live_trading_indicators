@@ -7,28 +7,17 @@ As a source of quotes, you can use DataFrame Pandas and also receive data from t
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.3.3
+## Version 0.4.0
 ### what's new
-#### 0.3.3
-- New indicator - Keltner
-- Fixed bug that occurs at the end of the day in live mode
-#### 0.3.2
-- New indicator - OHLCVM (quotes with the price of the maximum volume of the bar)
-- New indicator - VolumeClusters (OHLCVM and volume clusters is determined by the lower timeframe)
-- New indicator - ROC
-- New indicator - TEMA
-- New indicator - TRIX
-- New indicator - ADX
-- New indicator - VWMA
-#### 0.3.1
-- New indicator - Parabolic SAR.
-#### 0.3.0
-- Can use Pandas Dataframe as a source.
-- New indicator - BollingerBands.
-- New indicator - CCI.
-- New indicator - Supertrend.
-- New types of moving averages, now the moving average can be 'sma', 'ema', 'ema0', 'mma', 'mma0' ([types of move average](https://github.com/hal9000cc/live_trading_indicators/blob/main/README.md#types-of-move-average)).
-- Indicators can have *nan* values.
+#### 0.4.0
+- The cache of saved data has been significantly updated, the number of files has been reduced.
+- Indicators whose result depends on the starting point are no longer cached, but are always calculated from the initial time (OBV, ADL, VWAP, etc.)
+- New indicator - ADL.
+- New indicator - VWAP.
+- New indicator - Awesome oscillator.
+
+
+[previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
 ## Installing
 ```python
 pip install live_trading_indicators
