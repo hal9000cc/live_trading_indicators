@@ -300,25 +300,28 @@ class SourceData:
             day_dates.append(day_date)
             day_date += 1
 
-        is_live = False
-        for day_date in day_dates:
+        try:
 
-            day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
+            is_live = False
+            for day_date in day_dates:
 
-            td_time.append(day_data.time)
-            td_open.append(day_data.open)
-            td_high.append(day_data.high)
-            td_low.append(day_data.low)
-            td_close.append(day_data.close)
-            td_volume.append(day_data.volume)
-            if day_data.is_incomplete_day:
-                is_live = True
-                break
+                day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
+
+                td_time.append(day_data.time)
+                td_open.append(day_data.open)
+                td_high.append(day_data.high)
+                td_low.append(day_data.low)
+                td_close.append(day_data.close)
+                td_volume.append(day_data.volume)
+                if day_data.is_incomplete_day:
+                    is_live = True
+                    break
+
+        finally:
+            self.bars_cache.close_block_file()
 
         if len(td_time) == 0:
             raise LTIExceptionEmptyBarData()
-
-        self.bars_cache.close_block_file()
 
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,
