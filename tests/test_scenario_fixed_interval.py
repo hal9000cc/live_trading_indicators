@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import logging
 from src import live_trading_indicators as lti
 from src.live_trading_indicators.cast_input_params import cast_time
 from src.live_trading_indicators.constants import TIME_TYPE_UNIT
@@ -112,3 +113,4 @@ def test_fix_with_time_chec_boounds_cl(clear_data, test_source, symbol, a_timefr
 @pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
 def test_fix_with_time_chec_boounds_cf(config_default, test_source, symbol, a_timeframe):
     fortest_fix_with_time_chec_boounds(config_default, test_source, symbol, a_timeframe)
+

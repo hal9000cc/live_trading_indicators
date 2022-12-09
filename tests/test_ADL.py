@@ -12,7 +12,7 @@ def test_adl1(config_default, test_source, a_symbol, time_begin, time_end, sma_p
 
     timeframe = '5m'
 
-    indicators = lti.Indicators(test_source, time_begin, time_end)
+    indicators = lti.Indicators(test_source, time_begin, time_end, **config_default)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     adl = indicators.ADL(a_symbol, timeframe, ma_period=sma_period)
 

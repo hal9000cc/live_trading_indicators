@@ -4,6 +4,7 @@ import urllib.request
 import json
 import datetime as dt
 import numpy as np
+import logging
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
 from ..indicator_data import OHLCV_day
 from ..exceptions import *
@@ -28,6 +29,8 @@ exchange_info_data = {}
 
 request_cache = {}
 REQUEST_CACHE_TIMELIFE_HOUR = 1
+
+logger = logging.getLogger(__name__.split('.')[-1])
 
 
 def datasource_name():
@@ -199,14 +202,20 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
 
 def bars_online_request(api_url, symbol, timeframe, start_time, end_time):
 
+    logger.debug(f'bars_online_request {api_url=}, {symbol=}, timeframe={timeframe}, start_time={start_time}, end_time={end_time}')
     start_time_int = start_time.astype(np.int64)
     end_time_int = end_time.astype(np.int64)
 
     request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
 
     response = urllib.request.urlopen(request_url)
-    #used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
-    return response.read()
+    used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
+    logger.debug(f'request {request_url} {used_weight=}')
+
+    response_data = response.read()
+    logging.debug(f'bars request {symbol=}, {timeframe=}, {start_time=}, {end_time=}: get {len(response_data)}, {used_weight=}')
+
+    return response_data
 
 
 def bars_online_request_to_end_day(symbol, timeframe, start_time, end_time):

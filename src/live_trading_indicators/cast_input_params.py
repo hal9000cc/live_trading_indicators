@@ -15,27 +15,32 @@ def cast_time(time_parameter, end_of_unit=False):
             dt.datetime(time_parameter // 10000, time_parameter % 10000 // 100, time_parameter % 100), TIME_TYPE_UNIT)
         if end_of_unit:
             time += TIME_UNITS_IN_ONE_DAY - 1
-        return time
 
-    if type(time_parameter) == np.datetime64:
+    elif type(time_parameter) == np.datetime64:
         if end_of_unit:
-            return (time_parameter + 1).astype(TIME_TYPE) - 1
+            time = (time_parameter + 1).astype(TIME_TYPE) - 1
         else:
-            return time_parameter.astype(TIME_TYPE)
+            time = time_parameter.astype(TIME_TYPE)
 
-    if type(time_parameter) == dt.date:
+    elif type(time_parameter) == dt.date:
         if end_of_unit:
-            return np.datetime64(time_parameter, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY - 1
+            time = np.datetime64(time_parameter, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY - 1
         else:
-            return np.datetime64(time_parameter, TIME_TYPE_UNIT)
+            time = np.datetime64(time_parameter, TIME_TYPE_UNIT)
 
-    if type(time_parameter) == dt.datetime:
-        return np.datetime64(time_parameter, TIME_TYPE_UNIT)
+    elif type(time_parameter) == dt.datetime:
+        time = np.datetime64(time_parameter, TIME_TYPE_UNIT)
 
-    if type(time_parameter) == str:
-        return cast_time(np.datetime64(time_parameter), end_of_unit)
+    elif type(time_parameter) == str:
+        time = cast_time(np.datetime64(time_parameter), end_of_unit)
 
-    raise exceptions.LTIExceptionBadTimeParameter(time_parameter)
+    else:
+        raise exceptions.LTIExceptionBadTimeParameter(time_parameter)
+
+    if time < np.datetime64('1900-01-01') or time >= np.datetime64('2100-01-01'):
+        raise exceptions.LTIExceptionBadTimeParameter(f'{time_parameter} -> {time}')
+
+    return time
 
 
 def cast_timeframe(timeframe_value):

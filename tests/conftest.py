@@ -131,7 +131,8 @@ def clear_data():  # source_type: ticks
     shutil.rmtree(data_path, ignore_errors=True)
     yield {
         'cache_folder' : cache_folder,
-        'sources_folder': sources_folder
+        'sources_folder': sources_folder,
+        'log_level': 'DEBUG'
     }
     shutil.rmtree(data_path, ignore_errors=True)
 
@@ -147,4 +148,6 @@ def empty_test_folder():
 @pytest.fixture
 def config_default():
     lti.config('set_default')
+    return {'log_level': 'DEBUG'}
+    #return {}
 

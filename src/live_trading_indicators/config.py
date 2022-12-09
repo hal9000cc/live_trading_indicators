@@ -2,6 +2,7 @@ import os
 from os import path
 from pathlib import Path
 import json
+import datetime as dt
 from .constants import CONFIG_FILE_NAME
 
 
@@ -16,12 +17,14 @@ def config_get_default():
     return {
         'cache_folder': path.join(home_folder, 'data', 'timeframe_data'),
         'sources_folder': path.join(home_folder, 'data', 'sources'),
+        'log_folder': path.join(home_folder, 'logs'),
         'source_type': 'online',
         'endpoints_required': True,
         'max_empty_bars_fraction': 0.0,
         'max_empty_bars_consecutive': 0,
         'restore_empty_bars': True,
-        'print_log': True
+        'print_log': True,
+        'log_level': 'INFO'
     }
 
 
@@ -48,3 +51,35 @@ def config_save(config):
     settings_file_name = path.join(home_folder, CONFIG_FILE_NAME)
     with open(settings_file_name, 'w') as file:
         json.dump(config, file)
+
+
+def get_logging_config(config):
+
+    now = dt.datetime.now()
+    log_file_name = f'{now.year}{now.month:02d}{now.day:02d}{now.hour:02d}{now.minute:02d}{now.second:02d}.{now.microsecond}.log'
+
+    return {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'default': {
+                'format': '%(asctime)s:%(name)s:%(process)d:%(lineno)d ' '%(levelname)s %(message)s',
+                'datefmt': '%Y-%m-%d %H:%M:%S',
+            },
+        },
+        'handlers': {
+            'logfile': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                # 'when': 's',
+                'filename': path.join(config['log_folder'], 'live-trading-indicators.log'),
+                'formatter': 'default',
+                'backupCount': 5,
+            },
+            'verbose_output': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'default',
+                'stream': 'ext://sys.stdout',
+            },
+        },
+        'root': {'level': config['log_level'], 'handlers': ['logfile', 'verbose_output'] if config['print_log'] else ['logfile']},
+    }

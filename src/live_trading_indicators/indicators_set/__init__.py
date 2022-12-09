@@ -1,9 +1,11 @@
 import logging
-import datetime as dt
+import logging.config
+import os
+import os.path as path
 import importlib
 from enum import Enum
 from abc import ABC, abstractmethod
-from ..config import config_load
+from ..config import config_load, get_logging_config
 from ..cast_input_params import *
 from ..exceptions import *
 from ..timeframe import *
@@ -11,6 +13,7 @@ from .. import datasources
 from ..indicator_data import OHLCV_data
 from ..constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE, TIME_UNITS_IN_ONE_SECOND
 
+logger = logging.getLogger(__name__)
 
 class IndicatorsMode(Enum):
     fixed = 1
@@ -36,13 +39,15 @@ class Indicators:
             Configuration modification.
     """
 
-    def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, symbol=None, **config_mod):
+    def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, symbol=None,
+                 **config_mod):
+
+        self.config = config_load() | config_mod
+
+        self.init_log()
 
         self.indicators = {}
         self.cache = {}
-
-        self.config = config_load() | config_mod
-        self.init_log()
 
         self.with_incomplete_bar = with_incomplete_bar
 
@@ -136,13 +141,7 @@ class Indicators:
                 raise LTIExceptionBadTimeParameter(self.time_begin)
 
     def init_log(self):
-
-        if not self.config['print_log']:
-            return
-
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s %(message)s',
-                            handlers=[logging.StreamHandler()])
+        logging.config.dictConfig(get_logging_config(self.config))
 
     def __del__(self):
         del self.source_data
@@ -264,10 +263,11 @@ class Indicators:
 
         return out, None
 
-    def get_indicator_out_cached(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
+    def get_indicator_out_cached(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs,
+                                 time_begin, time_end):
 
         out_valid, out_for_grow = self.get_indicator_out_valid(indicator_name, symbols, timeframe,
-                                                                      indicator_kwargs, time_begin, time_end)
+                                                               indicator_kwargs, time_begin, time_end)
         if out_valid is None:
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
@@ -278,16 +278,19 @@ class Indicators:
 
         return out_valid[time_begin: time_end + timeframe.value]
 
-    def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin, time_end):
+    def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin,
+                          time_end):
 
         use_time_begin, use_time_end = self.check_call_time_intervals(time_begin, time_end, timeframe)
 
         no_cached = hasattr(indicator_module, 'no_cached') and indicator_module.no_cached
 
         if no_cached:
-            out = indicator_module.get_indicator_out(self, symbols, timeframe, use_time_begin, use_time_end, **indicator_kwargs)
+            out = indicator_module.get_indicator_out(self, symbols, timeframe, use_time_begin, use_time_end,
+                                                     **indicator_kwargs)
         else:
-            out = self.get_indicator_out_cached(indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, use_time_begin, use_time_end)
+            out = self.get_indicator_out_cached(indicator_name, indicator_module, symbols, timeframe, indicator_kwargs,
+                                                use_time_begin, use_time_end)
 
         return out
 
@@ -310,7 +313,7 @@ class Indicators:
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 
         if self.indicators_mode == IndicatorsMode.offline:
-            return self.get_bar_data_offline() # from pandas
+            return self.get_bar_data_offline()  # from pandas
 
         return self.get_bar_data_online(symbol, timeframe, bar_for_grow)
 
@@ -330,8 +333,8 @@ class Indicators:
             time_start_last_day = np.datetime64(time_start_last_day_d, TIME_TYPE_UNIT)
 
             new_day_data = self.source_data.get_bar_data(symbol, timeframe,
-                                                     time_start_last_day_d, time_end,
-                                                     bar_for_grow[time_start_last_day:])
+                                                         time_start_last_day_d, time_end,
+                                                         bar_for_grow[time_start_last_day:])
 
             if bar_for_grow.time[0] == time_start_last_day:
                 bar_data = new_day_data
@@ -402,7 +405,7 @@ class IndicatorProxy(ABC):
     def __call__(self, *args, **kwargs):
         pass
 
-    def full_data(self, symbols, timeframe,  **kwargs):
+    def full_data(self, symbols, timeframe, **kwargs):
 
         time_begin = np.datetime64(np.datetime64(self.indicators.time_begin, 'D'), TIME_TYPE_UNIT)
         time_end = np.datetime64(np.datetime64(self.indicators.time_end, 'D') + 1, TIME_TYPE_UNIT) - 1
@@ -414,7 +417,6 @@ class IndicatorProxy(ABC):
 class IndicatorProxyOnline(IndicatorProxy):
 
     def __call__(self, symbols, timeframe, time_begin=None, time_end=None, **kwargs):
-
         use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
         use_timeframe = Timeframe.cast(timeframe)
 
@@ -428,10 +430,10 @@ class IndicatorProxyOnline(IndicatorProxy):
 class IndicatorProxyOffline(IndicatorProxy):
 
     def __call__(self, time_begin=None, time_end=None, **kwargs):
-
         use_time_begin, use_time_end = cast_time(time_begin), cast_time(time_end, True)
 
-        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, None, self.indicators.offline_timeframe,
+        return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, None,
+                                                 self.indicators.offline_timeframe,
                                                  kwargs, time_begin, time_end)
 
 
@@ -440,7 +442,6 @@ def helo_append(help_list, doc_str):
 
 
 def help(mode=0):
-
     import os.path as path
     import glob
 
@@ -454,7 +455,6 @@ def help(mode=0):
 
         def __repr__(self):
             return self.content
-
 
     indicator_modules_path = path.split(__file__)[0]
 
@@ -479,7 +479,3 @@ def help(mode=0):
                 help_list.append(f'{module_name}(?)')
 
     return Help('\n'.join(help_list))
-
-
-
-
