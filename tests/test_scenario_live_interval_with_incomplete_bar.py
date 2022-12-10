@@ -15,7 +15,7 @@ def test_fix_live_with_incomplete_1(config_default, test_source, a_symbol, timef
         time.sleep(remain_time_sec)
 
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value
-    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True)
+    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True, **config_default)
 
     while True:
         ohlcv = indicators.OHLCV(a_symbol, timeframe)
@@ -41,7 +41,7 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
 
     now = dt.datetime.utcnow()
     time_begin = np.datetime64(now, 'D')
-    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True)
+    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True, **config_default)
 
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
 
@@ -70,7 +70,7 @@ def test_fix_live_with_incomplete_3(config_default, test_source, test_symbol, a_
 
     now = dt.datetime.utcnow()
     time_begin = np.datetime64(now, 'D')
-    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True)
+    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True, **config_default)
 
     ohlcv = indicators.OHLCV(test_symbol, a_timeframe)
 

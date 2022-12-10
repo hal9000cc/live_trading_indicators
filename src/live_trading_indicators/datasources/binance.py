@@ -21,7 +21,7 @@ DEFAULT_SYMBOL_PART = 'spot'
 # Now request bar limit is 500 for spot and coin-m, and 1500 for usd-m.
 # Spot and usd-m apply the restriction from the start time, but coin-m do it from the end.
 # Therefore, specifying the limit for coin-m is mandatory.
-REQUEST_BAR_LIMITS = {'cm': 500}
+REQUEST_BAR_LIMITS = {'cm': 500, 'um': 1500, 'spot': 1000}
 
 MINIMAL_BAR_LIMITS = 500
 
@@ -200,20 +200,18 @@ def bars_of_day_online(symbol, timeframe, date, day_for_grow=None):
     return day_data
 
 
-def bars_online_request(api_url, symbol, timeframe, start_time, end_time):
+def online_request(api_url, symbol, timeframe, start_time, end_time):
 
-    logger.debug(f'bars_online_request {api_url=}, {symbol=}, timeframe={timeframe}, start_time={start_time}, end_time={end_time}')
     start_time_int = start_time.astype(np.int64)
     end_time_int = end_time.astype(np.int64)
 
     request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
 
+    logging.debug(f'bars request {request_url=}')
     response = urllib.request.urlopen(request_url)
     used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
-    logger.debug(f'request {request_url} {used_weight=}')
-
     response_data = response.read()
-    logging.debug(f'bars request {symbol=}, {timeframe=}, {start_time=}, {end_time=}: get {len(response_data)}, {used_weight=}')
+    logging.debug(f'{used_weight=}')
 
     return response_data
 
@@ -228,7 +226,73 @@ def bars_online_request_to_end_day(symbol, timeframe, start_time, end_time):
     if limit:
         end_time = min(end_time, start_time + timeframe.value * (limit - 1))
 
-    response = bars_online_request(api_url, symbol, timeframe, start_time, end_time)
+    response = online_request(api_url, symbol, timeframe, start_time, end_time)
     return json.loads(response)
 
+
+def bars_online_request(symbol, timeframe, time_start, time_end):
+
+    try:
+
+        bars_online = bars_raw_online_request(symbol, timeframe, time_start, time_end)
+
+    except urllib.error.HTTPError as error:
+
+        if error.code not in (400,):
+            logger.error(f'{error=}, {error.url=}')
+            raise
+
+        info = exchange_info(symbol)
+        if info is None:
+            raise LTIExceptionSymbolNotFound(symbol) from error
+
+        logger.error(f'{error=}, {error.url=}')
+        raise
+
+    return bars_online
+
+
+def bars_raw_online_request(symbol, timeframe, time_start, time_end):
+    assert time_start.dtype.name == TIME_TYPE
+    assert time_end.dtype.name == TIME_TYPE
+    assert time_start <= time_end
+
+    part, symbol = symbol_decode(symbol)
+
+    api_url = get_api_url(part)
+
+    limit = REQUEST_BAR_LIMITS.get(part)
+
+    time, open, high, low, close, volume = [], [], [], [], [], []
+
+    query_time_start = timeframe.begin_of_tf(time_start)
+    while query_time_start < time_end:
+
+        query_limit = min(limit, (time_end - query_time_start).astype(np.int64) // timeframe.value + 2)
+        query_time_end = query_time_start + query_limit * timeframe.value - 1
+        raw_bars_data = online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
+        online_bars_data = json.loads(raw_bars_data)
+
+        if len(online_bars_data) == 0:
+            break
+
+        data = np.array(online_bars_data)
+        time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))
+        open.append(data[:, 1].astype(PRICE_TYPE))
+        high.append(data[:, 2].astype(PRICE_TYPE))
+        low.append(data[:, 3].astype(PRICE_TYPE))
+        close.append(data[:, 4].astype(PRICE_TYPE))
+        volume.append(data[:, 5].astype(VOLUME_TYPE))
+
+        query_time_start = timeframe.begin_of_tf(time[-1][-1]) + timeframe.value
+
+    if len(time) == 0:
+        return None
+
+    return np.hstack(time), \
+           np.hstack(open),\
+           np.hstack(high),\
+           np.hstack(low),\
+           np.hstack(close),\
+           np.hstack(volume)
 

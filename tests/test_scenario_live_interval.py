@@ -15,7 +15,7 @@ def test_live_1(config_default, test_source, a_symbol, timeframe):
         time.sleep(remain_time_sec)
 
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value
-    indicators = lti.Indicators(test_source, time_begin)
+    indicators = lti.Indicators(test_source, time_begin, **config_default)
 
     time.sleep(5)
     print(dt.datetime.utcnow())
@@ -27,9 +27,15 @@ def test_live_1(config_default, test_source, a_symbol, timeframe):
 
     time.sleep(5)
     print(dt.datetime.utcnow())
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    count_datasource_bars_get = indicators.source_data.count_datasource_bars_get
     ohlcv1 = indicators.OHLCV(a_symbol, timeframe)
     print(len(ohlcv1))
 
+    assert indicators.source_data.count_file_load == count_file_load
+    assert indicators.source_data.count_datasource_get == count_datasource_get + 1
+    assert indicators.source_data.count_datasource_bars_get == count_datasource_bars_get + 2
     assert ohlcv == ohlcv1
 
 
@@ -42,7 +48,7 @@ def test_live_2(config_default, test_source, a_symbol, timeframe):
         time.sleep(remain_time_sec)
 
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value * 2
-    indicators = lti.Indicators(test_source, time_begin)
+    indicators = lti.Indicators(test_source, time_begin, **config_default)
 
     time.sleep(5)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
@@ -53,7 +59,13 @@ def test_live_2(config_default, test_source, a_symbol, timeframe):
     time.sleep(remain_time_sec)
 
     time.sleep(5)
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    count_datasource_bars_get = indicators.source_data.count_datasource_bars_get
     ohlcv1 = indicators.OHLCV(a_symbol, timeframe)
+    assert indicators.source_data.count_file_load == count_file_load
+    assert indicators.source_data.count_datasource_get == count_datasource_get + 1
+    assert indicators.source_data.count_datasource_bars_get == count_datasource_bars_get + 3
     assert ohlcv == ohlcv1[:-1]
 
 
@@ -68,7 +80,7 @@ def test_live_3(config_default, test_source, a_symbol, timeframe):
         time.sleep(remain_time_sec)
 
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - TIME_UNITS_IN_ONE_DAY
-    indicators = lti.Indicators(test_source, time_begin)
+    indicators = lti.Indicators(test_source, time_begin, **config_default)
 
     time.sleep(9)
     print(dt.datetime.utcnow())
@@ -82,7 +94,13 @@ def test_live_3(config_default, test_source, a_symbol, timeframe):
 
     time.sleep(9)
     print(dt.datetime.utcnow())
+    count_file_load = indicators.source_data.count_file_load
+    count_datasource_get = indicators.source_data.count_datasource_get
+    count_datasource_bars_get = indicators.source_data.count_datasource_bars_get
     ohlcv1 = indicators.OHLCV(a_symbol, timeframe)
     print(len(ohlcv))
+    assert indicators.source_data.count_file_load == count_file_load
+    assert indicators.source_data.count_datasource_get == count_datasource_get + 1
+    assert indicators.source_data.count_datasource_bars_get == count_datasource_bars_get + 3
     assert ohlcv == ohlcv1[:-1]
 

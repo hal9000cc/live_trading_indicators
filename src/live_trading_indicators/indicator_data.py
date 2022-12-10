@@ -267,6 +267,7 @@ class OHLCV_data(TimeframeData):
         if (self.time != np.sort(self.time)).any():
             return False
 
+        logging.warning(f'fixing time for {self.symbol}, timeframe {self.timeframe}, date {self.time[0].astype("datetime64[D]")}')
         n_bars = len(time_need)
         tf_time = time_need
         tf_open = np.zeros(n_bars, dtype=PRICE_TYPE)

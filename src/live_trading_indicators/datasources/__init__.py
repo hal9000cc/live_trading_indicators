@@ -16,6 +16,7 @@ BLOCK_FILE_VERSION = 1
 CACHE_BLOCK_VERSION = 2
 
 DAYS_WAIT_FOR_ENTIRE = 30
+MAX_CLIENT_TIME_ERROR = TIME_UNITS_IN_ONE_SECOND * 60 * 15
 
 
 class SourceData:
@@ -33,6 +34,7 @@ class SourceData:
             self.default_symbol_part_for_path = ''
 
         self.count_datasource_get = 0
+        self.count_datasource_bars_get = 0
         self.count_file_load = 0
 
         self.bars_cache = BarsCache()
@@ -165,9 +167,10 @@ class SourceData:
             'volume': np.array(file_data.volume, dtype=VOLUME_TYPE)
         })
 
+
     def save_to_cache_verified(self, symbol, timeframe, bar_data, day_date):
 
-        now = dt.datetime.now()
+        now = np.datetime64(dt.datetime.now(), TIME_TYPE_UNIT)
 
         if bar_data.is_incomplete_day:
             return
@@ -179,6 +182,7 @@ class SourceData:
             if (np.datetime64(now, 'D') - day_date).astype(np.int64) < DAYS_WAIT_FOR_ENTIRE:
                 return
 
+        assert timeframe.begin_of_tf(np.datetime64(day_date, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY) + timeframe.value + MAX_CLIENT_TIME_ERROR < now
         self.save_to_blocks_cache(symbol, timeframe, day_date, bar_data)
 
     @staticmethod
@@ -268,54 +272,129 @@ class SourceData:
 
         return bar_data
 
-    def bars_of_day(self, symbol, timeframe, day_date, bar_for_grow=None):
+    def bars_online_request_with_grow(self, symbol, timeframe, query_time_start, query_time_end, day_for_grow):
 
-        bar_data = self.bars_of_day_from_cache(symbol, timeframe, day_date)
-        if bar_data is not None:
-            return bar_data
+        if day_for_grow is not None and day_for_grow.time[0] == query_time_start:
+            query_time_start = day_for_grow.time[-1]
+            bars_data = self.datasource_module.bars_online_request(symbol, timeframe, query_time_start, query_time_end)
+            if bars_data is not None:
+                self.count_datasource_bars_get += len(bars_data[0])
+                assert day_for_grow.time[-1] == bars_data[0][0]
+                bars_data = np.hstack([day_for_grow.time[:-1], bars_data[0]]), \
+                            np.hstack([day_for_grow.open[:-1], bars_data[1]]), \
+                            np.hstack([day_for_grow.high[:-1], bars_data[2]]), \
+                            np.hstack([day_for_grow.low[:-1], bars_data[3]]), \
+                            np.hstack([day_for_grow.close[:-1], bars_data[4]]), \
+                            np.hstack([day_for_grow.volume[:-1], bars_data[5]])
+            else:
+                bars_data = day_for_grow.time, day_for_grow.open, day_for_grow.high, \
+                       day_for_grow.low, day_for_grow.close, day_for_grow.volume
+        else:
+            bars_data = self.datasource_module.bars_online_request(symbol, timeframe, query_time_start, query_time_end)
+            self.count_datasource_bars_get += len(bars_data[0])
+
+        return bars_data
+
+    def download_days(self, symbol, timeframe, date_start, date_end, day_for_grow):
+        assert date_start.dtype.name == 'datetime64[D]'
+        assert date_end.dtype.name == 'datetime64[D]'
+
+        now = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT)
+        last_bar_time_of_timeframe = timeframe.begin_of_tf(now - MAX_CLIENT_TIME_ERROR)
+
+        query_time_start = date_start.astype(TIME_TYPE)
+        query_time_end = min((date_end + 1).astype(TIME_TYPE) - 1, now + MAX_CLIENT_TIME_ERROR)
+
+        if query_time_start > query_time_end:
+            return []
+
+        bars_data = self.bars_online_request_with_grow(symbol, timeframe, query_time_start, query_time_end, day_for_grow)
+
+        downloaded_days = []
+        day_date = date_start
+        while day_date <= date_end:
+
+            time_end_day = (day_date + 1).astype(TIME_TYPE)
+            time_start_day = day_date.astype(TIME_TYPE)
+            i_day_start = np.searchsorted(bars_data[0], time_start_day)
+            i_day_end = np.searchsorted(bars_data[0], time_end_day)
+
+            is_incomplete_day = i_day_end >= len(bars_data[0]) and bars_data[0][-1] >= last_bar_time_of_timeframe
+
+            day_data = OHLCV_day({
+                'symbol': symbol,
+                'timeframe': timeframe,
+                'is_incomplete_day': is_incomplete_day,
+                'time': bars_data[0][i_day_start: i_day_end],
+                'open': bars_data[1][i_day_start: i_day_end],
+                'high': bars_data[2][i_day_start: i_day_end],
+                'low': bars_data[3][i_day_start: i_day_end],
+                'close': bars_data[4][i_day_start: i_day_end],
+                'volume': bars_data[5][i_day_start: i_day_end]
+            })
+
+            day_data.fix_errors(day_date)
+            day_data.check_day_data(symbol, timeframe, day_date)
+            self.save_to_cache_verified(symbol, timeframe, day_data, day_date)
+            downloaded_days.append(day_data)
+
+            if is_incomplete_day:
+                break
+
+            day_date += 1
 
         self.count_datasource_get += 1
+        return downloaded_days
 
-        bar_data = self.datasource_module.bars_of_day(
-            symbol, timeframe,
-            day_date,
-            bar_for_grow if bar_for_grow is not None and bar_for_grow.time[0] == day_date else None)
-
-        bar_data.check_day_data(symbol, timeframe, day_date)
-        self.save_to_cache_verified(symbol, timeframe, bar_data, day_date)
-
-        return bar_data
+    @staticmethod
+    def append_series_from_day_data(day_data, td_time, td_open, td_high, td_low, td_close, td_volume):
+        td_time.append(day_data.time)
+        td_open.append(day_data.open)
+        td_high.append(day_data.high)
+        td_low.append(day_data.low)
+        td_close.append(day_data.close)
+        td_volume.append(day_data.volume)
 
     def get_bar_data(self, symbol, timeframe, time_begin, time_end, day_for_grow=None):
-
         assert time_begin is not None
         assert time_end is not None
         assert time_end >= time_begin
 
         td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
-        day_dates = []
         date_end = time_end.astype('datetime64[D]')
         day_date = time_begin.astype('datetime64[D]')
-        while day_date <= date_end:
-            day_dates.append(day_date)
-            day_date += 1
 
         try:
 
             is_live = False
-            for day_date in day_dates:
+            start_day_for_download = None
+            while day_date <= date_end:
 
-                day_data = self.bars_of_day(symbol, timeframe, day_date, day_for_grow)
+                day_data = self.bars_of_day_from_cache(symbol, timeframe, day_date)
+                if day_data is None:
+                    if start_day_for_download is None:
+                        start_day_for_download = day_date
+                    day_date += 1
+                    continue
 
-                td_time.append(day_data.time)
-                td_open.append(day_data.open)
-                td_high.append(day_data.high)
-                td_low.append(day_data.low)
-                td_close.append(day_data.close)
-                td_volume.append(day_data.volume)
-                if day_data.is_incomplete_day:
-                    is_live = True
-                    break
+                if start_day_for_download is not None:
+                    downloaded_days = self.download_days(symbol, timeframe, start_day_for_download, day_date - 1, day_for_grow)
+                    assert not downloaded_days[-1].is_incomplete_day
+                    start_day_for_download = None
+                    for downloaded_day_data in downloaded_days:
+                        self.append_series_from_day_data(downloaded_day_data, td_time,
+                                                         td_open, td_high, td_low, td_close, td_volume)
+
+                self.append_series_from_day_data(day_data, td_time, td_open, td_high, td_low, td_close, td_volume)
+                day_date += 1
+
+            if start_day_for_download is not None:
+                downloaded_days = self.download_days(symbol, timeframe, start_day_for_download, day_date - 1, day_for_grow)
+                for downloaded_day_data in downloaded_days:
+                    self.append_series_from_day_data(downloaded_day_data, td_time,
+                                                     td_open, td_high, td_low, td_close, td_volume)
+                    if downloaded_day_data.is_incomplete_day:
+                        is_live = True
 
         finally:
             self.bars_cache.close_block_file()
