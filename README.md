@@ -5,7 +5,9 @@
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
 Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
 
-As a source of quotes, you can use DataFrame Pandas and also receive data from the exchange online. The current version allows you to receive exchange data from:
+In addition to receiving data online, Dataframe Pandas can be used as a data source.
+
+The current version allows you to receive exchange data from:
 - **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
 - Many different exchanges via **CCXT** ([CryptoCurrency eXchange Trading Library](https://github.com/ccxt/ccxt#readme))
 
@@ -16,7 +18,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ### what's new
 #### 0.5.0
 - Optimized data loading, reduced the number of requests to the data source on high timeframes.
-- Added the ability to use the **ccxt** library as a data source.
+- Added the ability to use the **CCXT** library as a data source.
 
 
 [previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
