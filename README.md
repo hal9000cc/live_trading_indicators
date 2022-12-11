@@ -5,19 +5,18 @@
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
 Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
 
-As a source of quotes, you can use DataFrame Pandas and also receive data from the exchange online. The current version allows you to receive exchange data **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
+As a source of quotes, you can use DataFrame Pandas and also receive data from the exchange online. The current version allows you to receive exchange data from:
+- **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
+- Many different exchanges via **CCXT** ([CryptoCurrency eXchange Trading Library](https://github.com/ccxt/ccxt#readme))
 
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.4.0
+## Version 0.5.0
 ### what's new
-#### 0.4.0
-- The cache of saved data has been significantly updated, the number of files has been reduced.
-- Indicators whose result depends on the starting point are no longer cached, but are always calculated from the initial time (OBV, ADL, VWAP, etc.)
-- New indicator - ADL.
-- New indicator - VWAP.
-- New indicator - Awesome oscillator.
+#### 0.5.0
+- Optimized data loading, reduced the number of requests to the data source on high timeframes.
+- Added the ability to use the **ccxt** library as a data source.
 
 
 [previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
@@ -61,11 +60,11 @@ print(dataframe.head())
 3 2022-07-01 12:00:00  1050.21  1074.23  1043.00  1056.86  298465.0695
 4 2022-07-01 16:00:00  1056.86  1083.10  1054.82  1067.91  158796.2248
 ```
-### Example of getting indicator data from binance quotes online
+### Example of getting indicator data from Bybit quotes via ccxt online
 ```python
 import live_trading_indicators as lti
 
-indicators = lti.Indicators('binance')
+indicators = lti.Indicators('ccxt.bybit')
 macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 print(macd[40:].pandas().head())
 ```
@@ -217,10 +216,23 @@ ma22 = indicators.SMA('um/ethusdt', '1h', 'close', 22, 20220905, 20220915) # the
 #### 3. Real-time mode
 In this variant, when creating *Indicators*, only the start date is specified. The data is always received up to the current moment.
 When creating Indicators, you can specify *with_incomplete_bar=True*, then the data of the last, incomplete bar will be received. See the example above.
-### Binance trading symbol codes
+### Binance source
+#### Binance trading symbol codes
 - For the spot market, they completely coincide with the code on binance (*btcusdt*, *ethusdt*, etc.)
 - For the futures market **USD-M**, codes are prefixed with **um/** (*um/btcusdt*, *um/ethusdt*, etc.)
 - For the futures market **COIN-M**, codes are prefixed with **cm/** (*cm/btcusd_perp*, *cm/ethusd_perp*, etc.)
+### CCXT source
+Using CCXT, you can download data from a large number of exchanges, currently there are more than 100. The available symbols, their names and timeframes depend on the specific source. More information can be found in [the CCXT documentation.](https://github.com/ccxt/ccxt#readme)
+The use of xxct is optional, so it must be installed separately. It can be done like this:
+```
+pip install xxct
+```
+Then you can use all available ccxt exchanges by specifying them through a dot. To download, for example, from binance via ccxt, you need to specify ccxt.binance. To download from okx, we use ccxt.okx, ByBit - ccxt.bybit.
+##### Example
+```python
+indicators = lti.Indicators('ccxt.okx')
+ohlcv = indicators.OHLCV('BTC/USDT', '1h', 20220701, 20220702)
+```
 ### Types of move average
 live-trading-indicators supports the following types of moving averages:
 - 'sma' - simple move average
