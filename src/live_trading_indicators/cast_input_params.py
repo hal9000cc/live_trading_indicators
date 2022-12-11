@@ -43,11 +43,3 @@ def cast_time(time_parameter, end_of_unit=False):
     return time
 
 
-def cast_timeframe(timeframe_value):
-
-    tf = tf.Timeframe.cast(timeframe_value)
-    if tf is None:
-        raise exceptions.LTIBadTimeframeParameter(timeframe_value)
-
-    return tf
-

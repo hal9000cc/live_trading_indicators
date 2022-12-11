@@ -55,9 +55,6 @@ def config_save(config):
 
 def get_logging_config(config):
 
-    #now = dt.datetime.now()
-    #log_file_name = f'{now.year}{now.month:02d}{now.day:02d}{now.hour:02d}{now.minute:02d}{now.second:02d}.{now.microsecond}.log'
-
     log_folder = config['log_folder']
     if not os.path.isdir(log_folder):
         os.makedirs(log_folder)
