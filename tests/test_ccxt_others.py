@@ -5,11 +5,13 @@ from src.live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('ccxt_source, symbol, timeframe', [
+    ('bybit', 'ETHUSDT', '1h'),
     ('binancecoinm', 'ETH/USD', '1h'),
     ('binanceusdm', 'ETH/USDT', '1h'),
     ('binance', 'ETH/USDT', '1h'),
     ('ascendex', 'ETH/USDT', '1h'),
     ('bequant', 'ETH/USDT', '1h'),
+    ('okx', 'ETH/USDT', '1h')
 ])
 def test_ccxt_sources(clear_data, ccxt_source, symbol, timeframe):
 

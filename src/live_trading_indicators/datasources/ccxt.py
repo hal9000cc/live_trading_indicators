@@ -82,14 +82,14 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
         assert len(ohlcv) == 0 or ohlcv[-1][0] < downloaded_ohlcv[0][0]
         ohlcv += downloaded_ohlcv
 
-        since_time = timeframe.begin_of_tf(np.datetime64(downloaded_ohlcv[-1][0], 'ms').astype(TIME_TYPE)) + timeframe.value
+        since_time = timeframe.begin_of_tf(np.datetime64(int(downloaded_ohlcv[-1][0]), 'ms').astype(TIME_TYPE)) + timeframe.value
 
     if len(ohlcv) == 0:
         bar_data = np.zeros([0, 6], dtype=np.object)
     else:
         bar_data = np.array(ohlcv, dtype=np.object)
 
-    return np.array(bar_data[:, 0], dtype='datetime64[ms]').astype(TIME_TYPE), \
+    return np.array(bar_data[:, 0].astype(np.int64), dtype='datetime64[ms]').astype(TIME_TYPE), \
            np.array(bar_data[:, 1], dtype=PRICE_TYPE), \
            np.array(bar_data[:, 2], dtype=PRICE_TYPE), \
            np.array(bar_data[:, 3], dtype=PRICE_TYPE), \
