@@ -163,8 +163,11 @@ def bars_raw_online_request(symbol, timeframe, time_start, time_end):
         raw_bars_data = online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
         online_bars_data = json.loads(raw_bars_data)
 
-        if len(online_bars_data) == 0:
+        n_bars = len(online_bars_data)
+        if n_bars == 0:
             break
+
+        logging.info(f'Download using api symbol {symbol} timeframe {timeframe} from {query_time_start}, bars: {n_bars}')
 
         data = np.array(online_bars_data)
         time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))

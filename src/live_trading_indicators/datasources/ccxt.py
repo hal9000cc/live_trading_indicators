@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 import ccxt
 from ..exceptions import *
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE
@@ -76,8 +77,11 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
 
         downloaded_ohlcv = exchange.fetch_ohlcv(symbol, timeframe_ccxt, since, limit, params=exchange_params)
 
-        if len(downloaded_ohlcv) == 0:
+        n_bars = len(downloaded_ohlcv)
+        if n_bars == 0:
             break
+
+        logging.info(f'Download using api symbol {symbol} timeframe {timeframe} from {since}, bars: {n_bars}')
 
         assert len(ohlcv) == 0 or ohlcv[-1][0] < downloaded_ohlcv[0][0]
         ohlcv += downloaded_ohlcv

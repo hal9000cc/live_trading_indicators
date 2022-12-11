@@ -28,11 +28,6 @@ class SourceData:
 
         self.datasource_module = datasource_module
 
-        # if hasattr(datasource_module, 'DEFAULT_SYMBOL_PART'):
-        #     self.default_symbol_part_for_path = datasource_module.DEFAULT_SYMBOL_PART
-        # else:
-        #     self.default_symbol_part_for_path = ''
-
         self.count_datasource_get = 0
         self.count_datasource_bars_get = 0
         self.count_file_load = 0
