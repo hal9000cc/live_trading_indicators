@@ -65,17 +65,17 @@ print(dataframe.head())
 import live_trading_indicators as lti
 
 indicators = lti.Indicators('ccxt.bybit')
-macd = indicators.MACD('ethusdt', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
+macd = indicators.MACD('ETHUSDT', '1h', '2022-07-01', '2022-07-30', period_short=15, period_long=26, period_signal=9)
 print(macd[40:].pandas().head())
 ```
 ###### Result:
 ```
                  time      macd    signal      hist
-0 2022-07-02 16:00:00 -1.659356 -3.498261  1.838905
-1 2022-07-02 17:00:00 -0.981187 -3.111405  2.130218
-2 2022-07-02 18:00:00 -0.072798 -2.604397  2.531599
-3 2022-07-02 19:00:00  0.456062 -2.055381  2.511443
-4 2022-07-02 20:00:00  0.797304 -1.474812  2.272116
+0 2022-07-02 16:00:00 -1.661969 -3.514499  1.852530
+1 2022-07-02 17:00:00 -0.983912 -3.125461  2.141548
+2 2022-07-02 18:00:00 -0.081701 -2.617233  2.535532
+3 2022-07-02 19:00:00  0.464134 -2.064394  2.528529
+4 2022-07-02 20:00:00  0.828222 -1.477419  2.305641
 ```
 ### Example of getting indicator data from Pandas quotes
 ```python
@@ -223,11 +223,11 @@ When creating Indicators, you can specify *with_incomplete_bar=True*, then the d
 - For the futures market **COIN-M**, codes are prefixed with **cm/** (*cm/btcusd_perp*, *cm/ethusd_perp*, etc.)
 ### CCXT source
 Using CCXT, you can download data from a large number of exchanges, currently there are more than 100. The available symbols, their names and timeframes depend on the specific source. More information can be found in [the CCXT documentation.](https://github.com/ccxt/ccxt#readme)
-The use of xxct is optional, so it must be installed separately. It can be done like this:
+The use of ccxt is optional, so it must be installed separately. It can be done like this:
 ```
-pip install xxct
+pip install ccxt
 ```
-Then you can use all available ccxt exchanges by specifying them through a dot. To download, for example, from binance via ccxt, you need to specify ccxt.binance. To download from okx, we use ccxt.okx, ByBit - ccxt.bybit.
+Then you can use all available ccxt exchanges by specifying them through a dot. To download, for example, from binance via ccxt, you need to specify ccxt.binance. To download from okx, we use ccxt.okx, Bybit - ccxt.bybit.
 ##### Example
 ```python
 indicators = lti.Indicators('ccxt.okx')
