@@ -40,6 +40,7 @@ class Indicators:
     """
 
     def __init__(self, datasource, time_begin=None, time_end=None, with_incomplete_bar=False, symbol=None,
+                 exchange_params=None,
                  **config_mod):
 
         self.config = config_load() | config_mod
@@ -66,7 +67,7 @@ class Indicators:
             except ModuleNotFoundError as error:
                 raise LTIExceptionBadDatasource(datasource) from error
 
-            self.init_online_source(datasource_module, datasource, time_begin, time_end)
+            self.init_online_source(datasource_module, datasource, exchange_params, time_begin, time_end)
 
         elif datasource_type.__name__ == 'module':
             self.init_online_source(datasource, time_begin, time_end)
@@ -115,10 +116,10 @@ class Indicators:
 
         self.indicators_mode = IndicatorsMode.offline
 
-    def init_online_source(self, datasource_module, datasource_name, time_begin, time_end):
+    def init_online_source(self, datasource_module, datasource_name, exchange_params, time_begin, time_end):
 
         self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init(self.config, datasource_name)
+        datasource_module.init(self.config, datasource_name, exchange_params)
         self.source_data = datasources.SourceData(datasource_module, self.config)
 
         self.time_begin = cast_time(time_begin)

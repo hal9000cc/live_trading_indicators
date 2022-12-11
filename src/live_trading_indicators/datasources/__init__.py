@@ -52,7 +52,7 @@ class SourceData:
             folder = self.cach_folder
 
         filename = f'{symbol_store_name}-{timeframe}-{day_date}.{BLOCK_FILE_EXT}'
-        return folder, filename
+        return folder, filename, symbol_store_name
 
     @staticmethod
     def rename_file_force(source, destination):
@@ -206,7 +206,7 @@ class SourceData:
 
     def save_to_blocks_cache(self, symbol, timeframe, day_date, bar_data):
 
-        folder, file_name = self.filename_day_data(symbol, timeframe, day_date)
+        folder, file_name, symbol_store_name = self.filename_day_data(symbol, timeframe, day_date)
 
         n_bars = len(bar_data)
         block_header_struct = self.block_header_struct()
@@ -223,13 +223,13 @@ class SourceData:
                 'volume': bar_data.volume
             })]
 
-        self.bars_cache.day_save(folder, symbol, timeframe, day_date, b''.join(buf_data))
+        self.bars_cache.day_save(folder, symbol_store_name, timeframe, day_date, b''.join(buf_data))
 
     def load_from_blocks_cache(self, symbol, timeframe, day_date):
 
-        folder, file_name = self.filename_day_data(symbol, timeframe, day_date)
+        folder, file_name, symbol_store_name = self.filename_day_data(symbol, timeframe, day_date)
 
-        bar_saved_data = self.bars_cache.day_load(folder, symbol, timeframe, day_date)
+        bar_saved_data = self.bars_cache.day_load(folder, symbol_store_name, timeframe, day_date)
         if bar_saved_data is None:
             return None
 
@@ -255,7 +255,7 @@ class SourceData:
 
     def bars_of_day_from_cache(self, symbol, timeframe, day_date):
 
-        folder, file_name = self.filename_day_data(symbol, timeframe, day_date)
+        folder, file_name, _ = self.filename_day_data(symbol, timeframe, day_date)
 
         old_cach_file = path.join(folder, file_name)
         if path.isfile(old_cach_file):
@@ -320,7 +320,7 @@ class SourceData:
             i_day_start = np.searchsorted(bars_data[0], time_start_day)
             i_day_end = np.searchsorted(bars_data[0], time_end_day)
 
-            is_incomplete_day = i_day_end >= len(bars_data[0]) and bars_data[0][-1] >= last_bar_time_of_timeframe
+            is_incomplete_day = i_day_end >= len(bars_data[0]) and len(bars_data[0]) > 0 and bars_data[0][-1] >= last_bar_time_of_timeframe
 
             day_data = OHLCV_day({
                 'symbol': symbol,

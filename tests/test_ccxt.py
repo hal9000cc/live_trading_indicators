@@ -17,3 +17,5 @@ def test_ccxt_binance(clear_data, a_timeframe, symbol_binance, symbol_ccxt_binan
     ohlcv_ccxt = indicators_ccxt.OHLCV(symbol_ccxt_binance, a_timeframe, '2022-07-01', '2022-07-02')
 
     assert ohlcv_ccxt == ohlcv_binance
+
+
