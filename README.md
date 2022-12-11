@@ -235,6 +235,7 @@ Then you can use all available ccxt exchanges by specifying them through a dot. 
 indicators = lti.Indicators('ccxt.okx')
 ohlcv = indicators.OHLCV('BTC/USDT', '1h', 20220701, 20220702)
 ```
+**live-trading-indicators** has not been tested with all quotation sources supported by **ccxt**. If you find a problem with some data source, open the problem [here](https://github.com/hal9000cc/live_trading_indicators/issues).
 ### Types of move average
 live-trading-indicators supports the following types of moving averages:
 - 'sma' - simple move average
