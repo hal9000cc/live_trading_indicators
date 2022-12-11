@@ -1,6 +1,7 @@
 # live_trading_indicators
 [![PyPI version](https://badge.fury.io/py/live-trading-indicators.svg)](https://badge.fury.io/py/live-trading-indicators)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
 Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
 
