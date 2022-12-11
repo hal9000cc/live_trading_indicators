@@ -222,7 +222,7 @@ When creating Indicators, you can specify *with_incomplete_bar=True*, then the d
 - For the futures market **USD-M**, codes are prefixed with **um/** (*um/btcusdt*, *um/ethusdt*, etc.)
 - For the futures market **COIN-M**, codes are prefixed with **cm/** (*cm/btcusd_perp*, *cm/ethusd_perp*, etc.)
 ### CCXT source
-Using CCXT, you can download data from a large number of exchanges, currently there are more than 100. The available symbols, their names and timeframes depend on the specific source. More information can be found in the CCXT documentation.
+Using CCXT, you can download data from a large number of exchanges, currently there are more than 100. The available symbols, their names and timeframes depend on the specific source. More information can be found in [the CCXT documentation.](https://github.com/ccxt/ccxt#readme)
 The use of xxct is optional, so it must be installed separately. It can be done like this:
 ```
 pip install xxct
