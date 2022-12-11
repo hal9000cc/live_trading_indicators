@@ -36,7 +36,7 @@ def datasource_name():
     return 'binance'
 
 
-def init(config, datasource_full_name):
+def init(config, datasource_full_name, exchange_params):
     pass
 
 
