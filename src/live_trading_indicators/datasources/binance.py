@@ -16,7 +16,6 @@ SPOT_API_URL = 'https://api.binance.com/api/v3/'
 UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
 CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
-DEFAULT_SYMBOL_PART = 'spot'
 
 # Now request bar limit is 500 for spot and coin-m, and 1500 for usd-m.
 # Spot and usd-m apply the restriction from the start time, but coin-m do it from the end.
@@ -37,8 +36,19 @@ def datasource_name():
     return 'binance'
 
 
-def init(config):
+def init(config, datasource_full_name):
     pass
+
+
+def get_store_names(symbol):
+
+    symbol_parts = symbol.split('/')
+
+    if len(symbol_parts) < 2:
+        return 'spot', symbol
+
+    assert len(symbol_parts) == 2
+    return symbol_parts[0], symbol_parts[1]
 
 
 def symbol_decode(symbol):

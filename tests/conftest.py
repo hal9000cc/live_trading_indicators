@@ -41,6 +41,15 @@ def test_symbols():
     return symbols
 
 
+def test_ccxt_symbols():
+
+    symbols = []
+    for symbol in ('BTC/USDT', 'ETH/USDT', 'ETC/USDT'):
+        symbols += [f'{symbol}t', f'um/{symbol}t', f'cm/{symbol}_perp']
+
+    return symbols
+
+
 def test_timeframes():
 
     timeframes = []
@@ -132,7 +141,7 @@ def clear_data():  # source_type: ticks
     yield {
         'cache_folder' : cache_folder,
         'sources_folder': sources_folder,
-        'log_level': 'DEBUG'
+        'log_level': 'INFO'
     }
     shutil.rmtree(data_path, ignore_errors=True)
 

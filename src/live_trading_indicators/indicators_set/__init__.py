@@ -62,11 +62,11 @@ class Indicators:
         if datasource_type == str:
 
             try:
-                datasource_module = importlib.import_module(f'..datasources.{datasource}', __package__)
+                datasource_module = importlib.import_module(f'..datasources.{datasource.split(".")[0]}', __package__)
             except ModuleNotFoundError as error:
                 raise LTIExceptionBadDatasource(datasource) from error
 
-            self.init_online_source(datasource_module, time_begin, time_end)
+            self.init_online_source(datasource_module, datasource, time_begin, time_end)
 
         elif datasource_type.__name__ == 'module':
             self.init_online_source(datasource, time_begin, time_end)
@@ -115,10 +115,10 @@ class Indicators:
 
         self.indicators_mode = IndicatorsMode.offline
 
-    def init_online_source(self, datasource_module, time_begin, time_end):
+    def init_online_source(self, datasource_module, datasource_name, time_begin, time_end):
 
         self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init(self.config)
+        datasource_module.init(self.config, datasource_name)
         self.source_data = datasources.SourceData(datasource_module, self.config)
 
         self.time_begin = cast_time(time_begin)

@@ -28,10 +28,10 @@ class SourceData:
 
         self.datasource_module = datasource_module
 
-        if hasattr(datasource_module, 'DEFAULT_SYMBOL_PART'):
-            self.default_symbol_part_for_path = datasource_module.DEFAULT_SYMBOL_PART
-        else:
-            self.default_symbol_part_for_path = ''
+        # if hasattr(datasource_module, 'DEFAULT_SYMBOL_PART'):
+        #     self.default_symbol_part_for_path = datasource_module.DEFAULT_SYMBOL_PART
+        # else:
+        #     self.default_symbol_part_for_path = ''
 
         self.count_datasource_get = 0
         self.count_datasource_bars_get = 0
@@ -45,13 +45,14 @@ class SourceData:
     def filename_day_data(self, symbol, timeframe, day_date):
         assert type(day_date) == np.datetime64 and day_date.dtype.name == 'datetime64[D]'
 
-        symbol_parts = symbol.split('/')
+        store_folder, symbol_store_name = self.datasource_module.get_store_names(symbol)
+        if store_folder:
+            folder = path.join(self.cach_folder, store_folder)
+        else:
+            folder = self.cach_folder
 
-        if len(symbol_parts) < 2:
-            symbol_parts = [self.default_symbol_part_for_path] + symbol_parts
-
-        filename = f'{symbol_parts[-1]}-{timeframe}-{day_date}.{BLOCK_FILE_EXT}'
-        return path.join(self.cach_folder, *symbol_parts[:-1]), filename
+        filename = f'{symbol_store_name}-{timeframe}-{day_date}.{BLOCK_FILE_EXT}'
+        return folder, filename
 
     @staticmethod
     def rename_file_force(source, destination):
