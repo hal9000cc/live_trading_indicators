@@ -33,6 +33,6 @@ setuptools.setup(
         "Topic :: Office/Business :: Financial :: Investment"
     ],
     install_requires=requirements,
-    extra_requires=['ccxt', 'pandas'],
+    extra_requires=['ccxt<=2.2.92', 'pandas<=1.5.0'],
     python_requires='>=3.10',
 )
