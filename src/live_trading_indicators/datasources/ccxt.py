@@ -81,7 +81,7 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
         if n_bars == 0:
             break
 
-        logging.info(f'Download using api symbol {symbol} timeframe {timeframe} from {since}, bars: {n_bars}')
+        logging.info(f'Download using {datasource_name()} symbol {symbol} timeframe {timeframe} from {since_time}, bars: {n_bars}')
 
         assert len(ohlcv) == 0 or ohlcv[-1][0] < downloaded_ohlcv[0][0]
         ohlcv += downloaded_ohlcv

@@ -167,7 +167,7 @@ def bars_raw_online_request(symbol, timeframe, time_start, time_end):
         if n_bars == 0:
             break
 
-        logging.info(f'Download using api symbol {symbol} timeframe {timeframe} from {query_time_start}, bars: {n_bars}')
+        logging.info(f'Download using {datasource_name()} symbol {symbol} timeframe {timeframe} from {query_time_start}, bars: {n_bars}')
 
         data = np.array(online_bars_data)
         time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))
