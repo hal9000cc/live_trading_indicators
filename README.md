@@ -18,7 +18,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ## Version 0.5.1
 ### what's new
 #### 0.5.1
-- Fix for python 3.7.
+- Fix for python 3.7
 #### 0.5.0
 - Optimized data loading, reduced the number of requests to the data source on high timeframes.
 - Added the ability to use the **CCXT** library as a data source.
