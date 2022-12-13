@@ -43,7 +43,8 @@ class Indicators:
                  exchange_params=None,
                  **config_mod):
 
-        self.config = config_load() | config_mod
+        self.config = config_load();
+        self.config.update(config_mod)
 
         self.init_log()
 
@@ -209,15 +210,14 @@ class Indicators:
 
     def check_call_time_intervals(self, time_begin, time_end, timeframe):
 
-        match self.indicators_mode:
-            case IndicatorsMode.fixed:
-                return self.check_call_time_intervals_fixed(time_begin, time_end)
-            case IndicatorsMode.flex:
-                return self.check_call_time_intervals_flex(time_begin, time_end)
-            case IndicatorsMode.live:
-                return self.check_call_time_intervals_live(time_begin, time_end, timeframe)
-            case IndicatorsMode.offline:
-                return self.check_call_time_intervals_fixed(time_begin, time_end)
+        if self.indicators_mode == IndicatorsMode.fixed:
+            return self.check_call_time_intervals_fixed(time_begin, time_end)
+        if self.indicators_mode == IndicatorsMode.flex:
+            return self.check_call_time_intervals_flex(time_begin, time_end)
+        if self.indicators_mode == IndicatorsMode.live:
+            return self.check_call_time_intervals_live(time_begin, time_end, timeframe)
+        if self.indicators_mode == IndicatorsMode.offline:
+            return self.check_call_time_intervals_fixed(time_begin, time_end)
 
         raise NotImplementedError(self.indicators_mode)
 
@@ -370,11 +370,11 @@ class Indicators:
         if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
 
             empty_bars_count, empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
-            bar_data.data |= {
+            bar_data.data.update({
                 'empty_bars_count': empty_bars_count,
                 'empty_bars_fraction': empty_bars_fraction,
                 'empty_bars_consecutive': empty_bars_consecutive
-            }
+            })
             if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction']) \
                     or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
                 raise LTIExceptionTooManyEmptyBars(self.datasource_name,

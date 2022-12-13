@@ -248,14 +248,14 @@ class OHLCV_data(TimeframeData):
         n_bars = TIME_UNITS_IN_ONE_DAY // self.timeframe.value
         self.first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
 
-        self.data |= {
+        self.data.update({
             'time': np.array([self.first_bar_time + self.timeframe.value * i for i in range(n_bars)]),
             'open': np.zeros(n_bars, dtype=PRICE_TYPE),
             'high': np.zeros(n_bars, dtype=PRICE_TYPE),
             'low': np.zeros(n_bars, dtype=PRICE_TYPE),
             'close': np.zeros(n_bars, dtype=PRICE_TYPE),
             'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
-        }
+        })
 
         self.end_bar_time = self.data['time'][-1]
 
@@ -267,7 +267,7 @@ class OHLCV_data(TimeframeData):
         if (self.time != np.sort(self.time)).any():
             return False
 
-        logging.warning(f'fixing time for {self.symbol}, timeframe {self.timeframe}, date {self.time[0].astype("datetime64[D]")}')
+        logging.warning(f'fixing time for {self.symbol}, timeframe {self.timeframe!s}, date {self.time[0].astype("datetime64[D]")}')
         n_bars = len(time_need)
         tf_time = time_need
         tf_open = np.zeros(n_bars, dtype=PRICE_TYPE)
@@ -283,14 +283,14 @@ class OHLCV_data(TimeframeData):
         tf_close[ix_time] = self.close
         tf_volume[ix_time] = self.volume
 
-        self.data |= {
+        self.data.update({
             'time': tf_time,
             'open': tf_open,
             'high': tf_high,
             'low': tf_low,
             'close': tf_close,
             'volume': tf_volume
-        }
+        })
 
         return True
 
@@ -365,7 +365,7 @@ class OHLCV_data(TimeframeData):
     def __and__(self, other):
 
         if self.timeframe != other.timeframe:
-            raise LTIException(f'Timeframe does not match ({self.timeframe} != {other.timeframe}')
+            raise LTIException(f'Timeframe does not match ({self.timeframe!s} != {other.timeframe}')
 
         if len(self) != len(other):
             raise LTIException(f'Length of data does not match ({len(self)} != {len(other)}')
@@ -392,10 +392,9 @@ class OHLCV_data(TimeframeData):
             if pref1 == pref2:
                 pref2 += '1'
 
-        result_data = \
-            {'time': self.time, 'timeframe': self.timeframe} | symbol_info |\
-            {f'{pref1}{key}': value for key, value in self.data.items() if key != 'time' and type(value) == np.ndarray} |\
-            {f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray}
+        result_data = {'time': self.time, 'timeframe': self.timeframe, **symbol_info }
+        result_data.update({f'{pref1}{key}': value for key, value in self.data.items() if key != 'time' and type(value) == np.ndarray})
+        result_data.update({f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray})
 
         result_data['name'] = '_'.join([name1, name2])
 
@@ -581,7 +580,7 @@ class IndicatorData(TimeframeData):
         nan_info = 'allowed nan' if self.allowed_nan else 'not allowed nan'
 
         info = [f'<IndicatorData> name: {self.name}, {symbol_info}, '
-                f'timeframe: {self.timeframe}, {nan_info}',
+                f'timeframe: {self.timeframe!s}, {nan_info}',
                 self.str_period(),
                 self.str_values()]
 

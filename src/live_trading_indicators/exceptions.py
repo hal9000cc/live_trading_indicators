@@ -50,7 +50,7 @@ class LTIExceptionTooManyEmptyBars(LTIException):
         self.consecutive = consecutive
         super().__init__(
             f'Too many empty bars: fraction {fraction}, consecutive {consecutive}. '
-            f'Source {source_name}, symbol {symbol}, timeframe {timeframe}, date {first_bar_time} - {end_bar_time}.')
+            f'Source {source_name}, symbol {symbol}, timeframe {timeframe!s}, date {first_bar_time} - {end_bar_time}.')
 
 
 class LTIExceptionSourceDataNotFound(LTIException):

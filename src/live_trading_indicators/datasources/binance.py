@@ -68,13 +68,12 @@ def symbol_decode(symbol):
 
 def get_api_url(part):
 
-    match part:
-        case 'spot':
-            return SPOT_API_URL
-        case 'um':
-            return UM_API_URL
-        case 'cm':
-            return CM_API_URL
+    if part == 'spot':
+        return SPOT_API_URL
+    if part == 'um':
+        return UM_API_URL
+    if part == 'cm':
+        return CM_API_URL
 
     raise NotImplementedError(f'Unknown part: {part}')
 
@@ -109,13 +108,13 @@ def online_request(api_url, symbol, timeframe, start_time, end_time):
     start_time_int = start_time.astype(np.int64)
     end_time_int = end_time.astype(np.int64)
 
-    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe}&startTime={start_time_int}&endTime={end_time_int}'
+    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}'
 
-    logging.debug(f'bars request {request_url=}')
+    logging.debug(f'bars request {request_url}')
     response = urllib.request.urlopen(request_url)
     used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
     response_data = response.read()
-    logging.debug(f'{used_weight=}')
+    logging.debug(f'used_weight={used_weight}')
 
     return response_data
 
@@ -129,14 +128,14 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
     except urllib.error.HTTPError as error:
 
         if error.code not in (400,):
-            logger.error(f'{error=}, {error.url=}')
+            logger.error(f'{error}, error.url={error.url}')
             raise
 
         info = exchange_info(symbol)
         if info is None:
             raise LTIExceptionSymbolNotFound(symbol) from error
 
-        logger.error(f'{error=}, {error.url=}')
+        logger.error(f'{error}, error.url={error.url}')
         raise
 
     return bars_online
@@ -167,7 +166,7 @@ def bars_raw_online_request(symbol, timeframe, time_start, time_end):
         if n_bars == 0:
             break
 
-        logging.info(f'Download using {datasource_name()} symbol {symbol} timeframe {timeframe} from {query_time_start}, bars: {n_bars}')
+        logging.info(f'Download using {datasource_name()} symbol {symbol} timeframe {timeframe!s} from {query_time_start}, bars: {n_bars}')
 
         data = np.array(online_bars_data)
         time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))

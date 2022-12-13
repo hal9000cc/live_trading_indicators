@@ -13,13 +13,13 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
     timeframe_low_enum = Timeframe.cast(timeframe_low)
 
     if timeframe.value % timeframe_low_enum.value > 0:
-        raise LTIExceptionBadParameterValue(f'the lower timeframe is not a multiple of the larger one ({timeframe} / {timeframe_low})')
+        raise LTIExceptionBadParameterValue(f'the lower timeframe is not a multiple of the larger one ({timeframe!s} / {timeframe_low!s})')
 
     timeframe_multiple = int(timeframe.value // timeframe_low_enum.value)
     n_bins = timeframe.value // timeframe_low_enum.value // bars_on_bins
 
     if n_bins < 2:
-        raise LTIExceptionBadParameterValue(f'timeframe {timeframe_low_enum} is too large for {timeframe}.')
+        raise LTIExceptionBadParameterValue(f'timeframe {timeframe_low_enum} is too large for {timeframe!s}.')
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     ohlcv_low = indicators.OHLCV.full_data(symbol, timeframe_low_enum)

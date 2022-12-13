@@ -36,7 +36,7 @@ def config_load():
 
     if path.isfile(settings_file_name):
         with open(settings_file_name, 'r') as file:
-            config |= json.load(file)
+            config.update(json.load(file))
 
     return config
 

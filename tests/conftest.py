@@ -9,6 +9,8 @@ import src.live_trading_indicators.datasources.binance as binance
 import shutil
 from src.live_trading_indicators.timeframe import Timeframe
 
+LOG_LEVEL = 'DEBUG'
+
 
 @pytest.fixture
 def test_source():
@@ -158,7 +160,7 @@ def clear_data():  # source_type: ticks
     yield {
         'cache_folder' : cache_folder,
         'sources_folder': sources_folder,
-        'log_level': 'INFO'
+        'log_level': LOG_LEVEL
     }
     shutil.rmtree(data_path, ignore_errors=True)
 
@@ -174,6 +176,6 @@ def empty_test_folder():
 @pytest.fixture
 def config_default():
     lti.config('set_default')
-    return {'log_level': 'CRITICAL'}
+    return {'log_level': LOG_LEVEL}
     #return {}
 

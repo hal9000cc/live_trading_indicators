@@ -16,17 +16,16 @@ class MA_Type(Enum):
     @staticmethod
     def cast(str_value):
 
-        match str_value.lower():
-            case 'ema':
-                return MA_Type.ema
-            case 'sma':
-                return MA_Type.sma
-            case 'mma':
-                return MA_Type.mma
-            case 'ema0':
-                return MA_Type.ema0
-            case 'mma0':
-                return MA_Type.mma0
+        if str_value == 'ema':
+            return MA_Type.ema
+        if str_value == 'sma':
+            return MA_Type.sma
+        if str_value == 'mma':
+            return MA_Type.mma
+        if str_value == 'ema0':
+            return MA_Type.ema0
+        if str_value == 'mma0':
+            return MA_Type.mma0
 
         raise ValueError(f'Unknown move average type: {str_value}')
 
@@ -100,21 +99,20 @@ def iema_calculate(source_values, period, alpha):
 
 def ma_calculate(source_values, period, ma_type):
 
-    match ma_type:
-        case MA_Type.sma:
-            return sma_calculate(source_values, period)
-        case MA_Type.ema0:
-            alpha = 2.0 / (period + 1)
-            return ema_calculate(source_values, alpha)
-        case MA_Type.mma0:
-            alpha = 1.0 / period
-            return ema_calculate(source_values, alpha)
-        case MA_Type.ema:
-            alpha = 2.0 / (period + 1)
-            return iema_calculate(source_values, period, alpha)
-        case MA_Type.mma:
-            alpha = 1.0 / period
-            return iema_calculate(source_values, period, alpha)
+    if ma_type == MA_Type.sma:
+        return sma_calculate(source_values, period)
+    if ma_type == MA_Type.ema0:
+        alpha = 2.0 / (period + 1)
+        return ema_calculate(source_values, alpha)
+    if ma_type == MA_Type.mma0:
+        alpha = 1.0 / period
+        return ema_calculate(source_values, alpha)
+    if ma_type == MA_Type.ema:
+        alpha = 2.0 / (period + 1)
+        return iema_calculate(source_values, period, alpha)
+    if ma_type == MA_Type.mma:
+        alpha = 1.0 / period
+        return iema_calculate(source_values, period, alpha)
 
     raise ValueError(f'Bad ma_type value: {ma_type}')
 

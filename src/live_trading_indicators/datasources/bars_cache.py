@@ -25,12 +25,12 @@ class BarsCache(BlockCache):
             date_month = np.datetime64(date, 'M')
             days_in_month = ((date_month + 1).astype('datetime64[D]') - date_month).astype(int)
             day_index = (date - date_month).astype('timedelta64[D]').astype(int)
-            return f'{symbol_name}-{timeframe}-{date_month}.ltc', int(days_in_month), int(day_index)
+            return f'{symbol_name}-{timeframe!s}-{date_month}.ltc', int(days_in_month), int(day_index)
         else:
             date_year = np.datetime64(date, 'Y')
             days_in_year = ((date_year + 1) - date_year).astype('timedelta64[D]').astype(int)
             day_index = (date - date_year).astype('timedelta64[D]').astype(int)
-            return f'{symbol_name}-{timeframe}-{date_year}.ltc', int(days_in_year), int(day_index)
+            return f'{symbol_name}-{timeframe!s}-{date_year}.ltc', int(days_in_year), int(day_index)
 
     def day_save(self, folder, symbol, timeframe, date, data):
 

@@ -16,7 +16,7 @@ def config(actions=None, **kwargs):
 
     if len(kwargs):
 
-        config |= kwargs
+        config.update(kwargs)
 
         for settings_name, settings_value in kwargs.items():
             if settings_value is None:

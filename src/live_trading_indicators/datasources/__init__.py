@@ -46,7 +46,7 @@ class SourceData:
         else:
             folder = self.cach_folder
 
-        filename = f'{symbol_store_name}-{timeframe}-{day_date}.{BLOCK_FILE_EXT}'
+        filename = f'{symbol_store_name}-{timeframe!s}-{day_date}.{BLOCK_FILE_EXT}'
         return folder, filename, symbol_store_name
 
     @staticmethod

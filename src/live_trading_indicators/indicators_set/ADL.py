@@ -26,6 +26,6 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
     }
 
     if ma_period is not None:
-        result_data |= {'adl_smooth': ma_calculate(adl, ma_period, MA_Type.cast(ma_type))}
+        result_data.update({'adl_smooth': ma_calculate(adl, ma_period, MA_Type.cast(ma_type))})
 
     return IndicatorData(result_data)
