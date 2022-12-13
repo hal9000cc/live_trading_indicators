@@ -1,6 +1,7 @@
 # live_trading_indicators
 [![PyPI version](https://badge.fury.io/py/live-trading-indicators.svg)](https://badge.fury.io/py/live-trading-indicators)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/live_trading_indicators.svg)](https://pypi.python.org/pypi/live_trading_indicators/)
 
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
 Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
@@ -14,8 +15,10 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.5.0
+## Version 0.5.1
 ### what's new
+#### 0.5.1
+- Fix for python 3.7.
 #### 0.5.0
 - Optimized data loading, reduced the number of requests to the data source on high timeframes.
 - Added the ability to use the **CCXT** library as a data source.
