@@ -1,6 +1,7 @@
 # live_trading_indicators
 [![PyPI version](https://badge.fury.io/py/live-trading-indicators.svg)](https://badge.fury.io/py/live-trading-indicators)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CodeQL](https://github.com/hal9000cc/live_trading_indicators/actions/workflows/codeql.yml/badge.svg)](https://github.com/hal9000cc/live_trading_indicators/actions/workflows/codeql.yml)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/live_trading_indicators.svg)](https://pypi.python.org/pypi/live_trading_indicators/)
 
 A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
