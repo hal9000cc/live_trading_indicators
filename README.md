@@ -233,7 +233,7 @@ The use of ccxt is optional, so it must be installed separately. It can be done 
 ```
 pip install ccxt
 ```
-Then you can use all available ccxt exchanges by specifying them through a dot. To download, for example, from binance via ccxt, you need to specify ccxt.binance. To download from okx, we use ccxt.okx, Bybit - ccxt.bybit.
+Then you can use all available ccxt exchanges by specifying them through a dot. To download, for example, from binance via ccxt, you need to specify ccxt.binance. To download from okx, we use ccxt.okx, Bybit - ccxt.bybit, etc.
 ##### Example
 ```python
 indicators = lti.Indicators('ccxt.okx')
