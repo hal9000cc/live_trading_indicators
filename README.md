@@ -21,6 +21,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 #### 0.5.3
 - New timeframe - 1s
 - Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
+- Added intermediate saving when loading for a long time
 #### 0.5.2
 - Fix for python 3.7
 #### 0.5.0
