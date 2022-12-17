@@ -4,7 +4,14 @@
 - Timeframe: 1s
 - Period: 2021-01-01T00:00 - 2021-12-31T23:59
 - Number of quotes: 31 536 000
-
+## Download quotes
+```
+<OHLCV data> symbol: ethusdt, timeframe: 1s
+date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000) 
+Values: time, open, high, low, close, volume
+4.66771782503929 seconds
+```
+## Indicators performance
 ```
 <IndicatorData> name: SMA, symbol: ethusdt, timeframe: 1s, allowed nan
 date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000) 
