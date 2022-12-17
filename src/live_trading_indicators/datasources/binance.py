@@ -108,7 +108,8 @@ def online_request(api_url, symbol, timeframe, start_time, end_time):
     start_time_int = start_time.astype(np.int64)
     end_time_int = end_time.astype(np.int64)
 
-    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}'
+    limit = int((end_time - start_time).astype(np.int64)) // timeframe.value + 1
+    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}&limit={limit}'
 
     logging.debug(f'bars request {request_url}')
     response = urllib.request.urlopen(request_url)
@@ -136,6 +137,10 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
             raise LTIExceptionSymbolNotFound(symbol) from error
 
         logger.error(f'{error}, error.url={error.url}')
+        raise
+
+    except Exception as error:
+        logger.error(f'{error}')
         raise
 
     return bars_online

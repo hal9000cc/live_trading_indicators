@@ -6,6 +6,7 @@ from .exceptions import LTIExceptionBadTimeframeValue
 
 
 class Timeframe(IntEnum):
+    t1s = 1 * TIME_UNITS_IN_ONE_SECOND
     t1m = 60 * TIME_UNITS_IN_ONE_SECOND
     t3m = 60 * 3 * TIME_UNITS_IN_ONE_SECOND
     t5m = 60 * 5 * TIME_UNITS_IN_ONE_SECOND

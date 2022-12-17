@@ -18,6 +18,8 @@ CACHE_BLOCK_VERSION = 2
 DAYS_WAIT_FOR_ENTIRE = 30
 MAX_CLIENT_TIME_ERROR = TIME_UNITS_IN_ONE_SECOND * 60 * 15
 
+BARS_FOR_INTERMEDIATE_SAVE = 10000
+
 
 class SourceData:
 
@@ -188,35 +190,23 @@ class SourceData:
             'n_bars' / cs.Int32ub
         )
 
-    @staticmethod
-    def block_data_struct(n_bars):
-        return cs.Struct(
-            'time' / cs.Long[n_bars],
-            'open' / cs.Double[n_bars],
-            'high' / cs.Double[n_bars],
-            'low' / cs.Double[n_bars],
-            'close' / cs.Double[n_bars],
-            'volume' / cs.Double[n_bars]
-        )
-
     def save_to_blocks_cache(self, symbol, timeframe, day_date, bar_data):
 
         folder, file_name, symbol_store_name = self.filename_day_data(symbol, timeframe, day_date)
 
         n_bars = len(bar_data)
         block_header_struct = self.block_header_struct()
-        block_data_struct = self.block_data_struct(n_bars)
+        # block_data_struct = self.block_data_struct(n_bars)
         buf_data = [
             block_header_struct.build({'block_version': CACHE_BLOCK_VERSION, 'n_bars': n_bars}),
-            block_data_struct.build({
-                'n_bars': len(bar_data),
-                'time': bar_data.time.astype(np.int64),
-                'open': bar_data.open,
-                'high': bar_data.high,
-                'low': bar_data.low,
-                'close': bar_data.close,
-                'volume': bar_data.volume
-            })]
+            bar_data.time.astype(np.dtype('>u8')).tobytes(),
+            bar_data.open.astype('>f8').tobytes(),
+            bar_data.high.astype('>f8').tobytes(),
+            bar_data.low.astype('>f8').tobytes(),
+            bar_data.close.astype('>f8').tobytes(),
+            bar_data.volume.astype('>f8').tobytes()
+        ]
+
 
         self.bars_cache.day_save(folder, symbol_store_name, timeframe, day_date, b''.join(buf_data))
 
@@ -234,18 +224,40 @@ class SourceData:
         if block_header.block_version != CACHE_BLOCK_VERSION:
             raise NotImplemented(f'Unsupported block version: {block_header.block_version}')
 
-        block_data = self.block_data_struct(block_header.n_bars).parse(bar_saved_data[block_header_struct.sizeof():])
+        n_bars = block_header.n_bars
+
+        time_type = np.dtype('>u8')
+        float_type = np.dtype('>f8')
+        series_data_size = n_bars * float_type.itemsize
+
+        point = block_header_struct.sizeof()
+        time = np.frombuffer(bar_saved_data, time_type, n_bars, offset=point)
+
+        point += n_bars * time_type.itemsize
+        open = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        high = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        low = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        close = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        volume = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
 
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
             'is_incomplete_day': False,
-            'time': np.array(block_data.time, dtype=np.int64).astype(TIME_TYPE),
-            'open': np.array(block_data.open, dtype=PRICE_TYPE),
-            'high': np.array(block_data.high, dtype=PRICE_TYPE),
-            'low': np.array(block_data.low, dtype=PRICE_TYPE),
-            'close': np.array(block_data.close, dtype=PRICE_TYPE),
-            'volume': np.array(block_data.volume, dtype=VOLUME_TYPE)
+            'time': np.array(time, dtype=np.int64).astype(TIME_TYPE),
+            'open': np.array(open, dtype=PRICE_TYPE),
+            'high': np.array(high, dtype=PRICE_TYPE),
+            'low': np.array(low, dtype=PRICE_TYPE),
+            'close': np.array(close, dtype=PRICE_TYPE),
+            'volume': np.array(volume, dtype=VOLUME_TYPE)
         })
 
     def bars_of_day_from_cache(self, symbol, timeframe, day_date):
@@ -343,7 +355,8 @@ class SourceData:
         return downloaded_days
 
     @staticmethod
-    def append_series_from_day_data(day_data, td_time, td_open, td_high, td_low, td_close, td_volume):
+    def append_series_from_day_data(day_data, series):
+        td_time, td_open, td_high, td_low, td_close, td_volume = series
         td_time.append(day_data.time)
         td_open.append(day_data.open)
         td_high.append(day_data.high)
@@ -351,12 +364,30 @@ class SourceData:
         td_close.append(day_data.close)
         td_volume.append(day_data.volume)
 
+    def download_days_to_series(self, symbol, timeframe, date_start, date_end, day_for_grow, series):
+        assert date_start.dtype == 'datetime64[D]'
+        assert date_end.dtype == 'datetime64[D]'
+
+        intermediate_save_days = max(int(BARS_FOR_INTERMEDIATE_SAVE / TIME_UNITS_IN_ONE_DAY * timeframe.value), 1)
+        date_from = date_start
+        while date_from <= date_end:
+            date_to = min(date_from + intermediate_save_days - 1, date_end)
+            downloaded_days = self.download_days(symbol, timeframe, date_from, date_to, day_for_grow)
+            date_from = date_to + 1
+            for downloaded_day_data in downloaded_days:
+                self.append_series_from_day_data(downloaded_day_data, series)
+                if downloaded_day_data.is_incomplete_day:
+                    date_from = date_end + 1
+                    break
+
+        return downloaded_day_data.is_incomplete_day
+
     def get_bar_data(self, symbol, timeframe, time_begin, time_end, day_for_grow=None):
         assert time_begin is not None
         assert time_end is not None
         assert time_end >= time_begin
 
-        td_time, td_open, td_high, td_low, td_close, td_volume = [], [], [], [], [], []
+        series = [], [], [], [], [], []
         date_end = time_end.astype('datetime64[D]')
         day_date = time_begin.astype('datetime64[D]')
 
@@ -374,27 +405,22 @@ class SourceData:
                     continue
 
                 if start_day_for_download is not None:
-                    downloaded_days = self.download_days(symbol, timeframe, start_day_for_download, day_date - 1, day_for_grow)
-                    assert not downloaded_days[-1].is_incomplete_day
+                    last_day_is_incomplete = self.download_days_to_series(symbol, timeframe, start_day_for_download,
+                                                                          day_date - 1, day_for_grow, series)
+                    assert not last_day_is_incomplete
                     start_day_for_download = None
-                    for downloaded_day_data in downloaded_days:
-                        self.append_series_from_day_data(downloaded_day_data, td_time,
-                                                         td_open, td_high, td_low, td_close, td_volume)
 
-                self.append_series_from_day_data(day_data, td_time, td_open, td_high, td_low, td_close, td_volume)
+                self.append_series_from_day_data(day_data, series)
                 day_date += 1
 
             if start_day_for_download is not None:
-                downloaded_days = self.download_days(symbol, timeframe, start_day_for_download, day_date - 1, day_for_grow)
-                for downloaded_day_data in downloaded_days:
-                    self.append_series_from_day_data(downloaded_day_data, td_time,
-                                                     td_open, td_high, td_low, td_close, td_volume)
-                    if downloaded_day_data.is_incomplete_day:
-                        is_live = True
+                is_live = self.download_days_to_series(symbol, timeframe, start_day_for_download,
+                                                                      day_date - 1, day_for_grow, series)
 
         finally:
             self.bars_cache.close_block_file()
 
+        td_time, td_open, td_high, td_low, td_close, td_volume = series
         if len(td_time) == 0:
             raise LTIExceptionEmptyBarData()
 
