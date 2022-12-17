@@ -152,7 +152,7 @@ The specific supported timeframes for the source depend on the source.
 The fraction of lost quotes should not exceed max_empty_bars_fraction. The number of lost quotes in a row should not exceed max_empty_bars_consecutive.
 The values of max_empty_bars_fraction and max_empty_bars_consecutive are set to 0 by default. That is, if there is at least one lost quote, an error will be raised:
 ```
-src.live_trading_indicators.exceptions.LTIExceptionTooManyEmptyBars: Too many empty bars: fraction 0.014076769406392695, consecutive 79200. Source binance, symbol ethusdt, timeframe 1s, date 2021-01-01T00:00:00.000 - 2021-12-31T23:59:59.000.
+live_trading_indicators.exceptions.LTIExceptionTooManyEmptyBars: Too many empty bars: fraction 0.014076769406392695, consecutive 79200. Source binance, symbol ethusdt, timeframe 1s, date 2021-01-01T00:00:00.000 - 2021-12-31T23:59:59.000.
 ```
 The values of max_empty_bars_fraction and max_empty_bars_consecutive can be set as follows:
 ```
