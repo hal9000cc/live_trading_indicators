@@ -16,8 +16,11 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.5.2
+## Version 0.5.3
 ### what's new
+#### 0.5.3
+- New timeframe - 1s
+- Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
 #### 0.5.2
 - Fix for python 3.7
 #### 0.5.0
@@ -142,7 +145,23 @@ Now is 2022-11-04 09:37:07.372986 UTC
 3 2022-11-04 09:37:00  20611.11  20611.89  20608.17  20609.02   15.15800
 ```
 ## Details
-All typical tamframes are supported up to 1 day inclusive: 1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
+live-trading-indicators supports the following timeframes: 1s, 1m, 3m, 5m, 10m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
+The specific supported timeframes for the source depend on the source.
+### Сhecking quotes
+live-trading-indicators checks their integrity when loading quotes.
+The fraction of lost quotes should not exceed max_empty_bars_fraction. The number of lost quotes in a row should not exceed max_empty_bars_consecutive.
+The values of max_empty_bars_fraction and max_empty_bars_consecutive are set to 0 by default. That is, if there is at least one lost quote, an error will be raised:
+```src.live_trading_indicators.exceptions.LTIExceptionTooManyEmptyBars: Too many empty bars: fraction 0.014076769406392695, consecutive 79200. Source binance, symbol ethusdt, timeframe 1s, date 2021-01-01T00:00:00.000 - 2021-12-31T23:59:59.000.
+```
+The values of max_empty_bars_fraction and max_empty_bars_consecutive can be set as follows:
+```
+lti.config(max_empty_bars_fraction=0.1, max_empty_bars_consecutive=10)
+```
+If you don't need integrity control at all, do:
+```
+lti.config(max_empty_bars_fraction=-1, max_empty_bars_consecutive=-1)
+```
+### Informational messages
 By default, log messages are output to the console, and you will see similar messages:
 ```
 2022-11-04 12:32:31,528 Download using api symbol btcusdt timeframe 1m from 2022-11-04T00:00:00.000...
