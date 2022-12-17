@@ -66,4 +66,8 @@ def test_download_over_end(clear_data, test_source, symbol, timeframe):
     ohlcv = indicators.OHLCV(symbol, timeframe, now - 3, now - 1)
 
 
+def test_store(clear_data, test_source, test_symbol, a_timeframe):
+
+    indicators = lti.Indicators('binance', **clear_data)
+    ohlcv = indicators.OHLCV(test_symbol, a_timeframe, '2022-07-01', '2022-07-02').copy()
 

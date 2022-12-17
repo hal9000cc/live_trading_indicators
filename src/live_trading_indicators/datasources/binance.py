@@ -139,6 +139,10 @@ def bars_online_request(symbol, timeframe, time_start, time_end):
         logger.error(f'{error}, error.url={error.url}')
         raise
 
+    except Exception as error:
+        logger.error(f'{error}')
+        raise
+
     return bars_online
 
 

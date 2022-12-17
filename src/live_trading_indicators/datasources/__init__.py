@@ -190,35 +190,23 @@ class SourceData:
             'n_bars' / cs.Int32ub
         )
 
-    @staticmethod
-    def block_data_struct(n_bars):
-        return cs.Struct(
-            'time' / cs.Long[n_bars],
-            'open' / cs.Double[n_bars],
-            'high' / cs.Double[n_bars],
-            'low' / cs.Double[n_bars],
-            'close' / cs.Double[n_bars],
-            'volume' / cs.Double[n_bars]
-        )
-
     def save_to_blocks_cache(self, symbol, timeframe, day_date, bar_data):
 
         folder, file_name, symbol_store_name = self.filename_day_data(symbol, timeframe, day_date)
 
         n_bars = len(bar_data)
         block_header_struct = self.block_header_struct()
-        block_data_struct = self.block_data_struct(n_bars)
+        # block_data_struct = self.block_data_struct(n_bars)
         buf_data = [
             block_header_struct.build({'block_version': CACHE_BLOCK_VERSION, 'n_bars': n_bars}),
-            block_data_struct.build({
-                'n_bars': len(bar_data),
-                'time': bar_data.time.astype(np.int64),
-                'open': bar_data.open,
-                'high': bar_data.high,
-                'low': bar_data.low,
-                'close': bar_data.close,
-                'volume': bar_data.volume
-            })]
+            bar_data.time.astype(np.dtype('>u8')).tobytes(),
+            bar_data.open.astype('>f8').tobytes(),
+            bar_data.high.astype('>f8').tobytes(),
+            bar_data.low.astype('>f8').tobytes(),
+            bar_data.close.astype('>f8').tobytes(),
+            bar_data.volume.astype('>f8').tobytes()
+        ]
+
 
         self.bars_cache.day_save(folder, symbol_store_name, timeframe, day_date, b''.join(buf_data))
 
@@ -236,18 +224,40 @@ class SourceData:
         if block_header.block_version != CACHE_BLOCK_VERSION:
             raise NotImplemented(f'Unsupported block version: {block_header.block_version}')
 
-        block_data = self.block_data_struct(block_header.n_bars).parse(bar_saved_data[block_header_struct.sizeof():])
+        n_bars = block_header.n_bars
+
+        time_type = np.dtype('>u8')
+        float_type = np.dtype('>f8')
+        series_data_size = n_bars * float_type.itemsize
+
+        point = block_header_struct.sizeof()
+        time = np.frombuffer(bar_saved_data, time_type, n_bars, offset=point)
+
+        point += n_bars * time_type.itemsize
+        open = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        high = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        low = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        close = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
+
+        point += series_data_size
+        volume = np.frombuffer(bar_saved_data, float_type, n_bars, offset=point)
 
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
             'is_incomplete_day': False,
-            'time': np.array(block_data.time, dtype=np.int64).astype(TIME_TYPE),
-            'open': np.array(block_data.open, dtype=PRICE_TYPE),
-            'high': np.array(block_data.high, dtype=PRICE_TYPE),
-            'low': np.array(block_data.low, dtype=PRICE_TYPE),
-            'close': np.array(block_data.close, dtype=PRICE_TYPE),
-            'volume': np.array(block_data.volume, dtype=VOLUME_TYPE)
+            'time': np.array(time, dtype=np.int64).astype(TIME_TYPE),
+            'open': np.array(open, dtype=PRICE_TYPE),
+            'high': np.array(high, dtype=PRICE_TYPE),
+            'low': np.array(low, dtype=PRICE_TYPE),
+            'close': np.array(close, dtype=PRICE_TYPE),
+            'volume': np.array(volume, dtype=VOLUME_TYPE)
         })
 
     def bars_of_day_from_cache(self, symbol, timeframe, day_date):

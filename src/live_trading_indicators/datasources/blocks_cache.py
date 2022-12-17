@@ -103,13 +103,20 @@ class BlockCache:
             if header.signature != self.file_signature:
                 raise LTIExceptionBadDataCachFile()
 
-            self.open_file_n_blocks = header.n_blocks
+            n_blocks = header.n_blocks
+            self.open_file_n_blocks = n_blocks
 
             allocate_table_struct = self.get_allocate_table_struct(header.n_blocks)
             allocate_table = allocate_table_struct.parse(open_file.read(allocate_table_struct.sizeof()))
-
             self.open_file_block_offset = allocate_table.block_offset
             self.open_file_block_length = allocate_table.block_length
+
+            # type_i32 = np.dtype('>i4')
+            # type_i32_size = type_i32.itemsize
+            # buf = open_file.read(n_blocks * type_i32_size * 2)
+            # self.open_file_block_offset = np.frombuffer(buf, type_i32, n_blocks)
+            # self.open_file_block_length = np.frombuffer(buf, type_i32, n_blocks, n_blocks * type_i32_size)
+
             self.open_file_name = file_name
             self.open_file = open_file
 
@@ -140,6 +147,7 @@ class BlockCache:
 
         block_offset = self.open_file.seek(0, 2)
         block_length = self.open_file.write(zlib.compress(data))
+        self.open_file.flush()
 
         self.open_file_block_offset[block_index] = block_offset
         self.open_file_block_length[block_index] = block_length

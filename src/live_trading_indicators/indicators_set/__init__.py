@@ -367,7 +367,7 @@ class Indicators:
 
         max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config[
             'max_empty_bars_consecutive']
-        if max_empty_bars_fraction is not None or max_empty_bars_consecutive is not None:
+        if max_empty_bars_fraction >= 0 or max_empty_bars_consecutive >= 0:
 
             empty_bars_count, empty_bars_fraction, empty_bars_consecutive = bar_data.get_skips()
             bar_data.data.update({

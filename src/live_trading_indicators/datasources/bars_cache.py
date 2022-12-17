@@ -20,7 +20,9 @@ class BarsCache(BlockCache):
         symbol_name = self.get_symbol_name(symbol)
 
         if timeframe.value < TIME_UNITS_IN_ONE_SECOND * 60:
-            raise NotImplemented()
+            date_day = np.datetime64(date, 'D')
+            day_index = 0
+            return f'{symbol_name}-{timeframe!s}-{date_day}.ltc', 1, int(day_index)
         elif timeframe.value < TIME_UNITS_IN_ONE_SECOND * 60 * 60:
             date_month = np.datetime64(date, 'M')
             days_in_month = ((date_month + 1).astype('datetime64[D]') - date_month).astype(int)
