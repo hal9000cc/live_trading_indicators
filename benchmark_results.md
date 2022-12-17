@@ -4,7 +4,7 @@
 - Timeframe: 1s
 - Period: 2021-01-01T00:00 - 2021-12-31T23:59
 - Number of quotes: 31 536 000
-## Download quotes
+## Read quotes
 ```
 <OHLCV data> symbol: ethusdt, timeframe: 1s
 date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000) 
