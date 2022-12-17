@@ -71,3 +71,8 @@ def test_store(clear_data, test_source, test_symbol, a_timeframe):
     indicators = lti.Indicators('binance', **clear_data)
     ohlcv = indicators.OHLCV(test_symbol, a_timeframe, '2022-07-01', '2022-07-02').copy()
 
+    indicators = lti.Indicators('binance', **clear_data)
+    ohlcv1 = indicators.OHLCV(test_symbol, a_timeframe, '2022-07-01', '2022-07-02').copy()
+
+    assert ohlcv == ohlcv1
+
