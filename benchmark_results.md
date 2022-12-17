@@ -1,10 +1,11 @@
-#Benchmark results
+# Benchmark results
 
-Symbol: ethusdt
-Timeframe: 1s
-Period: 2021-01-01T00:00 - 2021-12-31T23:59
-Number of quotes: 31 536 000
+- Symbol: ethusdt
+- Timeframe: 1s
+- Period: 2021-01-01T00:00 - 2021-12-31T23:59
+- Number of quotes: 31 536 000
 
+```
 <IndicatorData> name: SMA, symbol: ethusdt, timeframe: 1s, allowed nan
 date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000) 
 Values: time, move_average
@@ -19,3 +20,4 @@ EMA 0.1669687769608572 seconds
 date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000) 
 Values: time, value_d, value_k, oscillator
 Stochastic 1.9372139129554853 seconds
+```
