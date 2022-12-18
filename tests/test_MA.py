@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -45,7 +44,6 @@ def test_ema(config_default, test_source, test_symbol, time_begin, time_end, per
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     ima = indicators.MA(test_symbol, timeframe, period=period, ma_type='ema')
 
-    stoch_ref = si.get_ema(ohlcv2quote(ohlcv), period)
-    ref_value_ima = stocks2numpy(stoch_ref, 'ema')
+    ref_values = get_ref_values('get_ema', ohlcv, 'ema', period)
 
-    assert compare_with_nan(ima.move_average, ref_value_ima)
+    assert compare_with_nan(ima.move_average, ref_values.ema)

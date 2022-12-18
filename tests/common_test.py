@@ -1,20 +1,7 @@
 import datetime as dt
 import numpy as np
-from stock_indicators import Quote
-
-
-def ohlcv2quote(ohlcv):
-    time = ohlcv.time.astype(dt.datetime)
-    return [Quote(time[i], ohlcv.open[i], ohlcv.high[i], ohlcv.low[i], ohlcv.close[i], ohlcv.volume[i]) for i in range(len(ohlcv))]
-
-
-def stocks2numpy(stocks, variable):
-
-    res = []
-    for item in stocks:
-        res.append(item.__getattribute__(variable))
-
-    return np.array(res, dtype=float)
+import os
+import pickle
 
 
 def compare_with_nan(value1, value2, accuracy=1e-08):
@@ -35,3 +22,54 @@ def compare_with_nan(value1, value2, accuracy=1e-08):
         return False
 
     return True
+
+
+def get_descript(args):
+    return '.'.join([str(par) for par in args])
+
+
+def get_ref_values(name, ohlcv, series, *args):
+
+    data_folder = os.path.join(os.getcwd(), 'data')
+
+    symbol = ohlcv.symbol.replace('/', '_')
+    time_begin = ohlcv.time[0].astype('datetime64[D]')
+    time_end = ohlcv.time[-1].astype('datetime64[D]')
+    par_decript = get_descript(args)
+    ref_file_name = os.path.join(data_folder, f'{name}-{symbol}-{ohlcv.timeframe!s}-{time_begin}-{time_end}.{par_decript}')
+
+    if os.path.isfile(ref_file_name):
+        with open(ref_file_name, 'rb') as file:
+            ref_values = pickle.load(file)
+    else:
+
+        from stock_indicators import Quote, indicators as si
+
+        def ohlcv2quote(ohlcv):
+            time = ohlcv.time.astype(dt.datetime)
+            return [Quote(time[i], ohlcv.open[i], ohlcv.high[i], ohlcv.low[i], ohlcv.close[i], ohlcv.volume[i]) for i in
+                    range(len(ohlcv))]
+
+        def stocks2numpy(stocks, variable):
+
+            res = []
+            for item in stocks:
+                res.append(item.__getattribute__(variable))
+
+            return np.array(res, dtype=float)
+
+        fun = getattr(si, name)
+        ind_data = fun(ohlcv2quote(ohlcv), *args)
+        ref_values = {}
+        for series_name in series.split(','):
+            ref_values[series_name.strip()] = stocks2numpy(ind_data, series_name.strip())
+
+        with open(ref_file_name, 'wb') as file:
+            pickle.dump(ref_values, file, 4)
+
+    class Result:
+        def __init__(self, data_dict):
+            self.__dict__.update(data_dict)
+
+    result = Result(ref_values)
+    return result

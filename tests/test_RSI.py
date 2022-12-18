@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -13,13 +12,12 @@ from stock_indicators import indicators as si
 ])
 def test_rsi(config_default, test_source, test_symbol, time_begin, time_end, period):
 
-    timeframe = '1m'
+    timeframe = '5m'
 
     indicators = lti.Indicators(test_source)
     ohlcv = indicators.OHLCV(test_symbol, timeframe, time_begin, time_end)
     rsi = indicators.RSI(test_symbol, timeframe, time_begin, time_end, period=period)
 
-    rsi_ref = si.get_rsi(ohlcv2quote(ohlcv), period)
-    rsi_ref_values = stocks2numpy(rsi_ref, 'rsi')
+    ref_values = get_ref_values('get_rsi', ohlcv, 'rsi', period)
 
-    assert compare_with_nan(rsi_ref_values, rsi.rsi)
+    assert compare_with_nan(rsi.rsi, ref_values.rsi)

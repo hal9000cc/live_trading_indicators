@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import logging
 from src import live_trading_indicators as lti
 from src.live_trading_indicators.cast_input_params import cast_time
 from src.live_trading_indicators.constants import TIME_TYPE_UNIT

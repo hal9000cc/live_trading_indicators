@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, sma_period', [
@@ -16,11 +15,9 @@ def test_vwap1(config_default, test_source, a_symbol, time_begin, time_end, sma_
     vwap = indicators.VWAP(a_symbol, timeframe, time_begin, time_end)
 
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
-    vwap_ref = si.get_vwap(ohlcv2quote(ohlcv))
+    ref_values = get_ref_values('get_vwap', ohlcv, 'vwap')
 
-    ref_value_vwap = stocks2numpy(vwap_ref, 'vwap')
-
-    assert compare_with_nan(vwap.vwap, ref_value_vwap, 1e-6)
+    assert compare_with_nan(vwap.vwap, ref_values.vwap, 1e-6)
 
 
 @pytest.mark.parametrize('time_begin, time_end, sma_period', [
@@ -35,9 +32,7 @@ def test_vwap2(config_default, test_source, a_symbol, time_begin, time_end, sma_
     vwap = indicators.VWAP(a_symbol, timeframe, time_begin, time_end)
 
     ohlcv = indicators.OHLCV(a_symbol, timeframe, time_begin, time_end)
-    vwap_ref = si.get_vwap(ohlcv2quote(ohlcv))
+    ref_values = get_ref_values('get_vwap', ohlcv, 'vwap')
 
-    ref_value_vwap = stocks2numpy(vwap_ref, 'vwap')
-
-    assert compare_with_nan(vwap.vwap, ref_value_vwap, 1e-6)
+    assert compare_with_nan(vwap.vwap, ref_values.vwap, 1e-6)
 

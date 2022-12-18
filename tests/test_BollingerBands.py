@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period, deviation', [
@@ -18,15 +17,10 @@ def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, t
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     bollinger_bands = indicators.BollingerBands(test_symbol, timeframe, period=period, deviation=deviation)
 
-    bb_ref = si.get_bollinger_bands(ohlcv2quote(ohlcv), period, deviation)
+    ref_values = get_ref_values('bollinger_bands', ohlcv, 'sma, upper_band, lower_band, z_score', period, deviation)
 
-    ref_value_mid = stocks2numpy(bb_ref, 'sma')
-    ref_value_up = stocks2numpy(bb_ref, 'upper_band')
-    ref_value_down = stocks2numpy(bb_ref, 'lower_band')
-    ref_z_score = stocks2numpy(bb_ref, 'z_score')
-
-    assert compare_with_nan(bollinger_bands.mid_line, ref_value_mid)
-    assert compare_with_nan(bollinger_bands.up_line, ref_value_up)
-    assert compare_with_nan(bollinger_bands.down_line, ref_value_down)
-    assert compare_with_nan(bollinger_bands.z_score, ref_z_score)
+    assert compare_with_nan(bollinger_bands.mid_line, ref_values.sma)
+    assert compare_with_nan(bollinger_bands.up_line, ref_values.upper_band)
+    assert compare_with_nan(bollinger_bands.down_line, ref_values.lower_band)
+    assert compare_with_nan(bollinger_bands.z_score, ref_values.z_score)
 

@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period_fast, period_slow', [
@@ -18,10 +17,8 @@ def test_awesome(config_default, test_source, test_symbol, time_begin, time_end,
     awesome = indicators.Awesome(test_symbol, timeframe, period_fast=period_fast, period_slow=period_slow)
 
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
-    awesome_ref = si.get_awesome(ohlcv2quote(ohlcv), period_fast, period_slow)
+    ref_values = get_ref_values('awesome', ohlcv, 'oscillator', period_fast, period_slow)
 
-    ref_value_oscillator = stocks2numpy(awesome_ref, 'oscillator')
-
-    assert compare_with_nan(awesome.awesome, ref_value_oscillator)
+    assert compare_with_nan(awesome.awesome, ref_values.oscillator)
 
 

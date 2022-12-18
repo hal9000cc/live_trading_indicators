@@ -12,7 +12,7 @@ def test_fix_live_with_incomplete_1(config_default, test_source, a_symbol, timef
     next_time = timeframe.begin_of_tf(dt.datetime.utcnow()) + timeframe.value
     remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
     if remain_time_sec < 10:
-        time.sleep(remain_time_sec)
+        time.sleep(remain_time_sec + 10)
 
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value
     indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True, **config_default)

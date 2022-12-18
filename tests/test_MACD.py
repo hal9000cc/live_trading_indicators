@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period_short, period_long, period_signal', [
@@ -21,12 +20,8 @@ def test_macd(config_default, test_source, test_symbol, time_begin, time_end,
                            period_short=period_short, period_long=period_long,
                            period_signal=period_signal, ma_type_signal='ema')
 
-    stoch_ref_macd = si.get_macd(ohlcv2quote(ohlcv), period_short, period_long, period_signal)
+    ref_values = get_ref_values('get_macd', ohlcv, 'macd, histogram, signal', period_short, period_long, period_signal)
 
-    ref_value_macd = stocks2numpy(stoch_ref_macd, 'macd')
-    ref_value_hist = stocks2numpy(stoch_ref_macd, 'histogram')
-    ref_value_signal = stocks2numpy(stoch_ref_macd, 'signal')
-
-    assert compare_with_nan(macd.macd, ref_value_macd)
-    assert compare_with_nan(macd.signal, ref_value_signal)
-    assert compare_with_nan(macd.hist, ref_value_hist)
+    assert compare_with_nan(macd.macd, ref_values.macd)
+    assert compare_with_nan(macd.signal, ref_values.signal)
+    assert compare_with_nan(macd.hist, ref_values.histogram)

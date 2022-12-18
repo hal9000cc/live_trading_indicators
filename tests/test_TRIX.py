@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -18,8 +17,6 @@ def test_trix(config_default, test_source, test_symbol, time_begin, time_end, pe
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     trix = indicators.TRIX(test_symbol, timeframe, period=period)
 
-    trix_ref = si.get_trix(ohlcv2quote(ohlcv), period)
+    ref_values = get_ref_values('get_trix', ohlcv, 'trix', period)
 
-    ref_value_trix = stocks2numpy(trix_ref, 'trix')
-
-    assert compare_with_nan(trix.trix, ref_value_trix)
+    assert compare_with_nan(trix.trix, ref_values.trix)

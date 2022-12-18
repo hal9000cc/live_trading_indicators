@@ -1,7 +1,6 @@
 import pytest
 from common_test import *
 import src.live_trading_indicators as lti
-from stock_indicators import indicators as si
 
 
 @pytest.mark.parametrize('time_begin, time_end, period, period_d, smooth', [
@@ -27,12 +26,9 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
     ohlcv = indicators.OHLCV(test_symbol, a_big_timeframe, time_begin, time_end)
     stochastic = indicators.Stochastic(test_symbol, a_big_timeframe, time_begin, time_end, period=period, period_d=period_d, smooth=smooth)
 
-    stoch_ref = si.get_stoch(ohlcv2quote(ohlcv), period, period_d, smooth)
-    value_d = stocks2numpy(stoch_ref, 'd')
-    value_k = stocks2numpy(stoch_ref, 'k')
-    oscillator = stocks2numpy(stoch_ref, 'oscillator')
+    ref_values = get_ref_values('get_stoch', ohlcv, 'd, k, oscillator', period, period_d, smooth)
 
     if smooth == 1:
-        assert compare_with_nan(stochastic.oscillator, oscillator)
-    assert compare_with_nan(stochastic.value_k, value_k)
-    assert compare_with_nan(stochastic.value_d, value_d)
+        assert compare_with_nan(stochastic.oscillator, ref_values.oscillator)
+    assert compare_with_nan(stochastic.value_k, ref_values.k)
+    assert compare_with_nan(stochastic.value_d, ref_values.d)
