@@ -34,6 +34,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
                 + np.take_along_axis(hist_prices, ix_max_volumes_wdims + 1, 1)) / 2
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'OHLCVM',
         'symbol': symbol,
         'timeframe': timeframe,

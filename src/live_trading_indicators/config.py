@@ -18,13 +18,13 @@ def config_get_default():
         'cache_folder': path.join(home_folder, 'data', 'timeframe_data'),
         'sources_folder': path.join(home_folder, 'data', 'sources'),
         'log_folder': path.join(home_folder, 'logs'),
-        'source_type': 'online',
         'endpoints_required': True,
         'max_empty_bars_fraction': 0.0,
         'max_empty_bars_consecutive': 0,
         'restore_empty_bars': True,
         'print_log': True,
-        'log_level': 'INFO'
+        'log_level': 'INFO',
+        'request_timeout': 10
     }
 
 

@@ -76,6 +76,7 @@ def test_bar_data_fix_skips(config_default, test_source, symbol, timeframe, date
     ixb = np.array([True] * len(source_out.time))
     ixb[np.array(skips)] = False
     out = lti.OHLCV_day({
+        'source': source_out.source,
         'symbol': source_out.symbol,
         'timeframe': source_out.timeframe,
         'time': source_out.time[ixb],

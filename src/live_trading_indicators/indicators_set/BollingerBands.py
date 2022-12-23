@@ -38,6 +38,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
     z_score = (source_values - mid_line) / std_deviations
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'BollingerBands',
         'symbol': symbol,
         'timeframe': timeframe,

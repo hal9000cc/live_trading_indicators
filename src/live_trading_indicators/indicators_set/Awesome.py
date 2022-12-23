@@ -18,6 +18,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         awesome = awesome / median_price
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'awesome',
         'symbol': symbol,
         'timeframe': timeframe,

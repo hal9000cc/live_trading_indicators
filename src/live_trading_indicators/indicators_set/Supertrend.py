@@ -52,6 +52,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=10, mu
     supertrend, supertrend_mid = calc_supertrend(ohlcv.close, ohlcv.high, ohlcv.low, atr.atr, multipler, period)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'Supertrend',
         'symbol': symbol,
         'timeframe': timeframe,

@@ -31,6 +31,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, perio
     value_d = ma_calculate(value_k, period_d, ma_type_enum)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'Stochastic',
         'symbol': symbol,
         'timeframe': timeframe,

@@ -9,9 +9,9 @@ from src.live_trading_indicators.exceptions import *
     ('binancecoinm', 'ETH/USD', '1h'),
     ('binanceusdm', 'ETH/USDT', '1h'),
     ('binance', 'ETH/USDT', '1h'),
-    ('ascendex', 'ETH/USDT', '1h'),
+#    ('ascendex', 'ETH/USDT', '1h'),
     ('bequant', 'ETH/USDT', '1h'),
-    ('okx', 'ETH/USDT', '1h')
+    #('okx', 'ETH/USDT', '1h')
 ])
 def test_ccxt_sources(clear_data, ccxt_source, symbol, timeframe):
 
@@ -29,7 +29,7 @@ def test_ccxt_sources(clear_data, ccxt_source, symbol, timeframe):
     ('binancecoinm', 'ETH/USD', '1h'),
     ('binanceusdm', 'ETH/USDT', '1h'),
     ('binance', 'ETH/USDT', '1h'),
-    ('ascendex', 'ETH/USDT', '1h'),
+    #('ascendex', 'ETH/USDT', '1h'),
     ('bequant', 'ETH/USDT', '1h'),
 ])
 def test_ccxt_extra_params(clear_data, ccxt_source, symbol, timeframe):

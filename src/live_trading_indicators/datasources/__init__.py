@@ -23,12 +23,13 @@ BARS_FOR_INTERMEDIATE_SAVE = 10000
 
 class SourceData:
 
-    def __init__(self, datasource_module, config):
+    def __init__(self, datasource_module, datasource_id, config):
 
         self.config = config
         self.cach_folder = path.join(self.config['cache_folder'], datasource_module.datasource_name())
 
         self.datasource_module = datasource_module
+        self.datasource_id = datasource_id
 
         self.count_datasource_get = 0
         self.count_datasource_bars_get = 0
@@ -156,6 +157,7 @@ class SourceData:
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
+            'source': self.datasource_id,
             'is_incomplete_day': False,
             'time': np.array(file_data.time, dtype=np.int64).astype(TIME_TYPE),
             'open': np.array(file_data.open, dtype=PRICE_TYPE),
@@ -207,7 +209,6 @@ class SourceData:
             bar_data.volume.astype('>f8').tobytes()
         ]
 
-
         self.bars_cache.day_save(folder, symbol_store_name, timeframe, day_date, b''.join(buf_data))
 
     def load_from_blocks_cache(self, symbol, timeframe, day_date):
@@ -251,6 +252,7 @@ class SourceData:
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
+            'source': self.datasource_id,
             'is_incomplete_day': False,
             'time': np.array(time, dtype=np.int64).astype(TIME_TYPE),
             'open': np.array(open, dtype=PRICE_TYPE),
@@ -332,6 +334,7 @@ class SourceData:
             day_data = OHLCV_day({
                 'symbol': symbol,
                 'timeframe': timeframe,
+                'source': self.datasource_id,
                 'is_incomplete_day': is_incomplete_day,
                 'time': bars_data[0][i_day_start: i_day_end],
                 'open': bars_data[1][i_day_start: i_day_end],
@@ -426,6 +429,7 @@ class SourceData:
 
         return OHLCV_data({'symbol': symbol,
                            'timeframe': timeframe,
+                           'source': self.datasource_id,
                            'is_live': is_live,
                            'time': np.hstack(td_time),
                            'open': np.hstack(td_open),

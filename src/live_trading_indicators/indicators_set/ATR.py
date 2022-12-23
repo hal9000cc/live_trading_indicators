@@ -19,6 +19,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
     atrp = atr / ohlcv.close * 100
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'ATR',
         'symbol': symbol,
         'timeframe': timeframe,

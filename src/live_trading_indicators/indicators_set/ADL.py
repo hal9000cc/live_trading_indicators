@@ -17,6 +17,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
     adl = np.cumsum(clv * ohlcv.volume)
 
     result_data = {
+        'source': ohlcv.source,
         'name': 'ADL',
         'symbol': symbol,
         'timeframe': timeframe,

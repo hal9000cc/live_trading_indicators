@@ -18,6 +18,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
     trix = np.diff(ema3) / ema3[: -1] * 100
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'TRIX',
         'symbol': symbol,
         'timeframe': timeframe,

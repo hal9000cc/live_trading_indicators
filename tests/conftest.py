@@ -126,6 +126,10 @@ def pytest_generate_tests(metafunc):
     if 'ohlcv_set' in metafunc.fixturenames:
         metafunc.parametrize('ohlcv_set', [
 
+                ohlcv_set(['BTCUSD_PERP-1m-2022-10-24.zip'], '1m', 'cm/btcusd_perp', '2022-10-24'),
+                ohlcv_set(['BTCUSD_PERP-1m-2022-10-25.zip'], '1m', 'cm/btcusd_perp', '2022-10-25'),
+                ohlcv_set(['BTCUSD_PERP-1m-2022-10-24.zip', 'BTCUSD_PERP-1m-2022-10-25.zip'], '1m', 'cm/btcusd_perp', '2022-10-24'),
+
                 ohlcv_set(['BTCUSDT-1m-2022-09-05.zip'], '1m', 'um/btcusdt', '2022-09-05'),
                 ohlcv_set(['BTCUSDT-1m-2022-09-06.zip'], '1m', 'um/btcusdt', '2022-09-06'),
                 ohlcv_set(['BTCUSDT-1m-2022-09-05.zip', 'BTCUSDT-1m-2022-09-06.zip'], '1m', 'um/btcusdt', '2022-09-05'),
@@ -140,15 +144,11 @@ def pytest_generate_tests(metafunc):
 
                 ohlcv_set(['BTCUSDT-1h-2022-09-07.zip'], '1h', 'btcusdt', '2022-09-07'),
                 ohlcv_set(['BTCUSDT-1h-2022-09-08.zip'], '1h', 'btcusdt', '2022-09-08'),
-                ohlcv_set(['BTCUSDT-1h-2022-09-07.zip', 'BTCUSDT-1h-2022-09-08.zip'], '1h', 'btcusdt', '2022-09-07'),
-
-                ohlcv_set(['BTCUSD_PERP-1m-2022-10-24.zip'], '1m', 'cm/btcusd_perp', '2022-10-24'),
-                ohlcv_set(['BTCUSD_PERP-1m-2022-10-25.zip'], '1m', 'cm/btcusd_perp', '2022-10-25'),
-                ohlcv_set(['BTCUSD_PERP-1m-2022-10-24.zip', 'BTCUSD_PERP-1m-2022-10-25.zip'], '1m', 'cm/btcusd_perp', '2022-10-24')])
+                ohlcv_set(['BTCUSDT-1h-2022-09-07.zip', 'BTCUSDT-1h-2022-09-08.zip'], '1h', 'btcusdt', '2022-09-07')])
 
 
 @pytest.fixture
-def clear_data():  # source_type: ticks
+def clear_data():
 
     data_path = 'test_data'
     cache_folder = path.join(data_path, 'timeframe_data')

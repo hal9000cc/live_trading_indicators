@@ -38,6 +38,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
     vwma = vwma_calculate(source_values, ohlcv.volume, period)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'VWMA',
         'symbol': symbol,
         'timeframe': timeframe,

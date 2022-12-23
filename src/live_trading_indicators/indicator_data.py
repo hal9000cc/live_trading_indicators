@@ -81,7 +81,7 @@ class TimeframeData:
             if type(value) == np.ndarray:
                 new_data[key] = np.hstack((value, other.data[key]))
             else:
-                if key not in ('symbol', 'name', 'timeframe'):
+                if key not in ('symbol', 'name', 'timeframe', 'source'):
                     continue
                 if value != other.data[key]:
                     raise ValueError(f'Data types do not match ({value} != {other.data[key]})')
@@ -163,7 +163,7 @@ class TimeframeData:
 
     def slice_by_int(self, i_start, i_stop):
 
-        copied_keys_not_series = {'symbol', 'timeframe', 'name', 'allowed_nan'}
+        copied_keys_not_series = {'symbol', 'timeframe', 'name', 'allowed_nan', 'source'}
         new_data = {}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
@@ -225,11 +225,11 @@ class OHLCV_data(TimeframeData):
 
     def __init__(self, data_dict):
         super().__init__(data_dict)
-        assert not {'timeframe', 'symbol'} - set(data_dict.keys())
+        assert not {'timeframe', 'symbol', 'source'} - set(data_dict.keys())
 
     def __str__(self):
 
-        info = [f'<OHLCV data> symbol: {self.symbol}, timeframe: {self.timeframe}', self.str_period()]
+        info = [f'<OHLCV data> source: {self.source}, symbol: {self.symbol}, timeframe: {self.timeframe}', self.str_period()]
 
         if self.data.get('empty_bars_count') is not None:
             info.append(
@@ -383,7 +383,7 @@ class OHLCV_data(TimeframeData):
         else:
             symbol_info = {}
 
-        if common_keys == {'time', 'timeframe'}:
+        if common_keys == {'time', 'timeframe', 'source'}:
             pref1 = ''
             pref2 = ''
         else:
@@ -397,6 +397,11 @@ class OHLCV_data(TimeframeData):
         result_data.update({f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray})
 
         result_data['name'] = '_'.join([name1, name2])
+
+        if self.source == other.source:
+            result_data['source'] = self.source
+        else:
+            result_data['source'] = ','.join([self.source, other.source])
 
         result_data['allowed_nan'] = self.allowed_nan or other.allowed_nan
         return IndicatorData(result_data)
@@ -569,7 +574,7 @@ class IndicatorData(TimeframeData):
     def __init__(self, data_dict):
 
         super().__init__(data_dict)
-        assert not {'timeframe', 'name'} - set(data_dict.keys())
+        assert not {'timeframe', 'name', 'source'} - set(data_dict.keys())
 
         self.check_series(self.allowed_nan)
 
@@ -579,7 +584,7 @@ class IndicatorData(TimeframeData):
         symbol_info = f'symbol: {symbol}'
         nan_info = 'allowed nan' if self.allowed_nan else 'not allowed nan'
 
-        info = [f'<IndicatorData> name: {self.name}, {symbol_info}, '
+        info = [f'<IndicatorData> source: {self.source}, name: {self.name}, {symbol_info}, '
                 f'timeframe: {self.timeframe!s}, {nan_info}',
                 self.str_period(),
                 self.str_values()]

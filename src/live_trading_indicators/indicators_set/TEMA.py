@@ -16,6 +16,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
     tema = (ema1 * 3) - (ema2 * 3) + ema3
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'TEMA',
         'symbol': symbol,
         'timeframe': timeframe,

@@ -12,6 +12,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
     out = ma_calculate(source_values, period, MA_Type.sma)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'SMA',
         'symbol': symbol,
         'timeframe': timeframe,

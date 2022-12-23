@@ -15,6 +15,7 @@ from ..constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE, TIME_UNITS_IN_ONE_SE
 
 logger = logging.getLogger(__name__)
 
+
 class IndicatorsMode(Enum):
     fixed = 1
     live = 2
@@ -100,6 +101,7 @@ class Indicators:
         self.source_data = OHLCV_data({
             'symbol': self.offline_symbol,
             'timeframe': self.offline_timeframe,
+            'source': 'pandas',
             'time': time_series,
             'open': datasource.open.to_numpy(dtype=PRICE_TYPE),
             'high': datasource.high.to_numpy(dtype=PRICE_TYPE),
@@ -117,11 +119,11 @@ class Indicators:
 
         self.indicators_mode = IndicatorsMode.offline
 
-    def init_online_source(self, datasource_module, datasource_name, exchange_params, time_begin, time_end):
+    def init_online_source(self, datasource_module, datasource_id, exchange_params, time_begin, time_end):
 
         self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init(self.config, datasource_name, exchange_params)
-        self.source_data = datasources.SourceData(datasource_module, self.config)
+        datasource_module.init(self.config, datasource_id, exchange_params)
+        self.source_data = datasources.SourceData(datasource_module, datasource_id, self.config)
 
         self.time_begin = cast_time(time_begin)
         self.time_end = cast_time(time_end, True)

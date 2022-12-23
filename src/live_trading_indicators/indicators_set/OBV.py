@@ -17,6 +17,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
     obv = np.cumsum(sign_volume)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'OBV',
         'symbol': symbol,
         'timeframe': timeframe,

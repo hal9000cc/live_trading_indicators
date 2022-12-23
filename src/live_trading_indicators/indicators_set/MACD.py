@@ -24,6 +24,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
     macd_hist = macd - signal
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'MACD',
         'symbol': symbol,
         'timeframe': timeframe,

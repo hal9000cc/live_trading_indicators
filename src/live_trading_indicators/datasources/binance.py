@@ -25,19 +25,20 @@ REQUEST_BAR_LIMITS = {'cm': 500, 'um': 1500, 'spot': 1000}
 MINIMAL_BAR_LIMITS = 500
 
 exchange_info_data = {}
-
 request_cache = {}
-REQUEST_CACHE_TIMELIFE_HOUR = 1
-
 logger = logging.getLogger(__name__.split('.')[-1])
+config = None
+
+#REQUEST_CACHE_TIMELIFE_HOUR = 1
 
 
 def datasource_name():
     return 'binance'
 
 
-def init(config, datasource_full_name, exchange_params):
-    pass
+def init(use_config, datasource_full_name, exchange_params):
+    global config
+    config = use_config
 
 
 def get_store_names(symbol):
@@ -112,7 +113,7 @@ def online_request(api_url, symbol, timeframe, start_time, end_time):
     request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}&limit={limit}'
 
     logging.debug(f'bars request {request_url}')
-    response = urllib.request.urlopen(request_url)
+    response = urllib.request.urlopen(request_url, timeout=config['request_timeout'])
     used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
     response_data = response.read()
     logging.debug(f'used_weight={used_weight}')

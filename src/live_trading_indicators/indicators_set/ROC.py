@@ -17,6 +17,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, ma
     begin = np.array([np.nan] * period, dtype=PRICE_TYPE)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'ROC',
         'symbol': symbol,
         'timeframe': timeframe,

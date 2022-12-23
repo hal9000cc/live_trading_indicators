@@ -15,6 +15,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
     down_line = mid_line - atr.atr * multiplier
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'Keltner',
         'symbol': symbol,
         'timeframe': timeframe,

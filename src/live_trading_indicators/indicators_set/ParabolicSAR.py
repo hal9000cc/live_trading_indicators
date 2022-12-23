@@ -79,6 +79,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, start=0.02, m
     parabolic_sar, signals = calc_paraboic(ohlcv.high, ohlcv.low, start, maximum, increment)
 
     return IndicatorData({
+        'source': ohlcv.source,
         'name': 'ParabolicSAR',
         'symbol': symbol,
         'timeframe': timeframe,
