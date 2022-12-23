@@ -1,4 +1,4 @@
-import ccxt
+# import ccxt
 import pytest
 import os.path as path
 import pandas as pd
@@ -48,19 +48,16 @@ def test_ccxt_symbols():
     return ['BTC/USDT', 'ETH/USDT', 'ETC/USDT']
 
 
-def test_ccxt_sources():
-
-    exchanges = []
-    #testing_exchanges = set(ccxt.exchanges)
-        # - {'bibox', 'binancecoinm', 'binanceus', 'bitbay', 'btcbox', 'mexc3', 'coinone', 'mercado', 'okx', 'kuna',
-        #    'bitforex', 'huobijp', 'okcoin'}
-
-    for exchange_name in ccxt.exchanges:
-        exchange = getattr(ccxt, exchange_name)()
-        if exchange.has['fetchOHLCV']:
-            exchanges.append(exchange_name)
-
-    return exchanges
+# def test_ccxt_sources():
+#
+#     exchanges = []
+#
+#     for exchange_name in ccxt.exchanges:
+#         exchange = getattr(ccxt, exchange_name)()
+#         if exchange.has['fetchOHLCV']:
+#             exchanges.append(exchange_name)
+#
+#     return exchanges
 
 
 def test_timeframes():
@@ -111,8 +108,8 @@ def pytest_generate_tests(metafunc):
     if 'a_ccxt_symbol' in metafunc.fixturenames:
         metafunc.parametrize('a_ccxt_symbol', test_ccxt_symbols())
 
-    if 'a_ccxt_source' in metafunc.fixturenames:
-        metafunc.parametrize('a_ccxt_source', test_ccxt_sources())
+    # if 'a_ccxt_source' in metafunc.fixturenames:
+    #     metafunc.parametrize('a_ccxt_source', test_ccxt_sources())
 
     if 'a_timeframe' in metafunc.fixturenames:
         metafunc.parametrize("a_timeframe", test_timeframes())

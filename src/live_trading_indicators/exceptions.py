@@ -72,9 +72,16 @@ class LTIExceptionOutOfThePeriod(LTIException):
 
 
 class LTIExceptionBadDatasource(LTIException):
-    def __init__(self, source):
+    def __init__(self, source, module_not_found_name=None):
+
         self.source = source
-        super().__init__(f'Bad source: {source}')
+
+        if module_not_found_name == 'ccxt':
+            message = f'Bad source: {source}. \nCCXT module not found. If you want to use CCXT sources, install the CCXT library.'
+        else:
+            message = f'Bad source: {source}'
+
+        super().__init__(message)
 
 
 class LTIExceptionBadParameterValue(LTIException):

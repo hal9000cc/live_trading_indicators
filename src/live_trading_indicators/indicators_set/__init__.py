@@ -67,7 +67,7 @@ class Indicators:
             try:
                 datasource_module = importlib.import_module(f'..datasources.{datasource.split(".")[0]}', __package__)
             except ModuleNotFoundError as error:
-                raise LTIExceptionBadDatasource(datasource) from error
+                raise LTIExceptionBadDatasource(datasource, error.name) from error
 
             self.init_online_source(datasource_module, datasource, exchange_params, time_begin, time_end)
 
