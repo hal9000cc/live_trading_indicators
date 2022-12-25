@@ -1,11 +1,23 @@
 import datetime as dt
 import importlib
 import numpy as np
+import weakref
 import logging
 from .exceptions import *
 from .constants import *
 
-pandas_module = None
+extra_modules = dict()
+
+
+def extra_module(module_name):
+    global extra_modules
+
+    module = extra_modules.get(module_name)
+    if module is None:
+        module = importlib.import_module(module_name, package=__package__)
+        extra_modules[module_name] = module
+
+    return module
 
 
 class TimeframeData:
@@ -212,13 +224,11 @@ class TimeframeData:
         return [key for key, value in self.data.items() if type(value) == np.ndarray]
 
     def pandas(self):
-        global pandas_module
 
-        if pandas_module is None:
-            pandas_module = importlib.import_module('pandas')
+        pandas = extra_module('pandas')
 
         pandas_series_names = set(self.data_keys())
-        return pandas_module.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
+        return pandas.DataFrame({key: value for key, value in self.data.items() if key in pandas_series_names})
 
 
 class OHLCV_data(TimeframeData):
@@ -406,6 +416,14 @@ class OHLCV_data(TimeframeData):
         result_data['allowed_nan'] = self.allowed_nan or other.allowed_nan
         return IndicatorData(result_data)
 
+    def plot(self):
+        return extra_module('.plotting').ohlcv_plot(self)
+
+    def show(self):
+        fig = self.plot()
+        fig.show()
+        return fig
+
 
 class OHLCV_day(OHLCV_data):
 
@@ -572,9 +590,15 @@ class OHLCV_day(OHLCV_data):
 class IndicatorData(TimeframeData):
 
     def __init__(self, data_dict):
+        assert not {'timeframe', 'name', 'indicators', 'similar_to_price'} - set(data_dict.keys())
 
-        super().__init__(data_dict)
-        assert not {'timeframe', 'name', 'source'} - set(data_dict.keys())
+        indicators = data_dict['indicators']
+        data_dict_for_super = {key: value for key, value in data_dict.items() if key != 'indicators'}
+        data_dict_for_super['source'] = indicators.datasource_id
+
+        super().__init__(data_dict_for_super)
+
+        self.indicators = weakref.ref(indicators)
 
         self.check_series(self.allowed_nan)
 
@@ -593,3 +617,19 @@ class IndicatorData(TimeframeData):
 
     def __repr__(self):
         return self.__str__()
+
+    def source_ohlcv(self):
+
+        indicators = self.indicators()
+        if indicators is None:
+            raise LTIException('Can\'t get the prices. The Indicators object has been destroyed.')
+
+        return indicators.OHLCV(self.symbol, self.timeframe, self.first_bar_time, self.end_bar_time)
+
+    def plot(self):
+        return extra_module('.plotting').indicator_data_plot(self)
+
+    def show(self):
+        fig = self.plot()
+        fig.show()
+        return fig

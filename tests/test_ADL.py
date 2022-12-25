@@ -15,7 +15,7 @@ def test_adl1(config_default, test_source, a_symbol, time_begin, time_end, sma_p
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     adl = indicators.ADL(a_symbol, timeframe, ma_period=sma_period)
 
-    ref_values = get_ref_values('adl', ohlcv, 'adl, adl_sma', sma_period)
+    ref_values = get_ref_values('get_adl', ohlcv, 'adl, adl_sma', sma_period)
 
     assert compare_with_nan(adl.adl, ref_values.adl, 1e-6)
     assert compare_with_nan(adl.adl_smooth, ref_values.adl_sma, 1e-6)
@@ -34,7 +34,27 @@ def test_adl2(config_default, test_source, time_begin, time_end, sma_period):
     ohlcv = indicators.OHLCV(a_symbol, timeframe, time_begin, time_end)
     adl = indicators.ADL(a_symbol, timeframe, time_begin, time_end, ma_period=sma_period)
 
-    ref_values = get_ref_values('adl', ohlcv, 'adl, adl_sma', sma_period)
+    ref_values = get_ref_values('get_adl', ohlcv, 'adl, adl_sma', sma_period)
 
     assert compare_with_nan(adl.adl, ref_values.adl, 1e-6)
     assert compare_with_nan(adl.adl_smooth, ref_values.adl_sma, 1e-6)
+
+
+@pytest.mark.parametrize('time_begin, time_end, sma_period', [
+    ('2022-07-01', '2022-07-07', 2)
+])
+def test_adl_plot(config_default, test_source, time_begin, time_end, sma_period):
+
+    symbol = 'um/ethusdt'
+    timeframe = '1h'
+
+    indicators = lti.Indicators(test_source, time_begin, time_end, **config_default)
+    ohlcv = indicators.OHLCV(symbol, timeframe)
+    adl = indicators.ADL(symbol, timeframe, ma_period=sma_period)
+
+    ref_values = get_ref_values('get_adl', ohlcv, 'adl, adl_sma', sma_period)
+
+    assert compare_with_nan(adl.adl, ref_values.adl, 1e-6)
+    assert compare_with_nan(adl.adl_smooth, ref_values.adl_sma, 1e-6)
+
+    adl.show()

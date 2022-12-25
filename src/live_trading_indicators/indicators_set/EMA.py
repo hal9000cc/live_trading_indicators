@@ -18,7 +18,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
         'timeframe': timeframe,
         'time': ohlcv.time,
         'ema': out,
-        'allowed_nan': True
+        'allowed_nan': True,
+        'similar_to_price': 'ema'
     })
 
 

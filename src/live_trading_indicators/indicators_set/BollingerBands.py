@@ -38,7 +38,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
     z_score = (source_values - mid_line) / std_deviations
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'BollingerBands',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -47,6 +47,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
         'up_line': up_line,
         'down_line': down_line,
         'z_score': z_score,
-        'allowed_nan': True
+        'allowed_nan': True,
+        'similar_to_price': 'mid_line, up_line, down_line'
     })
 
