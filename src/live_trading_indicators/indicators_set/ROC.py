@@ -17,13 +17,14 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, ma
     begin = np.array([np.nan] * period, dtype=PRICE_TYPE)
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'ROC',
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'roc': np.hstack((begin, roc)),
         'smooth_roc': np.hstack((begin, smooth_roc)),
+        'charts': (None, 'roc, smooth_roc'),
         'allowed_nan': True
     })
 

@@ -35,12 +35,13 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
         out = rsi_calculate(source_values, period, MA_Type.cast(ma_type))
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'RSI',
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'rsi': out,
+        'charts': (None, 'rsi'),
         'allowed_nan': True
     })
 

@@ -1,7 +1,7 @@
 import logging.config
 from .exceptions import *
 from .indicator_data import *
-from .indicators_set import Indicators, help
+from .indicators_set import Indicators, help, indicators_list
 from .timeframe import Timeframe
 from .config import config_get_default, config_load, config_save
 from .constants import TIME_TYPE, PRICE_TYPE, VOLUME_TYPE

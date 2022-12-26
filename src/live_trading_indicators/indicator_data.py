@@ -590,7 +590,7 @@ class OHLCV_day(OHLCV_data):
 class IndicatorData(TimeframeData):
 
     def __init__(self, data_dict):
-        assert not {'timeframe', 'name', 'indicators', 'similar_to_price'} - set(data_dict.keys())
+        assert not {'timeframe', 'name', 'indicators'} - set(data_dict.keys())
 
         indicators = data_dict['indicators']
         data_dict_for_super = {key: value for key, value in data_dict.items() if key != 'indicators'}

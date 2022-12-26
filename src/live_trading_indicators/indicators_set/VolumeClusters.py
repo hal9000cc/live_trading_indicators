@@ -30,7 +30,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
     mv_price = (hist_prices[ix_max_volumes] + hist_prices[ix_max_volumes + 1]) / 2
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'VolumeClusters',
         'symbol': symbol,
         'timeframe': timeframe,

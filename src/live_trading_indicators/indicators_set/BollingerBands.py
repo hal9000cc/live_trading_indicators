@@ -47,7 +47,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
         'up_line': up_line,
         'down_line': down_line,
         'z_score': z_score,
-        'allowed_nan': True,
-        'similar_to_price': 'mid_line, up_line, down_line'
+        'charts': ('mid_line, up_line, down_line', 'z_score'),
+        'allowed_nan': True
     })
 

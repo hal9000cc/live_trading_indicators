@@ -15,7 +15,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
     down_line = mid_line - atr.atr * multiplier
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'Keltner',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -24,6 +24,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         'up_line': up_line,
         'down_line': down_line,
         'width': (up_line - down_line) / mid_line,
+        'charts': ('mid_line, up_line, down_line', 'width'),
         'allowed_nan': True
     })
 

@@ -15,7 +15,7 @@ def indicator_data_plot(indicator_data):
     ohlcv_data = indicator_data.source_ohlcv()
     plt.rcParams['axes.axisbelow'] = True
 
-    n_indicator_axis = max(values_groups.keys())
+    n_indicator_axis = len(values_groups) - 1
     gridspec_kw = {'height_ratios': [3] + [1] + [1] * n_indicator_axis}
     fig, axis = plt.subplots(2 + n_indicator_axis, 1, sharex=True, dpi=200, gridspec_kw=gridspec_kw)
     ax_price = axis[0]
@@ -30,13 +30,13 @@ def indicator_data_plot(indicator_data):
     time = indicator_data.time
     plot_volumes(ohlcv_data, ax_volume)
 
-    for i_axis, values in values_groups.items():
+    for i_axis, values in enumerate(values_groups):
 
         if i_axis == 0:
             ax = axis[i_axis]
         else:
             ax = axis[i_axis + 1]
-            ax.set_ylabel(indicator_data.name)
+            #ax.set_ylabel(indicator_data.name)
 
         for value in values:
             plot_indicator(ax, value, time, indicator_data.data[value])
@@ -54,24 +54,25 @@ def indicator_data_plot(indicator_data):
 
 def get_values_groups(indicator_data):
 
-    similar_to_price = set() if indicator_data.similar_to_price is None\
-        else {value_name.strip() for value_name in indicator_data.similar_to_price.split(',')}
+    charts = indicator_data.data.get('charts')
 
-    no_paint = {'time'}
+    if charts is None:
 
-    values_groups = dict()
-    for key, value in indicator_data.data.items():
+        no_paint = {'time'}
 
-        if type(value) == np.ndarray and key not in no_paint:
+        price_chart = set()
+        for key, value in indicator_data.data.items():
+            if type(value) == np.ndarray and key not in no_paint:
+                price_chart.add(key)
 
-            i_group = 0 if key in similar_to_price else 1
+        return [price_chart]
 
-            group = values_groups.get(i_group)
-            if group is None:
-                group = {key}
-                values_groups[i_group] = group
-            else:
-                group.add(key)
+    values_groups = []
+    for values_list in charts:
+        values_set = set() if values_list is None\
+            else {value_name.strip() for value_name in values_list.split(',')}
+
+        values_groups.append(values_set)
 
     return values_groups
 
@@ -105,7 +106,7 @@ def ohlcv_plot(ohlcv_data):
 
 def plot_ohlcv(ohlcv_data, ax):
 
-    ax.set_ylabel('price')
+    #ax.set_ylabel('price')
 
     time = ohlcv_data.time
     ix_up_candles = ohlcv_data.close > ohlcv_data.open
@@ -126,7 +127,7 @@ def plot_ohlcv(ohlcv_data, ax):
 
 def plot_volumes(ohlcv_data, ax):
 
-    ax.set_ylabel('volume')
+    #ax.set_ylabel('volume')
 
     time = ohlcv_data.time
 

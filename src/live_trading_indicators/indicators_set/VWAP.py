@@ -15,7 +15,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
     vwap = np.cumsum(typical_price * ohlcv.volume) / volume_sum
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'VWAP',
         'symbol': symbol,
         'timeframe': timeframe,

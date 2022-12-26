@@ -446,9 +446,18 @@ def helo_append(help_list, doc_str):
     help_list.append(f'- {doc_str}')
 
 
-def help(mode=0):
+def indicators_list():
     import os.path as path
     import glob
+
+    indicator_modules_path = path.split(__file__)[0]
+    file_indicators = [path.basename(file_name) for file_name in glob.glob(path.join(indicator_modules_path, '*.py'))]
+    file_indicators.sort()
+    indicator_list = [path.splitext(file)[0] for file in file_indicators]
+    return list(filter(lambda x: x[0] != '_', indicator_list))
+
+
+def help(mode=0):
 
     class Help:
 
@@ -461,26 +470,19 @@ def help(mode=0):
         def __repr__(self):
             return self.content
 
-    indicator_modules_path = path.split(__file__)[0]
-
-    file_indicators = [path.basename(file_name) for file_name in glob.glob(path.join(indicator_modules_path, '*.py'))]
-    file_indicators.sort()
-
     help_list = []
-    for file in file_indicators:
-        module_name = path.splitext(file)[0]
-        if module_name[0] != '_':
-            module = importlib.import_module(f'.{module_name}', __package__)
-            if module.__doc__:
-                if mode == 0:
-                    helo_append(help_list, module.__doc__)
-                else:
-                    doc = module.__doc__.splitlines()
-                    first_line = f'{doc[0]} - {doc[1]}'
-                    doc.pop(0)
-                    doc[0] = first_line
-                    helo_append(help_list, '\n'.join(doc))
+    for module_name in indicators_list():
+        module = importlib.import_module(f'.{module_name}', __package__)
+        if module.__doc__:
+            if mode == 0:
+                helo_append(help_list, module.__doc__)
             else:
-                help_list.append(f'{module_name}(?)')
+                doc = module.__doc__.splitlines()
+                first_line = f'{doc[0]} - {doc[1]}'
+                doc.pop(0)
+                doc[0] = first_line
+                helo_append(help_list, '\n'.join(doc))
+        else:
+            help_list.append(f'{module_name}(?)')
 
     return Help('\n'.join(help_list))

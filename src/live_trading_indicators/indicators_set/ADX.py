@@ -36,7 +36,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
     adx = ma_calculate(dxi, period, ma_type_enum)
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'ADX',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -44,6 +44,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
         'adx': adx,
         'p_di': p_di,
         'm_di': m_di,
+        'charts': (None, 'adx, p_di, m_di'),
         'allowed_nan': True
     })
 

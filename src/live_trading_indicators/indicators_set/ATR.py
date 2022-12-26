@@ -19,7 +19,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
     atrp = atr / ohlcv.close * 100
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'ATR',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -27,5 +27,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
         'tr': tr,
         'atr': atr,
         'atrp': atrp,
+        'charts': (None, 'tr, atr', 'atrp'),
         'allowed_nan': True
     })

@@ -23,7 +23,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
         'timeframe': timeframe,
         'time': ohlcv.time,
         'adl': adl,
-        'similar_to_price': None,
+        'charts': (None, 'adl'),
         'allowed_nan': True
     }
 

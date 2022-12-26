@@ -30,12 +30,13 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period):
     cci[mad == 0] = 0
 
     return IndicatorData({
-        'source': ohlcv.source,
+        'indicators': indicators,
         'name': 'CCI',
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'cci': cci,
+        'charts': (None, 'cci'),
         'allowed_nan': True
     })
 
