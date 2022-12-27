@@ -35,6 +35,10 @@ class TimeframeData:
         self.first_bar_time = self.data['time'][0]
         self.end_bar_time = self.data['time'][-1]
 
+    @staticmethod
+    def get_copied_keys():
+        return set()
+
     def __len__(self):
         return len(self.data['time'])
 
@@ -175,12 +179,12 @@ class TimeframeData:
 
     def slice_by_int(self, i_start, i_stop):
 
-        copied_keys_not_series = {'symbol', 'timeframe', 'name', 'allowed_nan', 'source'}
+        slice_copied_keys = self.get_copied_keys()
         new_data = {}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
                 new_data[key] = value[i_start : i_stop]
-            elif key in copied_keys_not_series:
+            elif key in slice_copied_keys:
                 new_data[key] = value
 
         new_indicator_data = self.__class__(new_data)
@@ -236,6 +240,10 @@ class OHLCV_data(TimeframeData):
     def __init__(self, data_dict):
         super().__init__(data_dict)
         assert not {'timeframe', 'symbol', 'source'} - set(data_dict.keys())
+
+    @staticmethod
+    def get_copied_keys():
+        return {'symbol', 'timeframe', 'source'}
 
     def __str__(self):
 
@@ -592,15 +600,22 @@ class IndicatorData(TimeframeData):
     def __init__(self, data_dict):
         assert not {'timeframe', 'name', 'indicators'} - set(data_dict.keys())
 
-        indicators = data_dict['indicators']
-        data_dict_for_super = {key: value for key, value in data_dict.items() if key != 'indicators'}
-        data_dict_for_super['source'] = indicators.datasource_id
+        # indicators = data_dict['indicators']
+        # data_dict_for_super = {key: value for key, value in data_dict.items() if key != 'indicators'}
+        # data_dict_for_super['source'] = indicators.datasource_id
 
-        super().__init__(data_dict_for_super)
+        if not isinstance(data_dict['indicators'], weakref.ReferenceType):
+            data_dict['indicators'] = weakref.ref(data_dict['indicators'])
 
-        self.indicators = weakref.ref(indicators)
+        super().__init__(data_dict)
+
+        #self.indicators = weakref.ref(indicators)
 
         self.check_series(self.allowed_nan)
+
+    @staticmethod
+    def get_copied_keys():
+        return {'symbol', 'timeframe', 'name', 'allowed_nan', 'source', 'indicators', 'charts', 'parameters'}
 
     def __str__(self):
 

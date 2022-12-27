@@ -20,7 +20,7 @@ def indicator_data_plot(indicator_data):
     fig, axis = plt.subplots(2 + n_indicator_axis, 1, sharex=True, dpi=200, gridspec_kw=gridspec_kw)
     ax_price = axis[0]
     ax_volume = axis[1]
-    plt.subplots_adjust(hspace=0, top=0.92)
+    plt.subplots_adjust(hspace=0)
 
     cdf = mpl.dates.ConciseDateFormatter(ax_price.xaxis.get_major_locator())
     ax_price.xaxis.set_major_formatter(cdf)
@@ -45,10 +45,13 @@ def indicator_data_plot(indicator_data):
         ax.grid(visible=True, linestyle=':')
         ax.legend()
 
+    parameters = indicator_data.data.get('parameters')
+    if parameters is not None:
+        ax_price.set_title(', '.join([f'{key}={value!r}' for key, value in parameters.items()]))
+
     title = f'{indicator_data.name} ({ohlcv_data.symbol} {ohlcv_data.timeframe!s} [{ohlcv_data.source}])'
-    ax_price.title.set_visible(False)
     fig.suptitle(title)
-    fig.canvas.manager.set_window_title(title)
+    fig.canvas.manager.set_window_title(f'live_trading_indicators - {title}')
     return fig
 
 
@@ -87,6 +90,7 @@ def ohlcv_plot(ohlcv_data):
 
     fig, (ax_price, ax_volume) = plt.subplots(2, 1, sharex=True, dpi=200, gridspec_kw={'height_ratios': [3, 1]})
     plt.subplots_adjust(hspace=0, top=0.92)
+    #plt.subplots_adjust(hspace=0.1)
 
     cdf = mpl.dates.ConciseDateFormatter(ax_price.xaxis.get_major_locator())
     ax_price.xaxis.set_major_formatter(cdf)

@@ -20,6 +20,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'smooth': smooth, 'ma_type': ma_type},
         'name': 'ATR',
         'symbol': symbol,
         'timeframe': timeframe,

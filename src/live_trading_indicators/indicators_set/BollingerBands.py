@@ -39,6 +39,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'deviation': deviation, 'ma_type': ma_type, 'value': value},
         'name': 'BollingerBands',
         'symbol': symbol,
         'timeframe': timeframe,

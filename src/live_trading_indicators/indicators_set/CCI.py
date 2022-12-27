@@ -31,6 +31,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period):
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period},
         'name': 'CCI',
         'symbol': symbol,
         'timeframe': timeframe,

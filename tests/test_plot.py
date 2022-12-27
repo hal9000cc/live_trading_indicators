@@ -15,10 +15,10 @@ def test_plot(config_default, test_source, test_symbol, time_begin, time_end):
     ohlcv.show()
 
 
-@pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-03')
+@pytest.mark.parametrize('time_begin, time_begin_plot, time_end', [
+    ('2022-07-01', '2022-07-03', '2022-07-06')
 ])
-def test_plot_all(config_default, test_source, test_symbol, time_begin, time_end):
+def test_plot_all(config_default, test_source, test_symbol, time_begin, time_begin_plot, time_end):
 
     timeframe = '1h'
 
@@ -39,5 +39,5 @@ def test_plot_all(config_default, test_source, test_symbol, time_begin, time_end
     for indicator_name in lti.indicators_list():
         indicator = indicators.get_indicator(indicator_name)
         params = indicator_params.get(indicator_name, {})
-        out = indicator(test_symbol, timeframe, **params)
+        out = indicator(test_symbol, timeframe, time_begin_plot, time_end, **params)
         out.show()

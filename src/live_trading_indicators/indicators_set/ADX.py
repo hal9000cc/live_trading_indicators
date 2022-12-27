@@ -37,6 +37,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'smooth': smooth, 'ma_type': ma_type},
         'name': 'ADX',
         'symbol': symbol,
         'timeframe': timeframe,

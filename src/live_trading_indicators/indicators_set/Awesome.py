@@ -19,6 +19,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': { 'period_fast': period_fast, 'period_slow': period_slow,
+                        'ma_type_fast': ma_type_fast, 'ma_type_slow': ma_type_slow, 'normalized': normalized},
         'name': 'awesome',
         'symbol': symbol,
         'timeframe': timeframe,

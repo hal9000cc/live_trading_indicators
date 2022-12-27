@@ -18,6 +18,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
 
     result_data = {
         'indicators': indicators,
+        'parameters': {'ma_period': ma_period, 'ma_type': ma_type},
         'name': 'ADL',
         'symbol': symbol,
         'timeframe': timeframe,
