@@ -36,6 +36,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'ma_type': ma_type, 'value': value},
         'name': 'RSI',
         'symbol': symbol,
         'timeframe': timeframe,

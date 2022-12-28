@@ -39,6 +39,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'value': value},
         'name': 'VWMA',
         'symbol': symbol,
         'timeframe': timeframe,

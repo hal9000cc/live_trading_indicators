@@ -31,6 +31,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'timeframe_low': timeframe_low, 'bars_on_bins': bars_on_bins},
         'name': 'VolumeClusters',
         'symbol': symbol,
         'timeframe': timeframe,

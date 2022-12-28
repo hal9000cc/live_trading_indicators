@@ -23,16 +23,15 @@ def test_plot_all(config_default, test_source, test_symbol, time_begin, time_beg
     timeframe = '1h'
 
     indicator_params = {
-        'CCI': {'period': 5},
-        'EMA': {'period': 5},
-        'MA': {'period': 5},
-        'SMA': {'period': 5},
-        'MACD': {'period_short': 5, 'period_long': 9, 'period_signal': 3},
-        'RSI': {'period': 5},
-        'Stochastic': {'period': 5, 'period_d': 9},
-        'TEMA': {'period': 5},
-        'TRIX': {'period': 5},
-        'VWMA': {'period': 5}
+        'CCI': {'period': 14},
+        'EMA': {'period': 14},
+        'MA': {'period': 21},
+        'SMA': {'period': 14},
+        'MACD': {'period_short': 12, 'period_long': 26, 'period_signal': 9},
+        'RSI': {'period': 14},
+        'TEMA': {'period': 21},
+        'TRIX': {'period': 13},
+        'VWMA': {'period': 14}
     }
 
     indicators = lti.Indicators(test_source, time_begin, time_end)

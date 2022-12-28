@@ -53,6 +53,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=10, mu
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'multipler': multipler, 'ma_type': ma_type},
         'name': 'Supertrend',
         'symbol': symbol,
         'timeframe': timeframe,

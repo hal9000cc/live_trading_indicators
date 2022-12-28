@@ -80,6 +80,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, start=0.02, m
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'start': start, 'maximum': maximum, 'increment': increment},
         'name': 'ParabolicSAR',
         'symbol': symbol,
         'timeframe': timeframe,

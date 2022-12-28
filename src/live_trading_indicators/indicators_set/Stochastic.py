@@ -20,7 +20,7 @@ def calc_k(high, low, close, period):
     return value_k
 
 
-def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, period_d, smooth=3, ma_type='sma'):
+def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=5, period_d=3, smooth=3, ma_type='sma'):
 
     ma_type_enum = MA_Type.cast(ma_type)
 
@@ -32,6 +32,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, perio
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'period_d': period_d, 'smooth': smooth, 'ma_type': ma_type},
         'name': 'Stochastic',
         'symbol': symbol,
         'timeframe': timeframe,

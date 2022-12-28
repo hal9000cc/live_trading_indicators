@@ -25,6 +25,9 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period_short': period_short, 'period_long': period_long, 'period_signal': period_signal,
+                      'ma_type': ma_type, 'ma_type_signal': ma_type_signal,
+                      'value': value, 'relative_price': relative_price},
         'name': 'MACD',
         'symbol': symbol,
         'timeframe': timeframe,

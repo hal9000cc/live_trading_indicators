@@ -15,6 +15,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'value': value, 'ma_type': ma_type},
         'name': 'SMA',
         'symbol': symbol,
         'timeframe': timeframe,

@@ -18,6 +18,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {},
         'name': 'OBV',
         'symbol': symbol,
         'timeframe': timeframe,

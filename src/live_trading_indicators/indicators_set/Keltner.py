@@ -16,6 +16,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'period': period, 'multiplier': multiplier, 'period_atr': period_atr, 'ma_type': ma_type, 'ma_type_atr': ma_type_atr},
         'name': 'Keltner',
         'symbol': symbol,
         'timeframe': timeframe,
