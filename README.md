@@ -112,7 +112,7 @@ print(macd[40:].pandas().head())
 4 2022-08-15 00:44:00  3.763257  3.354183  0.409074
 ```
 ### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
-To get real-time data, you do not need to specify an end date.
+To get real-time data, you **don't have to specify an end date**.
 ```python
 import datetime as dt
 import live_trading_indicators as lti
