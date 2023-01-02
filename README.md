@@ -150,6 +150,7 @@ Now is 2022-11-04 09:37:07.372986 UTC
 3 2022-11-04 09:37:00  20611.11  20611.89  20608.17  20609.02   15.15800
 ```
 ### Plotting indicators charts
+Plotting uses matplotlib. These are optional features, so matplotlib must be installed separately.
 There are two methods for plotting: plot() and show(). plot() returns the drawn figure, show() returns None. For jupyter notepad, it is better to use show(), since plot() can draw a figure twice.
 ```python
 indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
