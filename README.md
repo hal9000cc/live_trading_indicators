@@ -41,6 +41,7 @@ pip install live_trading_indicators
 - [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
 - [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
 ## Quick start
+All the examples given here can be found in [jupyter notebook](https://github.com/hal9000cc/live_trading_indicators/blob/master/examples.ipynb)
 ### Getting quotes online
 ```python
 import live_trading_indicators as lti
