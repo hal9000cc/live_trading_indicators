@@ -19,8 +19,8 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ## Version 0.6.0
 ### what's new
 #### 0.6.0
-- Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/master/examples_show.ipynb).
-- Repeated download attempts in case of errors (requests_try setting**!!!**).
+- Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
+- Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/edit/stable/README.md#settings)).
 #### 0.5.3
 - New timeframe - 1s
 - Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
@@ -154,7 +154,7 @@ The specific supported timeframes for the source depend on the source.
 ### Сhecking quotes
 **live-trading-indicators** check the integrity of quotes when they are loaded.
 The fraction of lost quotes should not exceed max_empty_bars_fraction. The number of lost quotes in a row should not exceed max_empty_bars_consecutive.
-The values of max_empty_bars_fraction and max_empty_bars_consecutive are set to 0 by default. That is, if there is at least one lost quote, an error will be raised:
+The values of max_empty_bars_fraction and max_empty_bars_consecutive are set to 0 by default. That is, if there is at least one lost quote, LTIExceptionTooManyEmptyBars will be raised:
 ```
 live_trading_indicators.exceptions.LTIExceptionTooManyEmptyBars: Too many empty bars: fraction 0.014076769406392695, consecutive 79200. Source binance, symbol ethusdt, timeframe 1s, date 2021-01-01T00:00:00.000 - 2021-12-31T23:59:59.000.
 ```
@@ -168,6 +168,7 @@ If you don't need integrity control at all, do:
 import live_trading_indicators as lti
 lti.config(max_empty_bars_fraction=-1, max_empty_bars_consecutive=-1)
 ```
+The presence of the first and last bars in the date range is also checked. For more details, see [Settings](https://github.com/hal9000cc/live_trading_indicators/edit/stable/README.md#settings).
 ### Informational messages
 By default, log messages are output to the console, and you will see similar messages:
 ```
@@ -287,38 +288,35 @@ print(lti.config())
 ```
 Result:
 ```
-{'cache_folder': '/home/hal/.lti/data/timeframe_data', 'sources_folder': '/home/hal/.lti/data/sources', 'log_folder': '/home/hal/.lti/logs', 'endpoints_required': True, 'max_empty_bars_fraction': 0.0, 'max_empty_bars_consecutive': 0, 'restore_empty_bars': True, 'print_log': True, 'log_level': 'INFO', 'request_timeout': 10}
+{'cache_folder': '/home/user/.lti/data/timeframe_data', 'sources_folder': '/home/user/.lti/data/sources', 'log_folder': '/home/hal/.lti/logs', 'endpoints_required': True, 'max_empty_bars_fraction': 0.0, 'max_empty_bars_consecutive': 0, 'restore_empty_bars': True, 'print_log': True, 'log_level': 'INFO', 'request_timeout': 10, 'request_trys': 3}
 ```
 *config()* is also used to change the settings:
 ```python
 import live_trading_indicators as lti
 lti.config(request_timeout=15)
 ```
-
 When creating Indicators, you can specify the settings that will be used instead of the saved ones:
 ```python
-    indicators = lti.Indicators(test_source, time_begin, time_end, timeout=20)
+    indicators = lti.Indicators(test_source, time_begin, time_end, timeout=15, request_trys=5)
 ```
 ### Settings
 #### cache_folder
-Директория 
-#### sources_folder
-: path.join(home_folder, 'data', 'sources'),
+Directory for storing quotation data.
 #### log_folder
-': path.join(home_folder, 'logs'),
+Directory of log files.
 #### endpoints_required
-': True,
+Control of the presence of the first and last bar in the selected date range. In the absence of the first or last bar, LTIExceptionQuotationDataNotFound is raised. Default: True.
 #### max_empty_bars_fraction
 The maximum percentage of lost bars, if exceeded, an error will occur.
 #### max_empty_bars_consecutive
-The maximum number of lost bars in a row, if exceeded, an error will be raised.
+The maximum number of lost bars in a row, if exceeded, LTIExceptionTooManyEmptyBars will be raised.
 #### restore_empty_bars
-': True,
+If True, it restores the lost bars (open=close=close of the previous one, volume=0). The control of the number of lost bars (max_empty_bars_fraction, max_empty_bars_consecutive) is performed BEFORE recovery. Default: True.
 #### print_log
-': True,
+If True, outputs log messages to standard output. Default: True.
 #### log_level
-
+Log registration level. Default: INFO.
 #### request_timeout
-Request timeout for...
+Timeout of requests to download quotes, seconds. Default: 10.
 #### request_trys
 The number of attempts to download quotes.
