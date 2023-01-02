@@ -41,8 +41,8 @@ pip install live_trading_indicators
 - [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
 - [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
 ## Quick start
-All the examples given here can be found in [jupyter notebook](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb)
-### Getting quotes online
+All the examples given here can be found in [jupyter notebook examples](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb).
+### Getting quotes (online / cache)
 ```python
 import live_trading_indicators as lti
 
@@ -74,7 +74,7 @@ print(dataframe.head())
 3 2022-07-01 12:00:00  1050.21  1074.23  1043.00  1056.86  298465.0695
 4 2022-07-01 16:00:00  1056.86  1083.10  1054.82  1067.91  158796.2248
 ```
-### Example of getting indicator data from Bybit quotes via ccxt online
+### Example of getting indicator data from Bybit quotes via ccxt (online / cache)
 ```python
 import live_trading_indicators as lti
 
