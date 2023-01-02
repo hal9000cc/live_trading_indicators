@@ -16,8 +16,11 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.5.3
+## Version 0.6.0
 ### what's new
+#### 0.6.0
+- Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/master/examples_show.ipynb).
+- Repeated download attempts in case of errors (requests_try setting**!!!**).
 #### 0.5.3
 - New timeframe - 1s
 - Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
@@ -275,3 +278,47 @@ live-trading-indicators supports the following types of moving averages:
 - 'ema0' - classical exponential moving average with alpha = 2 / (n + 1), initialized by the first value
 - 'mma' - Modified moving average with alpha = 1 / n, initialized by SMA (as in some binance indicators)
 - 'mma0' - Modified moving average с alpha = 1 / n, initialized by the first value
+
+## live_trading_indicators library settings
+The settings can be obtained as dict using *config()*:
+```python
+import live_trading_indicators as lti
+print(lti.config())
+```
+Result:
+```
+{'cache_folder': '/home/hal/.lti/data/timeframe_data', 'sources_folder': '/home/hal/.lti/data/sources', 'log_folder': '/home/hal/.lti/logs', 'endpoints_required': True, 'max_empty_bars_fraction': 0.0, 'max_empty_bars_consecutive': 0, 'restore_empty_bars': True, 'print_log': True, 'log_level': 'INFO', 'request_timeout': 10}
+```
+*config()* is also used to change the settings:
+```python
+import live_trading_indicators as lti
+lti.config(request_timeout=15)
+```
+
+When creating Indicators, you can specify the settings that will be used instead of the saved ones:
+```python
+    indicators = lti.Indicators(test_source, time_begin, time_end, timeout=20)
+```
+### Settings
+#### cache_folder
+Директория 
+#### sources_folder
+: path.join(home_folder, 'data', 'sources'),
+#### log_folder
+': path.join(home_folder, 'logs'),
+#### endpoints_required
+': True,
+#### max_empty_bars_fraction
+The maximum percentage of lost bars, if exceeded, an error will occur.
+#### max_empty_bars_consecutive
+The maximum number of lost bars in a row, if exceeded, an error will be raised.
+#### restore_empty_bars
+': True,
+#### print_log
+': True,
+#### log_level
+
+#### request_timeout
+Request timeout for...
+#### request_trys
+The number of attempts to download quotes.
