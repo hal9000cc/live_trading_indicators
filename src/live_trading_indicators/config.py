@@ -24,7 +24,7 @@ def config_get_default():
         'restore_empty_bars': True,
         'print_log': True,
         'log_level': 'INFO',
-        'request_timeout': 20,
+        'request_timeout': 10,
         'request_trys': 3
     }
 

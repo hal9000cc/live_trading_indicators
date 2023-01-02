@@ -185,7 +185,7 @@ def bars_raw_online_request(symbol, timeframe, time_start, time_end):
         query_time_start = timeframe.begin_of_tf(time[-1][-1]) + timeframe.value
 
     if len(time) == 0:
-        return None
+        raise LTIExceptionQuotationDataNotFound(symbol, time_start)
 
     return np.hstack(time), \
            np.hstack(open),\

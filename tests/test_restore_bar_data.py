@@ -21,7 +21,7 @@ def test_bar_data_fix_1(config_default, test_source, symbol, timeframe, date):
 
     out = lti.OHLCV_data(source_out.data).copy()
     out.close[0] = 0
-    with pytest.raises(LTIExceptionSourceDataNotFound):
+    with pytest.raises(LTIExceptionQuotationDataNotFound):
         out.restore_bar_data()
 
 

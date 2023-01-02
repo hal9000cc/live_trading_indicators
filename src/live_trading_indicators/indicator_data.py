@@ -356,7 +356,7 @@ class OHLCV_data(TimeframeData):
             return
 
         if n_bars < 2:
-            raise LTIExceptionSourceDataNotFound(self.symbol, self.data)
+            raise LTIExceptionQuotationDataNotFound(self.symbol, self.data)
 
         ix_change = np.hstack((
             np.zeros(1, dtype=int),
@@ -602,4 +602,4 @@ class IndicatorData(TimeframeData):
     def show(self):
         fig = self.plot()
         fig.show()
-        
+

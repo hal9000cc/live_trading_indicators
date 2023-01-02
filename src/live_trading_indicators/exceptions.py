@@ -53,11 +53,11 @@ class LTIExceptionTooManyEmptyBars(LTIException):
             f'Source {source_name}, symbol {symbol}, timeframe {timeframe!s}, date {first_bar_time} - {end_bar_time}.')
 
 
-class LTIExceptionSourceDataNotFound(LTIException):
+class LTIExceptionQuotationDataNotFound(LTIException):
     def __init__(self, symbol, date):
         self.symbol = symbol
         self.date = date
-        super().__init__(f'Source data not found! Symbol {self.symbol}, date {self.date}.')
+        super().__init__(f'Quotation data not found! Symbol {self.symbol}, date {self.date}.')
 
 
 class LTIExceptionIndicatorNotFound(LTIException):
