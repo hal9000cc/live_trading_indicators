@@ -386,7 +386,6 @@ class OHLCV_data(TimeframeData):
     def show(self):
         fig = self.plot()
         fig.show()
-        return fig
 
 
 class OHLCV_day(OHLCV_data):
@@ -603,4 +602,4 @@ class IndicatorData(TimeframeData):
     def show(self):
         fig = self.plot()
         fig.show()
-        return fig
+        

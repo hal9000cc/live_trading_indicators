@@ -47,8 +47,6 @@ class Indicators:
         self.config = config_load();
         self.config.update(config_mod)
 
-        self.init_log()
-
         self.indicators = {}
         self.cache = {}
 
@@ -60,6 +58,8 @@ class Indicators:
         self.time_end = None
         self.source_data = None
         self.indicators_mode = None
+
+        self.init_log()
 
         datasource_type = type(datasource)
         if datasource_type == str:
