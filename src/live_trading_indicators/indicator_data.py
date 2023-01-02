@@ -380,52 +380,8 @@ class OHLCV_data(TimeframeData):
             self.low[point: point_end] = price
             self.close[point: point_end] = price
 
-    def __and__(self, other):
-
-        if self.timeframe != other.timeframe:
-            raise LTIException(f'Timeframe does not match ({self.timeframe!s} != {other.timeframe}')
-
-        if len(self) != len(other):
-            raise LTIException(f'Length of data does not match ({len(self)} != {len(other)}')
-
-        if (self.time != other.time).any():
-            raise LTIException(f'Time series of data does not match ({len(self)} != {len(other)}')
-
-        name1 = self.name if 'name' in self.data.keys() else self.symbol.replace('/', '_')
-        name2 = other.name if 'name' in other.data.keys() else other.symbol.replace('/', '_')
-
-        common_keys = set(self.data.keys()) & set(other.data.keys())
-        if 'symbol' in common_keys and self.symbol == other.symbol:
-            common_keys -= {'symbol'}
-            symbol_info = {'symbol': self.symbol}
-        else:
-            symbol_info = {}
-
-        if common_keys == {'time', 'timeframe', 'source'}:
-            pref1 = ''
-            pref2 = ''
-        else:
-            pref1 = f'{name1}_'
-            pref2 = f'{name2}_'
-            if pref1 == pref2:
-                pref2 += '1'
-
-        result_data = {'time': self.time, 'timeframe': self.timeframe, **symbol_info }
-        result_data.update({f'{pref1}{key}': value for key, value in self.data.items() if key != 'time' and type(value) == np.ndarray})
-        result_data.update({f'{pref2}{key}': value for key, value in other.data.items() if key != 'time' and type(value) == np.ndarray})
-
-        result_data['name'] = '_'.join([name1, name2])
-
-        if self.source == other.source:
-            result_data['source'] = self.source
-        else:
-            result_data['source'] = ','.join([self.source, other.source])
-
-        result_data['allowed_nan'] = self.allowed_nan or other.allowed_nan
-        return IndicatorData(result_data)
-
     def plot(self):
-        return extra_module('.plotting').ohlcv_plot(self)
+        return extra_module('.plotting').indicator_data_plot(self)
 
     def show(self):
         fig = self.plot()
@@ -598,18 +554,18 @@ class OHLCV_day(OHLCV_data):
 class IndicatorData(TimeframeData):
 
     def __init__(self, data_dict):
-        assert not {'timeframe', 'name', 'indicators'} - set(data_dict.keys())
-
-        # indicators = data_dict['indicators']
-        # data_dict_for_super = {key: value for key, value in data_dict.items() if key != 'indicators'}
-        # data_dict_for_super['source'] = indicators.datasource_id
+        data_dict_keys = set(data_dict.keys())
+        assert not {'timeframe', 'name', 'indicators'} - data_dict_keys
 
         if not isinstance(data_dict['indicators'], weakref.ReferenceType):
-            data_dict['indicators'] = weakref.ref(data_dict['indicators'])
+            indicators = data_dict['indicators']
+            data_dict['indicators'] = weakref.ref(indicators)
+            if 'source' not in data_dict_keys:
+                data_dict['source'] = indicators.datasource_id
+        else:
+            assert 'source' in data_dict_keys
 
         super().__init__(data_dict)
-
-        #self.indicators = weakref.ref(indicators)
 
         self.check_series(self.allowed_nan)
 

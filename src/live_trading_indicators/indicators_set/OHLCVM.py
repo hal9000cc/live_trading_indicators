@@ -35,6 +35,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
 
     return IndicatorData({
         'indicators': indicators,
+        'parameters': {'timeframe_low': timeframe_low, 'bars_on_bins': bars_on_bins},
         'name': 'OHLCVM',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -44,5 +45,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
         'low': ohlcv.low,
         'close': ohlcv.close,
         'volume': ohlcv.volume,
-        'mv_price': mv_price
+        'mv_price': mv_price.flatten(),
+        'charts': (({'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close', 'volume': 'volume'}, 'mv_price:bar_level'),)
     })

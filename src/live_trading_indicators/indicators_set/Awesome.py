@@ -26,7 +26,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         'timeframe': timeframe,
         'time': ohlcv.time,
         'awesome': awesome,
-        'charts': (None, 'awesome'),
+        'charts': (None, 'awesome:histdiff'),
         'allowed_nan': True
     })
 

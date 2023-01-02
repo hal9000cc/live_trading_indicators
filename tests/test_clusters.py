@@ -5,7 +5,6 @@ from src.live_trading_indicators.timeframe import Timeframe
 
 
 @pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-05'),
     ('2022-07-01', '2022-07-05')
 ])
 def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
@@ -36,3 +35,16 @@ def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
         i_mv = hist.argmax()
         mv_price = bars_low.low.min() if bars_low.low.min() == bars_low.high.max() else (prices[i_mv] + prices[i_mv + 1]) / 2
         assert mv_price == ohlcvm.mv_price[i]
+
+
+@pytest.mark.parametrize('time_begin, time_end', [
+    ('2022-07-01', '2022-07-05')
+])
+def test_clusters(config_default, test_source, test_symbol, time_begin, time_end):
+
+    timeframe = '1h'
+
+    indicators = lti.Indicators(test_source, time_begin, time_end)
+    ohlcvm = indicators.OHLCVM(test_symbol, timeframe)
+
+    ohlcvm.show()

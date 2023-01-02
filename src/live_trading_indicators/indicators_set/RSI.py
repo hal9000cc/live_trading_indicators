@@ -42,7 +42,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
         'timeframe': timeframe,
         'time': ohlcv.time,
         'rsi': out,
-        'charts': (None, 'rsi'),
+        'charts': (None, 'rsi, level30:level=30, level70:level=70, ymin:ymin=0, ymax:ymax=100'),
         'allowed_nan': True
     })
 

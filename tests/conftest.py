@@ -19,7 +19,8 @@ def test_source():
 
 @pytest.fixture
 def test_symbol():
-    return 'um/ethusdt'
+    #return 'um/ethusdt'
+    return 'um/btcusdt'
 
 
 def all_symbols():

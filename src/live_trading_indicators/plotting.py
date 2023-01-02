@@ -1,23 +1,43 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
+from matplotlib.markers import MarkerStyle
+from matplotlib import ticker
 from .constants import TIME_TYPE_UNIT, TIME_TYPE
+from .indicator_data import OHLCV_data
 
 color_up = 'green'
 color_down = 'red'
 
 
+@ticker.FuncFormatter
+def volume_major_formatter(x, pos):
+
+    if x == 0:
+        return '0'
+    elif x % 1000000000 == 0:
+        return f'{int(x // 1000000000):d}G'
+    elif x % 1000000 == 0:
+        return f'{int(x // 1000000):d}M'
+    elif x % 1000 == 0:
+        return f'{int(x // 1000):d}K'
+    elif x % 1 == 0:
+        return f'{int(x):d}K'
+
+    return f'{x}'
+
+
 def indicator_data_plot(indicator_data):
 
-    values_groups = get_values_groups(indicator_data)
+    values_groups, ohlcv_data_matching = get_values_groups(indicator_data)
 
-    ohlcv_data = indicator_data.source_ohlcv()
     plt.rcParams['axes.axisbelow'] = True
 
     n_indicator_axis = len(values_groups) - 1
     gridspec_kw = {'height_ratios': [3] + [1] + [1] * n_indicator_axis}
     fig, axis = plt.subplots(2 + n_indicator_axis, 1, sharex=True, dpi=200, gridspec_kw=gridspec_kw)
+    fig.set_size_inches(8, 4.8)
+
     ax_price = axis[0]
     ax_volume = axis[1]
     plt.subplots_adjust(hspace=0)
@@ -25,10 +45,34 @@ def indicator_data_plot(indicator_data):
     cdf = mpl.dates.ConciseDateFormatter(ax_price.xaxis.get_major_locator())
     ax_price.xaxis.set_major_formatter(cdf)
 
-    plot_ohlcv(ohlcv_data, ax_price)
-
+    timeframe = indicator_data.timeframe
     time = indicator_data.time
-    plot_volumes(ohlcv_data, ax_volume)
+    symbol = indicator_data.symbol
+    source = indicator_data.source
+
+    if ohlcv_data_matching is None:
+
+        if isinstance(indicator_data, OHLCV_data):
+            ohlcv_data = indicator_data
+        else:
+            ohlcv_data = indicator_data.source_ohlcv()
+
+        open = ohlcv_data.open
+        high = ohlcv_data.high
+        low = ohlcv_data.low
+        close = ohlcv_data.close
+        volume = ohlcv_data.volume
+
+    else:
+
+        open = indicator_data.data[ohlcv_data_matching['open']]
+        high = indicator_data.data[ohlcv_data_matching['high']]
+        low = indicator_data.data[ohlcv_data_matching['low']]
+        close = indicator_data.data[ohlcv_data_matching['close']]
+        volume = indicator_data.data[ohlcv_data_matching['volume']]
+
+    plot_ohlcv(ax_price, timeframe, time, open, high, low, close)
+    plot_volumes(ax_volume, timeframe, time, open, close, volume)
 
     for i_axis, values in enumerate(values_groups):
 
@@ -36,20 +80,65 @@ def indicator_data_plot(indicator_data):
             ax = axis[i_axis]
         else:
             ax = axis[i_axis + 1]
-            #ax.set_ylabel(indicator_data.name)
 
-        for value in values:
-            plot_indicator(ax, value, time, indicator_data.data[value])
+        for value_descript in values:
 
-    for ax in axis:
+            value_parts = value_descript.split('=')
+            value_name_descript = value_parts[0]
+
+            value_parts_name = value_name_descript.split(':')
+            value_name = value_parts_name[0]
+            chart_type = value_parts_name[1] if len(value_parts_name) > 1 else None
+
+            if len(value_parts) > 1:
+
+                value = float(value_parts[1])
+                if chart_type == 'ymin':
+                    ax.set_ylim(bottom=value)
+                    continue
+                elif chart_type == 'ymax':
+                    ax.set_ylim(top=value)
+                    continue
+
+                values = np.ones(len(time), dtype=float) * value
+
+            else:
+                values = indicator_data.data[value_name]
+
+            plot_indicator(ax, timeframe, time, value_name, values, chart_type)
+
+    need_legend = False
+    for i_ax, ax in enumerate(axis):
+
         ax.grid(visible=True, linestyle=':')
-        ax.legend()
+
+        if i_ax == 0:
+            ax_label = 'Price'
+        elif i_ax == 1:
+            ax_label = 'Volume'
+            ax.yaxis.set_major_formatter(volume_major_formatter)
+        elif i_ax > 1:
+            ax_label = indicator_data.name
+        else:
+            ax_label = None
+
+        if ax_label:
+            ax.text(0.99, 0.97, ax_label, transform=ax.transAxes, verticalalignment='top', horizontalalignment='right')
+
+        handles, labels = ax.get_legend_handles_labels()
+        if need_legend or len(handles) >= (2 if i_ax > 0 and len(axis) < 4 else 1):
+            ax.legend(loc='upper left', framealpha=0.5)
+            need_legend = True
 
     parameters = indicator_data.data.get('parameters')
     if parameters is not None:
-        ax_price.set_title(', '.join([f'{key}={value!r}' for key, value in parameters.items()]))
+        ax_price.set_title(', '.join([f'{key}={value!r}' for key, value in parameters.items()]), fontsize='small')
 
-    title = f'{indicator_data.name} ({ohlcv_data.symbol} {ohlcv_data.timeframe!s} [{ohlcv_data.source}])'
+    if isinstance(indicator_data, OHLCV_data):
+        title = f'{symbol} {timeframe!s} [{source}]'
+    else:
+        title = f'{indicator_data.name} ({symbol} {timeframe!s} [{source}])'
+
     fig.suptitle(title)
     fig.canvas.manager.set_window_title(f'live_trading_indicators - {title}')
     return fig
@@ -57,7 +146,10 @@ def indicator_data_plot(indicator_data):
 
 def get_values_groups(indicator_data):
 
-    charts = indicator_data.data.get('charts')
+    if isinstance(indicator_data, OHLCV_data):
+        charts = (None,)
+    else:
+        charts = indicator_data.data.get('charts')
 
     if charts is None:
 
@@ -68,77 +160,84 @@ def get_values_groups(indicator_data):
             if type(value) == np.ndarray and key not in no_paint:
                 price_chart.add(key)
 
-        return [price_chart]
+        return [price_chart], None
 
+    ohlcv_data_dict = None
     values_groups = []
     for values_list in charts:
-        values_set = set() if values_list is None\
-            else {value_name.strip() for value_name in values_list.split(',')}
+        if values_list is None:
+            values_set = set()
+        elif isinstance(values_list, str):
+            values_set = {value_name.strip() for value_name in values_list.split(',')}
+        elif isinstance(values_list, tuple):
+            values_set = set()
+            for value in values_list:
+                if isinstance(value, dict):
+                    ohlcv_data_dict = value
+                else:
+                    values_set.add(value)
 
         values_groups.append(values_set)
 
-    return values_groups
+    return values_groups, ohlcv_data_dict
 
 
-def plot_indicator(ax, name, time, values):
-    ax.plot(time, values, label=name)
+def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
+    if chart_type is None:
+        axis.plot(time, values, label=name)
+
+    elif chart_type == 'bar_level':
+        marker = MarkerStyle('_').scaled(0.7)
+        axis.scatter(time, values, marker=marker, linewidths=1, label=name)
+
+    elif chart_type == 'hist':
+        bar_width = np.timedelta64(timeframe.value // 3, TIME_TYPE_UNIT)
+        axis.bar(time, values, width=bar_width, label=name)
+
+    elif chart_type == 'histdiff':
+
+        bar_width = np.timedelta64(int(timeframe.value * 0.6), TIME_TYPE_UNIT)
+
+        diff = np.hstack([0.0, np.diff(values)])
+        diff_0 = diff == 0
+        diff_p = diff > 0
+        diff_m = diff < 0
+
+        axis.bar(time[diff_0], values[diff_0], width=bar_width, color='gray')
+        axis.bar(time[diff_p], values[diff_p], width=bar_width, color='green')
+        axis.bar(time[diff_m], values[diff_m], width=bar_width, color='red')
+
+    elif chart_type == 'level':
+        axis.plot(time, values, linestyle='dotted', color='black', linewidth=1)
+
+    else:
+        axis.plot(time, values, label=name, linestyle=chart_type)
 
 
-def ohlcv_plot(ohlcv_data):
+def plot_ohlcv(axis, timeframe, time, open, high, low, close):
 
-    plt.rcParams['axes.axisbelow'] = True
-
-    fig, (ax_price, ax_volume) = plt.subplots(2, 1, sharex=True, dpi=200, gridspec_kw={'height_ratios': [3, 1]})
-    plt.subplots_adjust(hspace=0, top=0.92)
-    #plt.subplots_adjust(hspace=0.1)
-
-    cdf = mpl.dates.ConciseDateFormatter(ax_price.xaxis.get_major_locator())
-    ax_price.xaxis.set_major_formatter(cdf)
-
-    ax_price.grid(visible=True, linestyle=':')
-    ax_volume.grid(visible=True, linestyle=':')
-
-    plot_ohlcv(ohlcv_data, ax_price)
-    plot_volumes(ohlcv_data, ax_volume)
-
-    title = f'{ohlcv_data.symbol} {ohlcv_data.timeframe!s} [{ohlcv_data.source}]'
-    ax_price.title.set_visible(False)
-    fig.suptitle(title)
-    fig.canvas.manager.set_window_title(title)
-    return fig
-
-
-def plot_ohlcv(ohlcv_data, ax):
-
-    #ax.set_ylabel('price')
-
-    time = ohlcv_data.time
-    ix_up_candles = ohlcv_data.close > ohlcv_data.open
+    ix_up_candles = close > open
     ix_down_candles = ~ix_up_candles
 
-    ranges_body = abs(ohlcv_data.close - ohlcv_data.open)
-    bottoms = np.vstack((ohlcv_data.close, ohlcv_data.open)).min(0)
+    ranges_body = abs(close - open)
+    bottoms = np.vstack((close, open)).min(0)
 
-    width_bar = np.timedelta64(int(ohlcv_data.timeframe.value * 0.8), TIME_TYPE_UNIT)
-    width_tail = np.timedelta64(int(ohlcv_data.timeframe.value * 0.1), TIME_TYPE_UNIT)
-    ax.bar(time[ix_up_candles], ranges_body[ix_up_candles], bottom=bottoms[ix_up_candles], color=color_up, width=width_bar)
-    ax.bar(time[ix_down_candles], ranges_body[ix_down_candles], bottom=bottoms[ix_down_candles], color=color_down, width=width_bar)
+    width_bar = np.timedelta64(int(timeframe.value * 0.8), TIME_TYPE_UNIT)
+    width_tail = np.timedelta64(int(timeframe.value * 0.2), TIME_TYPE_UNIT)
+    axis.bar(time[ix_up_candles], ranges_body[ix_up_candles], bottom=bottoms[ix_up_candles], color=color_up, width=width_bar)
+    axis.bar(time[ix_down_candles], ranges_body[ix_down_candles], bottom=bottoms[ix_down_candles], color=color_down, width=width_bar)
 
-    ranges_all = abs(ohlcv_data.high - ohlcv_data.low)
-    ax.bar(time[ix_up_candles], ranges_all[ix_up_candles], bottom=ohlcv_data.low[ix_up_candles], color=color_up, width=width_tail)
-    ax.bar(time[ix_down_candles], ranges_all[ix_down_candles], bottom=ohlcv_data.low[ix_down_candles], color=color_down, width=width_tail)
+    ranges_all = abs(high - low)
+    axis.bar(time[ix_up_candles], ranges_all[ix_up_candles], bottom=low[ix_up_candles], color=color_up, width=width_tail)
+    axis.bar(time[ix_down_candles], ranges_all[ix_down_candles], bottom=low[ix_down_candles], color=color_down, width=width_tail)
 
 
-def plot_volumes(ohlcv_data, ax):
+def plot_volumes(axis, timeframe, time, open, close, volume):
 
-    #ax.set_ylabel('volume')
+    width_bar = np.timedelta64(int(timeframe.value * 0.8), TIME_TYPE_UNIT)
 
-    time = ohlcv_data.time
-
-    width_bar = np.timedelta64(int(ohlcv_data.timeframe.value * 0.8), TIME_TYPE_UNIT)
-
-    ix_up_candles = ohlcv_data.close > ohlcv_data.open
+    ix_up_candles = close > open
     ix_down_candles = ~ix_up_candles
 
-    ax.bar(time[ix_up_candles], ohlcv_data.volume[ix_up_candles], color=color_up, width=width_bar)
-    ax.bar(time[ix_down_candles], ohlcv_data.volume[ix_down_candles], color=color_down, width=width_bar)
+    axis.bar(time[ix_up_candles], volume[ix_up_candles], color=color_up, width=width_bar)
+    axis.bar(time[ix_down_candles], volume[ix_down_candles], color=color_down, width=width_bar)

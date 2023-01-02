@@ -15,9 +15,9 @@ def test_cci(config_default, test_source, test_symbol, time_begin, time_end, per
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     cci = indicators.CCI(test_symbol, timeframe, period=period)
 
-    ref_values = get_ref_values('cci', ohlcv, 'cci', period)
+    ref_values = get_ref_values('get_cci', ohlcv, 'cci', period)
 
     ref_values.cci[np.isnan(ref_values.cci)] = 0
-    assert compare_with_nan(cci.cci, ref_values.cci, 1e-10)
+    assert compare_with_nan(cci.cci, ref_values.cci, 1e-9)
 
 

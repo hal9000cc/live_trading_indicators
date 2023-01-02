@@ -40,7 +40,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=5, per
         'value_d': value_d,
         'value_k': value_k,
         'oscillator': oscillator,
-        'charts': (None, 'value_d, value_k, oscillator'),
+        'charts': (None, 'value_d:dashed, value_k, oscillator, level20:level=20, level80:level=80, ymin:ymin=0, ymax:ymax=100'),
         'allowed_nan': True
     })
 

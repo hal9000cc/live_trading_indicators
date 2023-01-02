@@ -32,3 +32,16 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
         assert compare_with_nan(stochastic.oscillator, ref_values.oscillator)
     assert compare_with_nan(stochastic.value_k, ref_values.k)
     assert compare_with_nan(stochastic.value_d, ref_values.d)
+
+
+@pytest.mark.parametrize('time_begin, time_end', [
+    ('2022-07-01', '2022-07-05')
+])
+def test_stockhastic_plot(config_default, test_source, test_symbol, time_begin, time_end):
+
+    timeframe = '1h'
+
+    indicators = lti.Indicators(test_source, time_begin, time_end)
+    ohlcvm = indicators.Stochastic(test_symbol, timeframe)
+
+    ohlcvm.show()

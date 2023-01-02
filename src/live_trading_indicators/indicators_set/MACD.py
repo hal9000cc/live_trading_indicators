@@ -6,7 +6,7 @@ from ..move_average import ma_calculate, MA_Type
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short, period_long, period_signal,
                       ma_type='ema', ma_type_signal='sma',
-                      value='close', relative_price=False,):
+                      value='close'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     source_values = ohlcv.data[value]
@@ -16,8 +16,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
     ema_long = ma_calculate(source_values, period_long, ma_type_enum)
 
     macd = ema_short - ema_long
-    if relative_price:
-        macd /= source_values / 1000.0
 
     signal = ma_calculate(macd, period_signal, MA_Type.cast(ma_type_signal))
 
@@ -27,7 +25,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
         'indicators': indicators,
         'parameters': {'period_short': period_short, 'period_long': period_long, 'period_signal': period_signal,
                       'ma_type': ma_type, 'ma_type_signal': ma_type_signal,
-                      'value': value, 'relative_price': relative_price},
+                      'value': value},
         'name': 'MACD',
         'symbol': symbol,
         'timeframe': timeframe,
@@ -35,7 +33,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
         'macd': macd,
         'signal': signal,
         'hist': macd_hist,
-        'charts': (None, 'macd, signal, hist'),
+        'charts': (None, 'macd, signal, hist:hist'),
         'allowed_nan': True
     })
 

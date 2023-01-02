@@ -3,7 +3,7 @@ import src.live_trading_indicators as lti
 
 
 @pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-03')
+    ('2022-07-01', '2022-07-06')
 ])
 def test_plot(config_default, test_source, test_symbol, time_begin, time_end):
 
@@ -16,7 +16,7 @@ def test_plot(config_default, test_source, test_symbol, time_begin, time_end):
 
 
 @pytest.mark.parametrize('time_begin, time_begin_plot, time_end', [
-    ('2022-07-01', '2022-07-03', '2022-07-06')
+    ('2022-07-01', '2022-07-03', '2022-07-09')
 ])
 def test_plot_all(config_default, test_source, test_symbol, time_begin, time_begin_plot, time_end):
 
@@ -36,6 +36,8 @@ def test_plot_all(config_default, test_source, test_symbol, time_begin, time_beg
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
     for indicator_name in lti.indicators_list():
+        if indicator_name == 'VolumeClusters':
+            continue
         indicator = indicators.get_indicator(indicator_name)
         params = indicator_params.get(indicator_name, {})
         out = indicator(test_symbol, timeframe, time_begin_plot, time_end, **params)

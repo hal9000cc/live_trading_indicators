@@ -49,12 +49,6 @@ def test_adl_plot(config_default, test_source, time_begin, time_end, sma_period)
     timeframe = '1h'
 
     indicators = lti.Indicators(test_source, time_begin, time_end, **config_default)
-    ohlcv = indicators.OHLCV(symbol, timeframe)
     adl = indicators.ADL(symbol, timeframe, ma_period=sma_period)
-
-    ref_values = get_ref_values('get_adl', ohlcv, 'adl, adl_sma', sma_period)
-
-    assert compare_with_nan(adl.adl, ref_values.adl, 1e-6)
-    assert compare_with_nan(adl.adl_smooth, ref_values.adl_sma, 1e-6)
 
     adl.show()

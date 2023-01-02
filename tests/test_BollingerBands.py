@@ -26,3 +26,17 @@ def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, t
 
     if timeframe.value >= Timeframe.t1h.value:
         bollinger_bands.show()
+
+
+@pytest.mark.parametrize('time_begin, time_end, sma_period', [
+    ('2022-07-01', '2022-07-07', 2)
+])
+def test_test_bollinger_bands_plot(config_default, test_source, time_begin, time_end, sma_period):
+
+    symbol = 'um/ethusdt'
+    timeframe = '1h'
+
+    indicators = lti.Indicators(test_source, time_begin, time_end, **config_default)
+    bollinger_bands = indicators.BollingerBands(symbol, timeframe, period=14, deviation=2)
+
+    bollinger_bands.show()
