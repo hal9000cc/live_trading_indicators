@@ -25,6 +25,10 @@ def compare_with_nan(value1, value2, accuracy=1e-08):
 
 
 def get_descript(args):
+
+    if len(args) == 0:
+        return ''
+
     return '.'.join([str(par) for par in args])
 
 
@@ -36,7 +40,7 @@ def get_ref_values(name, ohlcv, series, *args):
     time_begin = ohlcv.time[0].astype('datetime64[D]')
     time_end = ohlcv.time[-1].astype('datetime64[D]')
     par_decript = get_descript(args)
-    ref_file_name = os.path.join(data_folder, f'{name}-{symbol}-{ohlcv.timeframe!s}-{time_begin}-{time_end}.{par_decript}')
+    ref_file_name = os.path.join(data_folder, f'{name}-{symbol}-{ohlcv.timeframe!s}-{time_begin}-{time_end}{par_decript}')
 
     if os.path.isfile(ref_file_name):
         with open(ref_file_name, 'rb') as file:
