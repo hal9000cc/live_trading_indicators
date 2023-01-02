@@ -155,9 +155,9 @@ There are two methods for plotting: plot() and show(). plot() returns the drawn 
 indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
 bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', period=14)
 bb.show()
+```
 ###### Result:
 ![image](https://github.com/hal9000cc/live_trading_indicators/blob/stable/bb_show_example.png)
-```
 ## Details
 live-trading-indicators supports the following timeframes: 1s, 1m, 3m, 5m, 10m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
 The specific supported timeframes for the source depend on the source.
