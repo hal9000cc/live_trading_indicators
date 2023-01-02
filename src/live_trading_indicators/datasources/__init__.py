@@ -27,6 +27,7 @@ class SourceData:
 
         self.config = config
         self.cach_folder = path.join(self.config['cache_folder'], datasource_module.datasource_name())
+        self.request_trys = int(self.config['request_trys'])
 
         self.datasource_module = datasource_module
         self.datasource_id = datasource_id
@@ -318,7 +319,16 @@ class SourceData:
         if query_time_start > query_time_end:
             return []
 
-        bars_data = self.bars_online_request_with_grow(symbol, timeframe, query_time_start, query_time_end, day_for_grow)
+        for i_try in range(self.request_trys):
+            try:
+                bars_data = self.bars_online_request_with_grow(symbol, timeframe, query_time_start, query_time_end, day_for_grow)
+                break
+            except LTIException:
+                raise
+            except Exception as error:
+                logging.error(error)
+                if i_try >= self.request_trys - 1:
+                    raise
 
         downloaded_days = []
         day_date = date_start

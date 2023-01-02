@@ -37,14 +37,14 @@ def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
         assert mv_price == ohlcvm.mv_price[i]
 
 
-@pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-05')
+@pytest.mark.parametrize('time_begin, time_end, timeframe', [
+    ('2022-07-01', '2022-07-05', '1h'),
+    ('2022-07-01', '2022-07-02', '1h'),
+    ('2022-07-01', '2022-07-01T02:00', '1m')
 ])
-def test_clusters(config_default, test_source, test_symbol, time_begin, time_end):
-
-    timeframe = '1h'
+def test_ohlcvm_show(config_default, test_source, timeframe, time_begin, time_end):
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
-    ohlcvm = indicators.OHLCVM(test_symbol, timeframe)
+    ohlcvm = indicators.OHLCVM('ethusdt', timeframe, timeframe_low='1s')
 
     ohlcvm.show()

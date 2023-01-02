@@ -1,13 +1,23 @@
 import numpy as np
+from packaging import version
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.markers import MarkerStyle
 from matplotlib import ticker
 from .constants import TIME_TYPE_UNIT, TIME_TYPE
+from .exceptions import *
 from .indicator_data import OHLCV_data
 
-color_up = 'green'
-color_down = 'red'
+MATPLOTLIB_VERSION_REQUIRED = '3.5.1'
+
+COLOR_UP = 'green'
+COLOR_DOWN = 'red'
+COLOR_MV = 'blue'
+COLOR_HIST_UP = 'green'
+COLOR_HIST_DOWN = 'red'
+
+if version.parse(mpl.__version__) < version.parse(MATPLOTLIB_VERSION_REQUIRED):
+    raise LTIException(f'Requires a version of matplotlib at least {MATPLOTLIB_VERSION_REQUIRED}')
 
 
 @ticker.FuncFormatter
@@ -126,9 +136,10 @@ def indicator_data_plot(indicator_data):
             ax.text(0.99, 0.97, ax_label, transform=ax.transAxes, verticalalignment='top', horizontalalignment='right')
 
         handles, labels = ax.get_legend_handles_labels()
-        if need_legend or len(handles) >= (2 if i_ax > 0 and len(axis) < 4 else 1):
-            ax.legend(loc='upper left', framealpha=0.5)
-            need_legend = True
+        if  len(handles) > 0:
+            if need_legend or len(handles) >= (2 if i_ax > 0 and len(axis) < 4 else 1):
+                ax.legend(loc='upper left', framealpha=0.5)
+                need_legend = True
 
     parameters = indicator_data.data.get('parameters')
     if parameters is not None:
@@ -187,8 +198,8 @@ def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
         axis.plot(time, values, label=name)
 
     elif chart_type == 'bar_level':
-        marker = MarkerStyle('_').scaled(0.7)
-        axis.scatter(time, values, marker=marker, linewidths=1, label=name)
+        bar_marker_width = np.timedelta64(int(timeframe.value * 1.0), TIME_TYPE_UNIT)
+        axis.bar(time, 0, bottom=values, width=bar_marker_width, linewidth=1, edgecolor=COLOR_MV, label=name)
 
     elif chart_type == 'hist':
         bar_width = np.timedelta64(timeframe.value // 3, TIME_TYPE_UNIT)
@@ -204,8 +215,8 @@ def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
         diff_m = diff < 0
 
         axis.bar(time[diff_0], values[diff_0], width=bar_width, color='gray')
-        axis.bar(time[diff_p], values[diff_p], width=bar_width, color='green')
-        axis.bar(time[diff_m], values[diff_m], width=bar_width, color='red')
+        axis.bar(time[diff_p], values[diff_p], width=bar_width, color=COLOR_HIST_UP)
+        axis.bar(time[diff_m], values[diff_m], width=bar_width, color=COLOR_HIST_DOWN)
 
     elif chart_type == 'level':
         axis.plot(time, values, linestyle='dotted', color='black', linewidth=1)
@@ -224,12 +235,12 @@ def plot_ohlcv(axis, timeframe, time, open, high, low, close):
 
     width_bar = np.timedelta64(int(timeframe.value * 0.8), TIME_TYPE_UNIT)
     width_tail = np.timedelta64(int(timeframe.value * 0.2), TIME_TYPE_UNIT)
-    axis.bar(time[ix_up_candles], ranges_body[ix_up_candles], bottom=bottoms[ix_up_candles], color=color_up, width=width_bar)
-    axis.bar(time[ix_down_candles], ranges_body[ix_down_candles], bottom=bottoms[ix_down_candles], color=color_down, width=width_bar)
+    axis.bar(time[ix_up_candles], ranges_body[ix_up_candles], bottom=bottoms[ix_up_candles], color=COLOR_UP, width=width_bar)
+    axis.bar(time[ix_down_candles], ranges_body[ix_down_candles], bottom=bottoms[ix_down_candles], color=COLOR_DOWN, width=width_bar)
 
     ranges_all = abs(high - low)
-    axis.bar(time[ix_up_candles], ranges_all[ix_up_candles], bottom=low[ix_up_candles], color=color_up, width=width_tail)
-    axis.bar(time[ix_down_candles], ranges_all[ix_down_candles], bottom=low[ix_down_candles], color=color_down, width=width_tail)
+    axis.bar(time[ix_up_candles], ranges_all[ix_up_candles], bottom=low[ix_up_candles], color=COLOR_UP, width=width_tail)
+    axis.bar(time[ix_down_candles], ranges_all[ix_down_candles], bottom=low[ix_down_candles], color=COLOR_DOWN, width=width_tail)
 
 
 def plot_volumes(axis, timeframe, time, open, close, volume):
@@ -239,5 +250,5 @@ def plot_volumes(axis, timeframe, time, open, close, volume):
     ix_up_candles = close > open
     ix_down_candles = ~ix_up_candles
 
-    axis.bar(time[ix_up_candles], volume[ix_up_candles], color=color_up, width=width_bar)
-    axis.bar(time[ix_down_candles], volume[ix_down_candles], color=color_down, width=width_bar)
+    axis.bar(time[ix_up_candles], volume[ix_up_candles], color=COLOR_UP, width=width_bar)
+    axis.bar(time[ix_down_candles], volume[ix_down_candles], color=COLOR_DOWN, width=width_bar)

@@ -24,7 +24,8 @@ def config_get_default():
         'restore_empty_bars': True,
         'print_log': True,
         'log_level': 'INFO',
-        'request_timeout': 10
+        'request_timeout': 20,
+        'request_trys': 3
     }
 
 
@@ -74,6 +75,7 @@ def get_logging_config(config):
                 # 'when': 's',
                 'filename': path.join(log_folder, 'live-trading-indicators.log'),
                 'formatter': 'default',
+                'maxBytes': 65536,
                 'backupCount': 5,
             },
             'verbose_output': {

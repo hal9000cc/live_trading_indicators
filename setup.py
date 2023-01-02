@@ -1,4 +1,5 @@
 import setuptools
+from src.live_trading_indicators import __version__ as version
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -9,7 +10,7 @@ requirements = [
 
 setuptools.setup(
     name='live_trading_indicators',
-    version='0.6.0',
+    version=version,
     author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
     description='A package for obtaining quotation data from various online and offline sources and calculating the values of'
@@ -38,6 +39,6 @@ setuptools.setup(
         "Topic :: Office/Business :: Financial :: Investment"
     ],
     install_requires=requirements,
-    extra_requires=['ccxt<=2.2.92', 'pandas<=1.5.0'],
+    extra_requires=['ccxt<=2.2.92', 'pandas<=1.5.0', 'matplotlib<=3.5.1'],
     python_requires='>=3.7',
 )

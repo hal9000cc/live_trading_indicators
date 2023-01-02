@@ -1,9 +1,12 @@
 import numpy as np
 import logging
+from packaging import version
 import ccxt
 from ..exceptions import *
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE
 from ..timeframe import Timeframe
+
+CCXT_VERSION_REQUIRED = '2.2.92'
 
 MAX_LIMITS = {
     'bequant': 1000,
@@ -18,6 +21,9 @@ exchange_name = None
 timeframes = None
 exchange_params = None
 limit_max = None
+
+if version.parse(ccxt.__version__) < version.parse(CCXT_VERSION_REQUIRED):
+    raise LTIException(f'Requires a version of ccxt at least {CCXT_VERSION_REQUIRED}')
 
 
 def datasource_name():
