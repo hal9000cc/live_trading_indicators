@@ -20,7 +20,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ### what's new
 #### 0.6.0
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
-- Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/edit/stable/README.md#settings)).
+- Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
 #### 0.5.3
 - New timeframe - 1s
 - Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
@@ -179,7 +179,7 @@ If you don't need integrity control at all, do:
 import live_trading_indicators as lti
 lti.config(max_empty_bars_fraction=-1, max_empty_bars_consecutive=-1)
 ```
-The presence of the first and last bars in the date range is also checked. For more details, see [Settings](https://github.com/hal9000cc/live_trading_indicators/edit/stable/README.md#settings).
+The presence of the first and last bars in the date range is also checked. For more details, see [Settings](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings).
 ### Informational messages
 By default, log messages are output to the console, and you will see similar messages:
 ```
