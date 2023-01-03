@@ -16,8 +16,9 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.6.1
+## Version 0.6.2
 ### what's new
+#### 0.6.2
 #### 0.6.1
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
@@ -41,7 +42,7 @@ pip install live_trading_indicators
 - [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
 - [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
 ## Quick start
-All the examples given here can be found in [jupyter notebook examples](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb).
+All the examples given here can be found in [jupyter notebook examples](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb). There are also [benchmark results in jupyter notebook](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb).
 ### Getting quotes (online / cache)
 ```python
 import live_trading_indicators as lti
