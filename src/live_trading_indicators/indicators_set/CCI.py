@@ -26,6 +26,8 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period):
     typical_price = (ohlcv.high + ohlcv.low + ohlcv.close) / 3
     sma_typical_price = ma_calculate(typical_price, period, MA_Type.sma)
     mad = calc_mad(typical_price, sma_typical_price, period)
+
+    np.seterr(invalid='ignore')
     cci = (typical_price - sma_typical_price) / mad / 0.015
     cci[mad == 0] = 0
 

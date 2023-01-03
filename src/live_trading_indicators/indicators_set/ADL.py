@@ -10,6 +10,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
 
+    np.seterr(invalid='ignore')
     hl_range = ohlcv.high - ohlcv.low
     clv = ((ohlcv.close - ohlcv.low) - (ohlcv.high - ohlcv.close)) / hl_range
     clv[hl_range == 0] = 0

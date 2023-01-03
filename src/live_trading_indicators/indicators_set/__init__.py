@@ -379,8 +379,8 @@ class Indicators:
                 'empty_bars_fraction': empty_bars_fraction,
                 'empty_bars_consecutive': empty_bars_consecutive
             })
-            if (empty_bars_fraction is not None and empty_bars_fraction > self.config['max_empty_bars_fraction']) \
-                    or (empty_bars_consecutive is not None and empty_bars_consecutive > max_empty_bars_consecutive):
+            if (empty_bars_fraction is not None and max_empty_bars_fraction >= 0 and empty_bars_fraction > max_empty_bars_fraction) \
+                    or (empty_bars_consecutive is not None and max_empty_bars_consecutive >= 0 and empty_bars_consecutive > max_empty_bars_consecutive):
                 raise LTIExceptionTooManyEmptyBars(self.datasource_name,
                                                    bar_data.symbol,
                                                    bar_data.timeframe,

@@ -35,7 +35,9 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
     up_line = mid_line + deviations
     down_line = mid_line - deviations
 
+    np.seterr(divide='ignore', invalid='ignore')
     z_score = (source_values - mid_line) / std_deviations
+    z_score[std_deviations == 0] = 0
 
     return IndicatorData({
         'indicators': indicators,
