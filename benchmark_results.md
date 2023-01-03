@@ -28,3 +28,4 @@ date: 2021-01-01T00:00 - 2021-12-31T23:59 (length: 31536000)
 Values: time, value_d, value_k, oscillator
 Stochastic 1.9372139129554853 seconds
 ```
+### [More benchmarks in jupyter notebook](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb)
