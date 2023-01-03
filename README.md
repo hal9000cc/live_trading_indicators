@@ -23,7 +23,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
 #### 0.5.3
 - New timeframe - 1s
-- Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmark_results.md)
+- Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb)
 - Added intermediate saving when loading for a long time
 #### 0.5.2
 - Fix for python 3.7
