@@ -247,7 +247,7 @@ class OHLCV_data(TimeframeData):
 
     def __str__(self):
 
-        info = [f'<OHLCV data> source: {self.source}, symbol: {self.symbol}, timeframe: {self.timeframe}', self.str_period()]
+        info = [f'(OHLCV data) source: {self.source}, symbol: {self.symbol}, timeframe: {self.timeframe}', self.str_period()]
 
         if self.data.get('empty_bars_count') is not None:
             info.append(
@@ -578,7 +578,7 @@ class IndicatorData(TimeframeData):
         symbol_info = f'symbol: {symbol}'
         nan_info = 'allowed nan' if self.allowed_nan else 'not allowed nan'
 
-        info = [f'<IndicatorData> source: {self.source}, name: {self.name}, {symbol_info}, '
+        info = [f'(IndicatorData) source: {self.source}, name: {self.name}, {symbol_info}, '
                 f'timeframe: {self.timeframe!s}, {nan_info}',
                 self.str_period(),
                 self.str_values()]
