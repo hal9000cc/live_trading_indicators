@@ -20,7 +20,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ### what's new
 #### 0.6.2
 - New indicator - ZigZag
-![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/images/zigzag.png "live_trading_indicators - New indicator: ZigZag for BTCUSDT timeframe 4h")
+![live_trading_indicators - New indicator: ZigZag for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/images/zigzag.png "live_trading_indicators - New indicator: ZigZag for BTCUSDT timeframe 4h")
 #### 0.6.1
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
@@ -161,7 +161,7 @@ bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', peri
 bb.show()
 ```
 ###### Result:
-![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/bb_show_example.png "live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h")
+![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/images/bb_show_example.png "live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h")
 ## Details
 live-trading-indicators supports the following timeframes: 1s, 1m, 3m, 5m, 10m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
 The specific supported timeframes for the source depend on the source.
