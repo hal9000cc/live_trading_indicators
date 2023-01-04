@@ -47,7 +47,7 @@ def get_ref_values(name, ohlcv, series, *args):
             ref_values = pickle.load(file)
     else:
 
-        from stock_indicators import Quote, indicators as si
+        from stock_indicators import Quote, EndType, indicators as si
 
         def ohlcv2quote(ohlcv):
             time = ohlcv.time.astype(dt.datetime)
@@ -60,9 +60,17 @@ def get_ref_values(name, ohlcv, series, *args):
             for item in stocks:
                 res.append(item.__getattribute__(variable))
 
-            return np.array(res, dtype=float)
+            try:
+                return np.array(res, dtype=float)
+            except:
+                return np.array(res)
 
         fun = getattr(si, name)
+        if name == 'get_zig_zag':
+            args = list(args)
+            args[0] = EndType[args[0]]
+            args = tuple(args)
+
         ind_data = fun(ohlcv2quote(ohlcv), *args)
         ref_values = {}
         for series_name in series.split(','):

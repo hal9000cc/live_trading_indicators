@@ -1,5 +1,9 @@
 """ADL(ma_period=None, ma_type='sma')
-Accumulation/distribution line."""
+Accumulation/distribution line.
+Parameters:
+    ma_period - moving average period (int) for adl_smooth value, it can be None if adl_smooth is not needed
+    ma_type - moving average type for adl_smooth value (can be 'sma', 'ema', 'mma', 'ema0', 'mma0')"""
+
 from ..indicator_data import IndicatorData
 from ..move_average import *
 

@@ -136,7 +136,7 @@ def indicator_data_plot(indicator_data):
             ax.text(0.99, 0.97, ax_label, transform=ax.transAxes, verticalalignment='top', horizontalalignment='right')
 
         handles, labels = ax.get_legend_handles_labels()
-        if  len(handles) > 0:
+        if len(handles) > 0:
             if need_legend or len(handles) >= (2 if i_ax > 0 and len(axis) < 4 else 1):
                 ax.legend(loc='upper left', framealpha=0.5)
                 need_legend = True
@@ -161,6 +161,7 @@ def get_values_groups(indicator_data):
         charts = (None,)
     else:
         charts = indicator_data.data.get('charts')
+        assert isinstance(charts, tuple)
 
     if charts is None:
 
@@ -220,6 +221,10 @@ def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
 
     elif chart_type == 'level':
         axis.plot(time, values, linestyle='dotted', color='black', linewidth=1)
+
+    elif chart_type == 'pivots':
+        bx_points = ~np.isnan(values)
+        axis.plot(time[bx_points], values[bx_points], label=name)
 
     else:
         axis.plot(time, values, label=name, linestyle=chart_type)

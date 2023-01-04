@@ -1,5 +1,10 @@
 """MA(period=, value='close', ma_type='sma')
-Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'"""
+Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
+Parameters:
+    value - quote value used (can be 'open', 'high', 'low', 'close', 'volume')
+    ma_period - moving average period, int
+    ma_type - moving average type (can be 'sma', 'ema', 'mma', 'ema0', 'mma0')"""
+
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
