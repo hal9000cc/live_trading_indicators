@@ -19,7 +19,8 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ## Version 0.6.2
 ### what's new
 #### 0.6.2
-- New indicator - ADL
+- New indicator - ZigZag
+![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/images/zigzag.png "live_trading_indicators - New indicator: ZigZag for BTCUSDT timeframe 4h")
 #### 0.6.1
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
@@ -213,7 +214,6 @@ The list of supported indicators and their parameters can be obtained by calling
 import live_trading_indicators as lti
 print(lti.help())
 ```
-- ADL(ma_period=None, ma_type='sma') - Accumulation/distribution line.
 - ADX(period=14, smooth=14, ma_type='mma') - Average directional movement index.
 - ATR(smooth=14, ma_type='mma') - Average true range.
 - Awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False) - Awesome oscillator.
@@ -226,7 +226,6 @@ print(lti.help())
 - OBV() - On Balance Volume.
 - OHLCV() - Quotes: open, high, low, close, volume.
 - OHLCVM(timeframe_low='1m', bars_on_bins=6) - Quotes and the price of the maximum volume: open, high, low, close, volume, mv_price.
-The price of the maximum volume is determined by the lower timeframe (default 1m).
 - ParabolicSAR(start=0.02, maximum=0.2, increment=0.02) - Parabolic SAR.
 - ROC(period=14, ma_period=14, ma_type='sma', value='close') - Rate of Change.
 - RSI(period=, ma_type='mma', value='close') - Relative strength index.
@@ -238,6 +237,7 @@ The price of the maximum volume is determined by the lower timeframe (default 1m
 - VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
+- ZigZag_pivots(delta=0.02, type='high_low', redrawable=False) - Zig-zag indicator (pivots).
 ### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
