@@ -161,7 +161,7 @@ def get_values_groups(indicator_data):
         charts = (None,)
     else:
         charts = indicator_data.data.get('charts')
-        assert isinstance(charts, tuple)
+        assert isinstance(charts, (tuple, type(None)))
 
     if charts is None:
 
