@@ -475,13 +475,18 @@ def help(mode=0):
         module = importlib.import_module(f'.{module_name}', __package__)
         if module.__doc__:
             if mode == 0:
-                helo_append(help_list, module.__doc__)
-            else:
+                helo_append(help_list, '\n'.join([module.__doc__, '']))
+            elif mode == 1:
                 doc = module.__doc__.splitlines()
                 first_line = f'{doc[0]} - {doc[1]}'
                 doc.pop(0)
                 doc[0] = first_line
                 helo_append(help_list, '\n'.join(doc))
+            else:
+                doc = module.__doc__.splitlines()
+                first_line = f'{doc[0]} - {doc[1]}'
+                helo_append(help_list, first_line)
+
         else:
             help_list.append(f'{module_name}(?)')
 

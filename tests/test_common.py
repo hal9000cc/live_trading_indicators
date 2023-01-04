@@ -14,7 +14,7 @@ def test_timeframe_cast():
 
 
 def test_help():
-    print(help())
+    print(help(2))
 
 
 def test_list():
