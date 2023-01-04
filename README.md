@@ -19,6 +19,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ## Version 0.6.2
 ### what's new
 #### 0.6.2
+- New indicator - ADL
 #### 0.6.1
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
