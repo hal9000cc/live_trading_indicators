@@ -331,4 +331,4 @@ Log registration level. Default: INFO.
 #### request_timeout
 Timeout of requests to download quotes, seconds. Default: 10.
 #### request_trys
-The number of attempts to download quotes.
+The number of attempts to download quotes. Default: 3.
