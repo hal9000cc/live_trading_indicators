@@ -1,4 +1,4 @@
-"""ZigZag_pivots(delta=0.02, type='high_low', redrawable=False)
+"""ZigZag(delta=0.02, type='high_low', redrawable=False)
 Zig-zag indicator (pivots).
 Return pivots prices and pivots types.
 Parameters:
