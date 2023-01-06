@@ -1,7 +1,5 @@
 import logging
 import logging.config
-import os
-import os.path as path
 import importlib
 from enum import Enum
 from abc import ABC, abstractmethod
@@ -44,7 +42,7 @@ class Indicators:
                  exchange_params=None,
                  **config_mod):
 
-        self.config = config_load();
+        self.config = config_load()
         self.config.update(config_mod)
 
         self.indicators = {}
@@ -58,6 +56,7 @@ class Indicators:
         self.time_end = None
         self.source_data = None
         self.indicators_mode = None
+        self.custom_indicators = self.config.get('custom_indicators')
 
         self.init_log()
 
@@ -398,13 +397,22 @@ class IndicatorProxy(ABC):
 
         self.indicator_name = indicator_name
 
-        try:
-            self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
-            self.indicators = indicators
-        except ModuleNotFoundError as error:
-            if error.name.split('.')[-1] == indicator_name:
-                raise LTIExceptionIndicatorNotFound(indicator_name) from error
-            raise
+        self.indicator_module = None
+        if indicators.custom_indicators is not None:
+            try:
+                self.indicator_module = importlib.import_module(f'{indicators.custom_indicators}{indicator_name}')
+                self.indicators = indicators
+            except ModuleNotFoundError as error:
+                pass
+
+        if self.indicator_module is None:
+            try:
+                self.indicator_module = importlib.import_module(f'.{indicator_name}', __package__)
+                self.indicators = indicators
+            except ModuleNotFoundError as error:
+                if error.name.split('.')[-1] == indicator_name:
+                    raise LTIExceptionIndicatorNotFound(indicator_name) from error
+                raise
 
     @abstractmethod
     def __call__(self, *args, **kwargs):

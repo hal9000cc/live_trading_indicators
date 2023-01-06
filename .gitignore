@@ -134,3 +134,5 @@ tests old/test_data/
 tests/test_data
 bin/
 pyvenv.cfg
+
+*.test_dat
