@@ -42,7 +42,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'up': up,
         'down': down,
         'oscillator': oscillator,
-        'charts': (None, 'up, down, oscillator'),
+        'charts': (None, 'up, down', 'oscillator'),
         'allowed_nan': True
     })
 
