@@ -115,6 +115,16 @@ print(macd[40:].pandas().head())
 3 2022-08-15 00:43:00  3.684476  3.170449  0.514027
 4 2022-08-15 00:44:00  3.763257  3.354183  0.409074
 ```
+### Plotting indicators charts
+Plotting uses matplotlib. These are optional features, so matplotlib must be installed separately.
+There are two methods for plotting: plot() and show(). plot() returns the drawn figure, show() returns None. For jupyter notepad, it is better to use show(), since plot() can draw a figure twice.
+```python
+indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
+bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', period=14)
+bb.show()
+```
+###### Result:
+![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://raw.githubusercontent.com/hal9000cc/live_trading_indicators/stable/images/bb_show_example.png "live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h")
 ### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
 To get real-time data, you **don't have to specify an end date**.
 ```python
@@ -153,16 +163,6 @@ Now is 2022-11-04 09:37:07.372986 UTC
 2 2022-11-04 09:36:00  20615.69  20617.75  20609.74  20611.46  199.43313
 3 2022-11-04 09:37:00  20611.11  20611.89  20608.17  20609.02   15.15800
 ```
-### Plotting indicators charts
-Plotting uses matplotlib. These are optional features, so matplotlib must be installed separately.
-There are two methods for plotting: plot() and show(). plot() returns the drawn figure, show() returns None. For jupyter notepad, it is better to use show(), since plot() can draw a figure twice.
-```python
-indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
-bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', period=14)
-bb.show()
-```
-###### Result:
-![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://github.com/hal9000cc/live_trading_indicators/blob/stable/images/bb_show_example.png)
 ## Details
 live-trading-indicators supports the following timeframes: 1s, 1m, 3m, 5m, 10m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d.
 The specific supported timeframes for the source depend on the source.
