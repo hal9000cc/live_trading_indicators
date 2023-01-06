@@ -214,8 +214,10 @@ The list of supported indicators and their parameters can be obtained by calling
 import live_trading_indicators as lti
 print(lti.help())
 ```
+- ADL(ma_period=None, ma_type='sma') - Accumulation/distribution line.
 - ADX(period=14, smooth=14, ma_type='mma') - Average directional movement index.
 - ATR(smooth=14, ma_type='mma') - Average true range.
+- Aroon(period=14) - Aroon oscillator.
 - Awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False) - Awesome oscillator.
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
 - CCI(period=) - Commodity channel index.
@@ -237,8 +239,7 @@ print(lti.help())
 - VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
-- ZigZag_pivots(delta=0.02, type='high_low', redrawable=False) - Zig-zag indicator (pivots).
-### Specifying the period
+- ZigZag(delta=0.02, type='high_low', redrawable=False) - Zig-zag indicator (pivots).### Specifying the period
 The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
 
 There are three strategies for specifying a time period:
