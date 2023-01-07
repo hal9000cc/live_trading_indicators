@@ -1,2 +1,2 @@
-  examples_show.ipynb -linguist-generated
-  examples.ipynb -linguist-generated
+  examples_show.ipynb linguist-generated=false
+  examples.ipynb linguist-generated=false
