@@ -111,12 +111,6 @@ class BlockCache:
             self.open_file_block_offset = allocate_table.block_offset
             self.open_file_block_length = allocate_table.block_length
 
-            # type_i32 = np.dtype('>i4')
-            # type_i32_size = type_i32.itemsize
-            # buf = open_file.read(n_blocks * type_i32_size * 2)
-            # self.open_file_block_offset = np.frombuffer(buf, type_i32, n_blocks)
-            # self.open_file_block_length = np.frombuffer(buf, type_i32, n_blocks, n_blocks * type_i32_size)
-
             self.open_file_name = file_name
             self.open_file = open_file
 
