@@ -25,7 +25,9 @@ def config_get_default():
         'print_log': True,
         'log_level': 'INFO',
         'request_timeout': 10,
-        'request_trys': 3
+        'request_trys': 3,
+        'quotation_database': path.join(home_folder, 'data', 'quotation.db'),
+        'compression_type': 'auto'
     }
 
 

@@ -4,14 +4,13 @@ import construct as cs
 import zlib
 import logging
 from ..exceptions import *
+from .sqlite_cache import Sqlite3Cache
 from .bars_cache import BarsCache
 from ..indicator_data import *
 from ..constants import PRICE_TYPE, VOLUME_TYPE
 
 
-BLOCK_FILE_SIGNATURE = b'LTI'
 BLOCK_FILE_EXT = 'lti'
-BLOCK_FILE_VERSION = 1
 
 CACHE_BLOCK_VERSION = 2
 
@@ -36,6 +35,7 @@ class SourceData:
         self.count_datasource_bars_get = 0
         self.count_file_load = 0
 
+        self.sql_bars_cache = Sqlite3Cache(self.config)
         self.bars_cache = BarsCache()
 
     def __del__(self):
@@ -52,70 +52,6 @@ class SourceData:
 
         filename = f'{symbol_store_name}-{timeframe!s}-{day_date}.{BLOCK_FILE_EXT}'
         return folder, filename, symbol_store_name
-
-    @staticmethod
-    def rename_file_force(source, destination):
-
-        if path.isfile(destination):
-            os.remove(destination)
-
-        os.rename(source, destination)
-
-    @staticmethod
-    def get_file_signature_struct():
-        return cs.Struct('signature' / cs.Const(BLOCK_FILE_SIGNATURE), 'file_version' / cs.Int16ub)
-
-    @staticmethod
-    def build_signature_and_version():
-        return __class__.get_file_signature_struct().build({'file_version': BLOCK_FILE_VERSION})
-
-    @staticmethod
-    def parse_signature_and_version(stream):
-        return __class__.get_file_signature_struct().parse_stream(stream)
-
-    @staticmethod
-    def get_header_struct_v1():
-        return cs.Struct(
-            'n_bars' / cs.Int
-        )
-
-    @staticmethod
-    def build_header_v1(day_data):
-
-        header = {
-            'n_bars': len(day_data.time)
-        }
-
-        return __class__.get_header_struct_v1().build(header)
-
-    def build_header(self, day_data):
-
-        if BLOCK_FILE_VERSION == 1:
-            return self.build_header_v1(day_data)
-
-        raise NotImplementedError()
-
-    @staticmethod
-    def parse_header(file, file_version):
-
-        if file_version == 1:
-            header_struct = __class__.get_header_struct_v1()
-        else:
-            raise NotImplementedError()
-
-        return header_struct.sizeof(), header_struct.parse(file)
-
-    @staticmethod
-    def get_file_data_struct(n_bars):
-        return cs.Struct(
-
-            'time' / cs.Long[n_bars],
-            'open' / cs.Double[n_bars],
-            'high' / cs.Double[n_bars],
-            'low' / cs.Double[n_bars],
-            'close' / cs.Double[n_bars],
-            'volume' / cs.Double[n_bars]
-        )
 
     def save_to_cache(self, file_name, bar_data):
 
@@ -142,33 +78,6 @@ class SourceData:
             file.write(zlib.compress(b''.join(buf_data)))
         self.rename_file_force(temp_file_name, file_name)
 
-    def load_from_cache(self, file_name, symbol, timeframe):
-
-        with open(file_name, 'rb') as file:
-
-            signature_and_version = self.parse_signature_and_version(file)
-            if signature_and_version.signature != BLOCK_FILE_SIGNATURE:
-                raise LTIException('Bad data cash file')
-
-            buf = zlib.decompress(file.read())
-            header_len, header = self.parse_header(buf, signature_and_version.file_version)
-            data_struct = self.get_file_data_struct(header.n_bars)
-            file_data = data_struct.parse(buf[header_len:])
-
-        return OHLCV_day({
-            'symbol': symbol,
-            'timeframe': timeframe,
-            'source': self.datasource_id,
-            'is_incomplete_day': False,
-            'time': np.array(file_data.time, dtype=np.int64).astype(TIME_TYPE),
-            'open': np.array(file_data.open, dtype=PRICE_TYPE),
-            'high': np.array(file_data.high, dtype=PRICE_TYPE),
-            'low': np.array(file_data.low, dtype=PRICE_TYPE),
-            'close': np.array(file_data.close, dtype=PRICE_TYPE),
-            'volume': np.array(file_data.volume, dtype=VOLUME_TYPE)
-        })
-
-
     def save_to_cache_verified(self, symbol, timeframe, bar_data, day_date):
 
         now = np.datetime64(dt.datetime.now(), TIME_TYPE_UNIT)
@@ -184,7 +93,7 @@ class SourceData:
                 return
 
         assert timeframe.begin_of_tf(np.datetime64(day_date, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY) + timeframe.value + MAX_CLIENT_TIME_ERROR < now
-        self.save_to_blocks_cache(symbol, timeframe, day_date, bar_data)
+        self.sql_bars_cache.save_day(self.datasource_id, symbol, timeframe, day_date, bar_data)
 
     @staticmethod
     def block_header_struct():
@@ -192,25 +101,6 @@ class SourceData:
             'block_version' / cs.Int8ub,
             'n_bars' / cs.Int32ub
         )
-
-    def save_to_blocks_cache(self, symbol, timeframe, day_date, bar_data):
-
-        folder, file_name, symbol_store_name = self.filename_day_data(symbol, timeframe, day_date)
-
-        n_bars = len(bar_data)
-        block_header_struct = self.block_header_struct()
-        # block_data_struct = self.block_data_struct(n_bars)
-        buf_data = [
-            block_header_struct.build({'block_version': CACHE_BLOCK_VERSION, 'n_bars': n_bars}),
-            bar_data.time.astype(np.dtype('>u8')).tobytes(),
-            bar_data.open.astype('>f8').tobytes(),
-            bar_data.high.astype('>f8').tobytes(),
-            bar_data.low.astype('>f8').tobytes(),
-            bar_data.close.astype('>f8').tobytes(),
-            bar_data.volume.astype('>f8').tobytes()
-        ]
-
-        self.bars_cache.day_save(folder, symbol_store_name, timeframe, day_date, b''.join(buf_data))
 
     def load_from_blocks_cache(self, symbol, timeframe, day_date):
 
@@ -265,19 +155,14 @@ class SourceData:
 
     def bars_of_day_from_cache(self, symbol, timeframe, day_date):
 
-        folder, file_name, _ = self.filename_day_data(symbol, timeframe, day_date)
+        bar_data = self.sql_bars_cache.load_day(self.datasource_id, symbol, timeframe, day_date)
 
-        old_cach_file = path.join(folder, file_name)
-        if path.isfile(old_cach_file):
+        if bar_data is None:
+            #search old files
+            bar_data = self.load_from_blocks_cache(symbol, timeframe, day_date)
+            if bar_data is not None:
+                self.sql_bars_cache.save_day(self.datasource_id, symbol, timeframe, day_date, bar_data)
 
-            bar_data = self.load_from_cache(old_cach_file, symbol, timeframe)
-            self.save_to_blocks_cache(symbol, timeframe, day_date, bar_data)
-            os.remove(old_cach_file)
-
-            self.count_file_load += 1
-            return bar_data
-
-        bar_data = self.load_from_blocks_cache(symbol, timeframe, day_date)
         if bar_data is not None:
             self.count_file_load += 1
 
@@ -404,34 +289,29 @@ class SourceData:
         date_end = time_end.astype('datetime64[D]')
         day_date = time_begin.astype('datetime64[D]')
 
-        try:
+        is_live = False
+        start_day_for_download = None
+        while day_date <= date_end:
 
-            is_live = False
-            start_day_for_download = None
-            while day_date <= date_end:
-
-                day_data = self.bars_of_day_from_cache(symbol, timeframe, day_date)
-                if day_data is None:
-                    if start_day_for_download is None:
-                        start_day_for_download = day_date
-                    day_date += 1
-                    continue
-
-                if start_day_for_download is not None:
-                    last_day_is_incomplete = self.download_days_to_series(symbol, timeframe, start_day_for_download,
-                                                                          day_date - 1, day_for_grow, series)
-                    assert not last_day_is_incomplete
-                    start_day_for_download = None
-
-                self.append_series_from_day_data(day_data, series)
+            day_data = self.bars_of_day_from_cache(symbol, timeframe, day_date)
+            if day_data is None:
+                if start_day_for_download is None:
+                    start_day_for_download = day_date
                 day_date += 1
+                continue
 
             if start_day_for_download is not None:
-                is_live = self.download_days_to_series(symbol, timeframe, start_day_for_download,
+                last_day_is_incomplete = self.download_days_to_series(symbol, timeframe, start_day_for_download,
                                                                       day_date - 1, day_for_grow, series)
+                assert not last_day_is_incomplete
+                start_day_for_download = None
 
-        finally:
-            self.bars_cache.close_block_file()
+            self.append_series_from_day_data(day_data, series)
+            day_date += 1
+
+        if start_day_for_download is not None:
+            is_live = self.download_days_to_series(symbol, timeframe, start_day_for_download,
+                                                                  day_date - 1, day_for_grow, series)
 
         td_time, td_open, td_high, td_low, td_close, td_volume = series
         if len(td_time) == 0:

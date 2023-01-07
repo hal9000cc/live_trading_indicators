@@ -158,7 +158,8 @@ def clear_data():
     yield {
         'cache_folder' : cache_folder,
         'sources_folder': sources_folder,
-        'log_level': LOG_LEVEL
+        'log_level': LOG_LEVEL,
+        'quotation_database': path.join(data_path, 'quotation_database')
     }
     shutil.rmtree(data_path, ignore_errors=True)
 

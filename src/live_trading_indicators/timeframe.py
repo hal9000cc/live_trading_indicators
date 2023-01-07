@@ -20,9 +20,6 @@ class Timeframe(IntEnum):
     t8h = 60 * 60 * 8 * TIME_UNITS_IN_ONE_SECOND
     t12h = 60 * 60 * 12 * TIME_UNITS_IN_ONE_SECOND
     t1d = 60 * 60 * 24 * TIME_UNITS_IN_ONE_SECOND
-    t2d = 60 * 60 * 24 * 2 * TIME_UNITS_IN_ONE_SECOND
-    t4d = 60 * 60 * 24 * 4 * TIME_UNITS_IN_ONE_SECOND
-    t1w = 60 * 60 * 24 * 7 * TIME_UNITS_IN_ONE_SECOND
 
     def __str__(self):
         return self.name[1:]

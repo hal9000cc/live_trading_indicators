@@ -37,5 +37,3 @@ def test_bad_data(config_default, test_source, a_symbol, time_begin, time_end):
 
     with pytest.raises(LTIExceptionQuotationDataNotFound):
         ohlcv = indicators.OHLCV(a_symbol, timeframe)
-
-    pass

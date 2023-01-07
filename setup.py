@@ -6,7 +6,8 @@ with open("README.md", "r") as fh:
 
 requirements = [
     'construct<=2.10.0',
-    'numba<=0.56.3']
+    'numba<=0.56.3',
+    'lz4<=4.3.2']
 
 setuptools.setup(
     name='live_trading_indicators',
