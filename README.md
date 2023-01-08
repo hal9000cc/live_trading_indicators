@@ -16,9 +16,9 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.7.0
+## Version 0.7.1
 ### what's new
-#### 0.7.0
+#### 0.7.1
 - Migration of quote storage to sqlite3
 - Added support for three compression algorithms: gzip, bz2 and lz4 ([see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#compression_type))
 - Add the depth parameter for ZigZag indicator
