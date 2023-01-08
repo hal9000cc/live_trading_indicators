@@ -20,7 +20,8 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ### what's new
 #### 0.7.0
 - Migration of quote storage to sqlite3
-- Added support for three compression algorithms: gzip, bz2 and lz4
+- Added support for three compression algorithms: gzip, bz2 and lz4 ([see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#compression_type))
+- Add the depth parameter for ZigZag indicator
 #### 0.6.3
 - New indicator - Aroon
 #### 0.6.2
@@ -28,16 +29,6 @@ Package data from online sources is stored by default in the *.lti* folder of th
 #### 0.6.1
 - Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 - Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
-#### 0.5.3
-- New timeframe - 1s
-- Optimized loading of a large volume of quotes - [benchbarks](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb)
-- Added intermediate saving when loading for a long time
-#### 0.5.2
-- Fix for python 3.7
-#### 0.5.0
-- Optimized data loading, reduced the number of requests to the data source on high timeframes.
-- Added the ability to use the **CCXT** library as a data source.
-
 
 [previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
 ## Installing
@@ -125,6 +116,7 @@ There are two methods for plotting: plot() and show(). plot() returns the drawn 
 indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
 bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', period=14)
 bb.show()
+You can find other examples of charts [here](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 ```
 ###### Result:
 ![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://raw.githubusercontent.com/hal9000cc/live_trading_indicators/stable/images/bb_show_example.png "live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h")
