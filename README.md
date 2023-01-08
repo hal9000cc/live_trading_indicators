@@ -332,7 +332,7 @@ The number of attempts to download quotes. Default: 3.
 #### quotation_database
 Path to the sqlite3 database for storing quotes.
 #### compression_type
-The algorithm for compressing quotes when saving to the database. Can be gzip, BZ2, LZ4 and auto:
+The algorithm for compressing quotes when saving to the database. Can be gzip, bz2, lz4 and auto:
 - bz2 - good compression, slow
 - gzip - medium compression, medium speed
 - lz4 - low compression, high speed
