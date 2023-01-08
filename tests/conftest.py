@@ -1,12 +1,12 @@
-# import ccxt
 import pytest
 import os.path as path
 import pandas as pd
 import numpy as np
+import uuid
+import shutil
 from src.live_trading_indicators.constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE
 from src import live_trading_indicators as lti
 import src.live_trading_indicators.datasources.binance as binance
-import shutil
 from src.live_trading_indicators.timeframe import Timeframe
 
 LOG_LEVEL = 'DEBUG'
@@ -159,7 +159,7 @@ def clear_data():
         'cache_folder' : cache_folder,
         'sources_folder': sources_folder,
         'log_level': LOG_LEVEL,
-        'quotation_database': path.join(data_path, 'quotation_database')
+        'quotation_database': path.join(data_path, uuid.uuid4().hex)
     }
     shutil.rmtree(data_path, ignore_errors=True)
 

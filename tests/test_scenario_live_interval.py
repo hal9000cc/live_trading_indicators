@@ -50,15 +50,14 @@ def test_live_2(config_default, test_source, a_symbol, timeframe):
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value * 2
     indicators = lti.Indicators(test_source, time_begin, **config_default)
 
-    time.sleep(5)
+    time.sleep(10)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     assert len(ohlcv.time) == 2
 
     next_time = timeframe.begin_of_tf(dt.datetime.utcnow()) + timeframe.value
     remain_time_sec = (np.datetime64(next_time, 's') - np.datetime64(dt.datetime.utcnow(), 's')).astype(np.int64)
-    time.sleep(remain_time_sec)
+    time.sleep(remain_time_sec + 10)
 
-    time.sleep(5)
     count_file_load = indicators.source_data.count_file_load
     count_datasource_get = indicators.source_data.count_datasource_get
     count_datasource_bars_get = indicators.source_data.count_datasource_bars_get
