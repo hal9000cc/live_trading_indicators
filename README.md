@@ -116,10 +116,10 @@ There are two methods for plotting: plot() and show(). plot() returns the drawn 
 indicators = lti.Indicators('binance', '2022-07-01', '2022-07-15')
 bb = indicators.BollingerBands('btcusdt', '4h', '2022-07-05', '2022-07-15', period=14)
 bb.show()
-You can find other examples of charts [here](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 ```
 ###### Result:
 ![live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h](https://raw.githubusercontent.com/hal9000cc/live_trading_indicators/stable/images/bb_show_example.png "live_trading_indicators library example chart: Bollinger bands for BTCUSDT timeframe 4h")
+You can find other examples of charts [here](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
 ### Getting real-time data (the last 3 minutes on the 1m timeframe without an incomplete bar)
 To get real-time data, you **don't have to specify an end date**.
 ```python
