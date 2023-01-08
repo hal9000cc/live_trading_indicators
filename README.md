@@ -337,4 +337,5 @@ The algorithm for compressing quotes when saving to the database. Can be gzip, b
 - gzip - medium compression, medium speed
 - lz4 - low compression, high speed
 - auto - automatic selection
+
 Default: auto
