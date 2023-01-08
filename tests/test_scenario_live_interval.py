@@ -17,7 +17,7 @@ def test_live_1(config_default, test_source, a_symbol, timeframe):
     time_begin = np.datetime64(dt.datetime.utcnow(), TIME_TYPE_UNIT) - timeframe.value
     indicators = lti.Indicators(test_source, time_begin, **config_default)
 
-    time.sleep(5)
+    time.sleep(10)
     print(dt.datetime.utcnow())
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
     print(len(ohlcv))

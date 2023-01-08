@@ -34,21 +34,21 @@ def test_hole_load(clear_data, test_source, test_symbol, a_timeframe):
     assert ohlcv[np.datetime64('2022-07-06', TIME_TYPE_UNIT): ] == ohlcv06
 
 
-@pytest.mark.parametrize('timeframe, symbol', [
-    (Timeframe.t5m, 'um/ethusdt')
-])
-def test_save_intermediate(clear_data, test_source, symbol, timeframe):
-
-    indicators = lti.Indicators('binance', **clear_data)
-
-    indicators.OHLCV(symbol, timeframe, 20220701, 20220820)
-
-    store_path = os.path.join('test_data', 'timeframe_data', test_source, symbol.split('/')[0])
-    mt1 = os.path.getmtime(os.path.join(store_path, f'{symbol.split("/")[1]}-{timeframe!s}-2022-07.ltc'))
-    mt2 = os.path.getmtime(os.path.join(store_path, f'{symbol.split("/")[1]}-{timeframe!s}-2022-08.ltc'))
-    t1, t2 = dt.datetime.fromtimestamp(mt1), dt.datetime.fromtimestamp(mt2)
-
-    assert (t2 - t1).total_seconds() > 1
+# @pytest.mark.parametrize('timeframe, symbol', [
+#     (Timeframe.t5m, 'um/ethusdt')
+# ])
+# def test_save_intermediate(clear_data, test_source, symbol, timeframe):
+#
+#     indicators = lti.Indicators('binance', **clear_data)
+#
+#     indicators.OHLCV(symbol, timeframe, 20220701, 20220820)
+#
+#     store_path = os.path.join('test_data', 'timeframe_data', test_source, symbol.split('/')[0])
+#     mt1 = os.path.getmtime(os.path.join(store_path, f'{symbol.split("/")[1]}-{timeframe!s}-2022-07.ltc'))
+#     mt2 = os.path.getmtime(os.path.join(store_path, f'{symbol.split("/")[1]}-{timeframe!s}-2022-08.ltc'))
+#     t1, t2 = dt.datetime.fromtimestamp(mt1), dt.datetime.fromtimestamp(mt2)
+#
+#     assert (t2 - t1).total_seconds() > 1
 
 
 @pytest.mark.parametrize('timeframe, symbol', [

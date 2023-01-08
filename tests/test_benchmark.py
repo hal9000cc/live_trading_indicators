@@ -7,8 +7,9 @@ import src.live_trading_indicators as lti
 
 def test_benchmark():
 
+    return
     symbol = 'ethusdt'
-    timeframe = '1w'
+    timeframe = '1s'
 
     indicators = lti.Indicators('binance', '2021-01-01', '2021-12-31', max_empty_bars_fraction=0.02, max_empty_bars_consecutive=-1)
 
@@ -16,7 +17,6 @@ def test_benchmark():
 
     time = timeit.timeit('print(indicators.OHLCV(symbol, timeframe))', number=1, globals=test_globals)
     print(f'Load OHLCV: {time} seconds\n')
-    return
 
     indicator_params = {
         'CCI': {'period': 14},

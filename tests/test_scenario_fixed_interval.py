@@ -119,8 +119,8 @@ def test_2020_year(clear_data, test_source, symbol, timeframe):
 
     indicators = lti.Indicators(test_source, **clear_data)
     ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
-    assert len(ohlcv.size) == 366
+    assert len(ohlcv) == 366
 
     indicators = lti.Indicators(test_source, **clear_data)
     ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
-    assert len(ohlcv.size) == 366
+    assert len(ohlcv) == 366

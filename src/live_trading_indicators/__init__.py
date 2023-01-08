@@ -6,7 +6,7 @@ from .timeframe import Timeframe
 from .config import config_get_default, config_load, config_save
 from .constants import TIME_TYPE, PRICE_TYPE, VOLUME_TYPE
 
-__version__ = '0.7.0.3'
+__version__ = '0.7.0'
 
 
 def config(actions=None, **kwargs):
