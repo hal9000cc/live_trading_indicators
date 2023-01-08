@@ -16,8 +16,11 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.6.3
+## Version 0.7.0
 ### what's new
+#### 0.7.0
+- Migration of quote storage to sqlite3
+- Added support for three compression algorithms: gzip, bz2 and lz4
 #### 0.6.3
 - New indicator - Aroon
 #### 0.6.2
@@ -240,9 +243,8 @@ print(lti.help())
 - VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
-- ZigZag(delta=0.02, type='high_low', redrawable=False) - Zig-zag indicator (pivots).### Specifying the period
-The period can be specified both during initialization of *Indicators* and in the indicator parameters. The data type when specifying the period can be *datetime.date*, *datetime.datetime*, *numpy.datetime64*, string, or a number in the format *YYYYMMDD*.
-
+- ZigZag(delta=0.02, depth=1, type='high_low', redrawable=False) - Zig-zag indicator (pivots).
+### Specifying the period
 There are three strategies for specifying a time period:
 #### 1. The time period is specified when creating Indicators (base period)
 Indicator values can be obtained for any period within the interval specified for *Indicators*. When exiting the specified interval, an exception will be raised *LTIExceptionOutOfThePeriod*.
@@ -335,3 +337,12 @@ Log registration level. Default: INFO.
 Timeout of requests to download quotes, seconds. Default: 10.
 #### request_trys
 The number of attempts to download quotes. Default: 3.
+#### quotation_database
+Path to the sqlite3 database for storing quotes.
+#### compression_type
+The algorithm for compressing quotes when saving to the database. Can be gzip, BZ2, LZ4 and auto:
+- bz2 - good compression, slow
+- gzip - medium compression, medium speed
+- lz4 - low compression, high speed
+- auto - automatic selection
+Default: auto
