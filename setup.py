@@ -14,8 +14,12 @@ setuptools.setup(
     version=version,
     author="Aleksandr Kuznetsov",
     author_email="hal@hal9000.cc",
-    description='A package for obtaining quotation data from various online and offline sources and calculating the values of'
-                ' technical indicators based on these quotations.',
+    description=
+    "A package for obtaining quotation data from various sources and saving them to a database. "
+    "Quotes can be quickly extracted and used for calculations and forecasts. "
+    "It is possible to receive and process data in real time. "
+    "There are a significant number of ready-to-use indicators. "
+    "The integrity of the data stored in the database is carefully monitored.",
 
     long_description=long_description,
     long_description_content_type='text/markdown',
