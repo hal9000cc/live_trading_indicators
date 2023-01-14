@@ -1,12 +1,12 @@
 """Ichimoku(period_short=9, period_mid=26, period_long=52, offset_senkou=26, offset_chikou=26)
 Ichimoku indicator."""
-import numba as nb
+from numba import njit
 import numpy as np
 from ..indicator_data import IndicatorData
 from ..constants import PRICE_TYPE
 
 
-@nb.njit(cache=True)
+@njit(cache=True)
 def calc_av_min_max(high, low, period):
 
     n_bars = len(high)
