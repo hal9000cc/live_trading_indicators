@@ -127,7 +127,7 @@ class Sqlite3Cache:
                 volume	BLOB,
                 PRIMARY KEY(source, symbol, timeframe, day));
 
-        )""")
+        """)
 
     def convert_1_2(self):
 
