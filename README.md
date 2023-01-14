@@ -7,7 +7,7 @@
 A package for obtaining quotation data from various sources and saving them to a database. Quotes can be quickly extracted and used for calculations and forecasts. It is possible to receive and process data in real time. There are a significant number of ready-to-use indicators.
 The integrity of the data stored in the database is carefully monitored.
 
-One of the advantages of live_tradings_indicators is the speed of work. Extracting 31 million quotes in one year on the 1s timeframe takes less than two seconds: [performance test](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb).
+One of the advantages of the live_trading_indicators library is the speed of work. Extracting 31 million quotes in one year on the 1s timeframe takes less than two seconds: [performance test](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb).
 
 To calculate indicators, you can also use the Pandas Data Frame as a data source.
 
