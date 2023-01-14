@@ -110,17 +110,3 @@ def test_fix_with_time_chec_boounds_cl(clear_data, test_source, symbol, a_timefr
 @pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
 def test_fix_with_time_chec_boounds_cf(config_default, test_source, symbol, a_timeframe):
     fortest_fix_with_time_chec_boounds(config_default, test_source, symbol, a_timeframe)
-
-
-@pytest.mark.parametrize('symbol, timeframe', [
-    ('ethusdt', '1d')
-])
-def test_2020_year(clear_data, test_source, symbol, timeframe):
-
-    indicators = lti.Indicators(test_source, **clear_data)
-    ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
-    assert len(ohlcv) == 366
-
-    indicators = lti.Indicators(test_source, **clear_data)
-    ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
-    assert len(ohlcv) == 366

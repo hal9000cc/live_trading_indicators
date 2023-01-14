@@ -113,7 +113,11 @@ def indicator_data_plot(indicator_data):
                 values = np.ones(len(time), dtype=float) * value
 
             else:
-                values = indicator_data.data[value_name]
+                if chart_type == 'cloud':
+                    assert len(value_parts_name) == 3
+                    values = indicator_data.data[value_name], indicator_data.data[value_parts_name[2]]
+                else:
+                    values = indicator_data.data[value_name]
 
             plot_indicator(ax, timeframe, time, value_name, values, chart_type)
 
@@ -226,6 +230,12 @@ def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
         bx_points = ~np.isnan(values)
         axis.plot(time[bx_points], values[bx_points], label=name)
 
+    elif chart_type == 'cloud':
+        value_line1 = values[0]
+        value_line2 = values[1]
+        bx_up = value_line1 > value_line2
+        axis.fill_between(time, value_line1, value_line2, alpha=0.3, where=bx_up, facecolor='gray')
+        axis.fill_between(time, value_line1, value_line2, alpha=0.3, where=~bx_up, facecolor='blue')
     else:
         axis.plot(time, values, label=name, linestyle=chart_type)
 

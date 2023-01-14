@@ -76,3 +76,27 @@ def test_store(clear_data, test_source, test_symbol, a_timeframe):
 
     assert ohlcv == ohlcv1
 
+
+@pytest.mark.parametrize('symbol, timeframe', [
+    ('ethusdt', '1d')
+])
+def test_2020_year(clear_data, test_source, symbol, timeframe):
+
+    indicators = lti.Indicators(test_source, **clear_data)
+    ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
+    assert len(ohlcv) == 366
+
+    indicators = lti.Indicators(test_source, **clear_data)
+    ohlcv = indicators.OHLCV(symbol, timeframe, 20200101, 20201231)
+    assert len(ohlcv) == 366
+
+
+@pytest.mark.parametrize('symbol, timeframe', [
+    ('btcusdt', '1h')
+])
+def test_2020_year_h(test_source, symbol, timeframe):
+
+    indicators = lti.Indicators(test_source, log_level='DEBUG')
+    ohlcv = indicators.OHLCV(symbol, timeframe, 20220101, 20221231)
+
+    pass

@@ -9,6 +9,8 @@ import multiprocessing
 from ..indicator_data import OHLCV_day
 from ..constants import TIME_TYPE, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_SECOND
 
+DATABASE_VERSION = 2
+
 
 class CompressionType(IntEnum):
     no = 0
@@ -38,15 +40,35 @@ class Sqlite3Cache:
 
         cursor = self.sl3base.cursor()
         check_bars_table = cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='quotes'")
-
         if check_bars_table.fetchone() is None:
             self.init_database()
+            return
 
-    def day_to_int(self, day_date):
+        self.database_config = self.get_config()
+        if self.database_config['version'] == '1':
+            self.convert_1_2()
+            self.database_config = self.get_config()
+
+        assert int(self.database_config['version']) == DATABASE_VERSION
+
+    @staticmethod
+    def day_to_int(day_date):
         return int(day_date.astype('datetime64[D]').astype(np.int64))
 
-    def day_from_int(self, day_int):
+    @staticmethod
+    def day_from_int(day_int):
         return np.datetime64(day_int, 'D')
+
+    def get_config(self):
+
+        cursor = self.sl3base.cursor()
+
+        check_config_table = cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='config'")
+        if check_config_table.fetchone() is None:
+            return {'version': '1'}
+
+        config_table = cursor.execute("SELECT name, value FROM config")
+        return {name: value for name, value in config_table.fetchall()}
 
     def get_compression_module(self, compression_type):
 
@@ -83,24 +105,77 @@ class Sqlite3Cache:
 
     def init_database(self):
         cursor = self.sl3base.cursor()
-        cursor.execute("""
-            CREATE TABLE quotes(
-                source TEXT,
-                symbol TEXT,
-                timeframe INT,
-                day INT,
-                compression_type INT,
-                time BLOB,
-                open BLOB,
-                high BLOB,
-                low BLOB,
-                close BLOB,
-                volume BLOB,
-                PRIMARY KEY (source, symbol, timeframe, day)
-            ) WITHOUT ROWID""")
+        cursor.executescript("""
+                
+            CREATE TABLE config (
+                name TEXT NOT NULL,
+                value);
+                
+            INSERT INTO config(name, value) VALUES ("version", "2");
+                
+            CREATE TABLE quotes (
+                source	TEXT NOT NULL,
+                symbol	TEXT NOT NULL,
+                timeframe	INTEGER NOT NULL,
+                day	INTEGER NOT NULL,
+                compression_type	INT,
+                time	BLOB,
+                open	BLOB,
+                high	BLOB,
+                low	BLOB,
+                close	BLOB,
+                volume	BLOB,
+                PRIMARY KEY(source, symbol, timeframe, day));
+
+        )""")
+
+    def convert_1_2(self):
+
+        logging.info('Start database conversion from version 1 to 2...')
+        cursor = self.sl3base.cursor()
+        cursor.executescript("""
+
+            BEGIN TRANSACTION;
+            
+            CREATE TABLE quotes_new (
+                source	TEXT NOT NULL,
+                symbol	TEXT NOT NULL,
+                timeframe	INTEGER NOT NULL,
+                day	INTEGER NOT NULL,
+                compression_type	INT,
+                time	BLOB,
+                open	BLOB,
+                high	BLOB,
+                low	BLOB,
+                close	BLOB,
+                volume	BLOB,
+                PRIMARY KEY(source, symbol, timeframe, day)
+            );
+
+            INSERT INTO quotes_new (source, symbol, timeframe, day, compression_type, time, open, high, low, close, volume)             
+            SELECT source, symbol, timeframe, day, compression_type, time, open, high, low, close, volume
+            FROM quotes;
+            
+            DROP TABLE quotes;
+            ALTER TABLE quotes_new RENAME TO quotes;
+    
+            CREATE TABLE config (
+                name TEXT NOT NULL,
+                value);
+                
+            INSERT INTO config(name, value) VALUES ("version", "2");
+            
+            COMMIT TRANSACTION;
+            VACUUM;
+        
+        """)
+
+        logging.info('Database conversion completed.')
 
     def save_day(self, source, symbol, timeframe, day_date, bar_data):
         assert isinstance(bar_data, OHLCV_day)
+
+        logging.debug(f'saving to sql {source} {symbol} {timeframe} {day_date}')
 
         if self.compression_type == CompressionType.auto:
             if timeframe.value <= 1 * TIME_UNITS_IN_ONE_SECOND:

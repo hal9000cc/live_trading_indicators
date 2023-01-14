@@ -26,14 +26,11 @@ def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, t
     assert compare_with_nan(bollinger_bands.down_line, ref_values.lower_band)
     assert compare_with_nan(bollinger_bands.z_score, ref_values.z_score)
 
-    if timeframe.value >= Timeframe.t1h.value:
-        bollinger_bands.show()
-
 
 @pytest.mark.parametrize('time_begin, time_end, sma_period', [
     ('2022-07-01', '2022-07-07', 2)
 ])
-def test_test_bollinger_bands_plot(config_default, test_source, time_begin, time_end, sma_period):
+def test_bollinger_bands_plot(config_default, test_source, time_begin, time_end, sma_period):
 
     symbol = 'um/ethusdt'
     timeframe = '1h'

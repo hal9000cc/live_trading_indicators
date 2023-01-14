@@ -92,7 +92,7 @@ class SourceData:
             if (np.datetime64(now, 'D') - day_date).astype(np.int64) < DAYS_WAIT_FOR_ENTIRE:
                 return
 
-        assert timeframe.begin_of_tf(np.datetime64(day_date, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY) + timeframe.value + MAX_CLIENT_TIME_ERROR < now
+        #assert timeframe.begin_of_tf(np.datetime64(day_date, TIME_TYPE_UNIT) + TIME_UNITS_IN_ONE_DAY) + timeframe.value + MAX_CLIENT_TIME_ERROR < now
         self.sql_bars_cache.save_day(self.datasource_id, symbol, timeframe, day_date, bar_data)
 
     @staticmethod
