@@ -4,10 +4,10 @@
 [![CodeQL](https://github.com/hal9000cc/live_trading_indicators/actions/workflows/codeql.yml/badge.svg)](https://github.com/hal9000cc/live_trading_indicators/actions/workflows/codeql.yml)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/live_trading_indicators.svg)](https://pypi.python.org/pypi/live_trading_indicators/)
 
-A package for obtaining quotation data from various online and offline sources and calculating the values of technical indicators based on these quotations.
-Data from online sources is received automatically. It is possible to receive data in real time. The received data is stored in a file cache with the possibility of quick use. Data integrity is carefully monitored.
+A package for obtaining quotation data from various sources and saving them to a database. Quotes can be quickly extracted and used for calculations and forecasts. It is possible to receive and process data in real time. There are a significant number of ready-to-use indicators.
+The integrity of the data stored in the database is carefully monitored.
 
-In addition to receiving data online, Dataframe Pandas can be used as a data source.
+To calculate indicators, you can also use the Pandas Data Frame as a data source.
 
 The current version allows you to receive exchange data from:
 - **Binance** (**spot**, **futures USD-M**, **futures COIN-M**).
