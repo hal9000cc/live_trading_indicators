@@ -42,3 +42,5 @@ def test_plot_all(config_default, test_source, test_symbol, time_begin, time_beg
         params = indicator_params.get(indicator_name, {})
         out = indicator(test_symbol, timeframe, time_begin_plot, time_end, **params)
         out.show()
+
+    pass
