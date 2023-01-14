@@ -218,6 +218,7 @@ print(lti.help())
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
 - CCI(period=) - Commodity channel index.
 - EMA(period=, value='close') - Exponential moving average.
+- Ichimoku(period_short=9, period_mid=26, period_long=52, offset_senkou=26, offset_chikou=26) - Ichimoku indicator.
 - Keltner(period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma') - Keltner channel.
 - MA(period=, value='close', ma_type='sma') - Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
 - MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close') - Moving Average Convergence/Divergence.
