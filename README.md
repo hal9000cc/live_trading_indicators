@@ -7,6 +7,8 @@
 A package for obtaining quotation data from various sources and saving them to a database. Quotes can be quickly extracted and used for calculations and forecasts. It is possible to receive and process data in real time. There are a significant number of ready-to-use indicators.
 The integrity of the data stored in the database is carefully monitored.
 
+One of the advantages of live_tradings_indicators is the speed of work. Extracting 31 million quotes in one year on the 1s timeframe takes less than two seconds: [performance test](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb).
+
 To calculate indicators, you can also use the Pandas Data Frame as a data source.
 
 The current version allows you to receive exchange data from:
@@ -42,7 +44,7 @@ pip install live_trading_indicators
 - [Discussions](https://github.com/hal9000cc/live_trading_indicators/discussions)
 - [Issues](https://github.com/hal9000cc/live_trading_indicators/issues)
 ## Quick start
-All the examples given here can be found in [jupyter notebook examples](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb). There are also [benchmark results in jupyter notebook](https://github.com/hal9000cc/live_trading_indicators/blob/stable/benchmarks.ipynb).
+All the examples given here can be found in [jupyter notebook examples](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples.ipynb).
 ### Getting quotes (online / cache)
 ```python
 import live_trading_indicators as lti
