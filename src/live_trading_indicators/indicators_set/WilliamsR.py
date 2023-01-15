@@ -40,7 +40,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'timeframe': timeframe,
         'time': ohlcv.time,
         'williams_r': williams_r,
-        'charts': (None, 'williams_r, level20:level=-20, level80:level=-80, ymin:ymin=-100, ymax:ymax=0'),
+        'charts': (None, 'williams_r, level20:level=-20, level80:level=-80, ymax:ymax=0, ymin:ymin=-100'),
         'allowed_nan': True
     })
 
