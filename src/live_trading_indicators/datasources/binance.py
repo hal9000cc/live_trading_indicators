@@ -1,13 +1,10 @@
-import logging
 import urllib
 import urllib.request
 import json
-import datetime as dt
 import numpy as np
 import logging
 from .online_source import OnlineSource
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
-from ..indicator_data import OHLCV_day
 from ..exceptions import *
 
 BINANCE_TIME_TYPE = 'datetime64[ms]'

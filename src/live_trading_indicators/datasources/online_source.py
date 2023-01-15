@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 class OnlineSource:
 
     @abstractmethod
+    @staticmethod
     def datasource_name(self):
         pass
 
