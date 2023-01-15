@@ -17,7 +17,7 @@ def calc_williams(high, low, close, period):
     for t in range(period - 1, n_bars):
         high_max = high[t - period + 1: t + 1].max()
         low_min = low[t - period + 1: t + 1].min()
-        williams_r[t] = (close[t] - high_max) / (high_max - low_min) * 100
+        williams_r[t] = 0 if high_max == low_min else (close[t] - high_max) / (high_max - low_min) * 100
 
     return williams_r
 
