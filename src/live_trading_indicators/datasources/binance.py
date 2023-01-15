@@ -5,6 +5,7 @@ import json
 import datetime as dt
 import numpy as np
 import logging
+from .online_source import OnlineSource
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
 from ..indicator_data import OHLCV_day
 from ..exceptions import *
@@ -24,173 +25,168 @@ REQUEST_BAR_LIMITS = {'cm': 500, 'um': 1500, 'spot': 1000}
 
 MINIMAL_BAR_LIMITS = 500
 
-exchange_info_data = {}
-request_cache = {}
-logger = logging.getLogger(__name__.split('.')[-1])
-config = None
 
-#REQUEST_CACHE_TIMELIFE_HOUR = 1
+def get_source(config, datasource_id, exchange_params):
+    return BinanceSource(config, datasource_id, exchange_params)
 
 
-def datasource_name():
-    return 'binance'
+class BinanceSource(OnlineSource):
 
+    def __init__(self, config, datasource_full_name, exchange_params):
+        self.config = config
+        self.exchange_info_data = {}
+        self.request_cache = {}
+        self.logger = logging.getLogger(__name__.split('.')[-1])
 
-def init(use_config, datasource_full_name, exchange_params):
-    global config
-    config = use_config
+    @staticmethod
+    def datasource_name():
+        return 'binance'
 
+    @staticmethod
+    def get_store_names(symbol):
 
-def get_store_names(symbol):
+        symbol_parts = symbol.split('/')
 
-    symbol_parts = symbol.split('/')
+        if len(symbol_parts) < 2:
+            return 'spot', symbol
 
-    if len(symbol_parts) < 2:
-        return 'spot', symbol
+        assert len(symbol_parts) == 2
+        return symbol_parts[0], symbol_parts[1]
 
-    assert len(symbol_parts) == 2
-    return symbol_parts[0], symbol_parts[1]
+    @staticmethod
+    def symbol_decode(symbol):
 
+        symbol_parts = symbol.lower().split('/')
 
-def symbol_decode(symbol):
+        if len(symbol_parts) == 1:
+            return 'spot', symbol_parts[0]
 
-    symbol_parts = symbol.lower().split('/')
+        if len(symbol_parts) == 2:
+            part = symbol_parts[0]
+            if part != 'um' and part != 'cm':
+                raise LTIExceptionSymbolNotFound(symbol)
+            return part, symbol_parts[-1]
 
-    if len(symbol_parts) == 1:
-        return 'spot', symbol_parts[0]
+        raise LTIExceptionSymbolNotFound(symbol)
 
-    if len(symbol_parts) == 2:
-        part = symbol_parts[0]
-        if part != 'um' and part != 'cm':
-            raise LTIExceptionSymbolNotFound(symbol)
+    @staticmethod
+    def get_api_url(part):
 
-    return part, symbol_parts[-1]
+        if part == 'spot':
+            return SPOT_API_URL
+        if part == 'um':
+            return UM_API_URL
+        if part == 'cm':
+            return CM_API_URL
 
+        raise NotImplementedError(f'Unknown part: {part}')
 
-def get_api_url(part):
+    def download_exchange_info_part(self, part):
 
-    if part == 'spot':
-        return SPOT_API_URL
-    if part == 'um':
-        return UM_API_URL
-    if part == 'cm':
-        return CM_API_URL
+        api_url = self.get_api_url(part)
+        response = urllib.request.urlopen(f'{api_url}exchangeInfo').read()
+        part_info = json.loads(response)
 
-    raise NotImplementedError(f'Unknown part: {part}')
+        part_info['symbols'] = {symbol_info['symbol'].lower(): symbol_info for symbol_info in part_info['symbols']}
 
+        self.exchange_info_data[part] = part_info
+        return part_info
 
-def download_exchange_info_part(part):
-    global exchange_info_data
+    def exchange_info(self, symbol):
 
-    api_url = get_api_url(part)
-    response = urllib.request.urlopen(f'{api_url}exchangeInfo').read()
-    part_info = json.loads(response)
+        part, symbol = self.symbol_decode(symbol)
 
-    part_info['symbols'] = {symbol_info['symbol'].lower(): symbol_info for symbol_info in part_info['symbols']}
+        part_info = self.exchange_info_data.get(part)
+        if part_info is None:
+            part_info = self.download_exchange_info_part(part)
 
-    exchange_info_data[part] = part_info
-    return part_info
+        return part_info['symbols'].get(symbol)
 
+    def online_request(self, api_url, symbol, timeframe, start_time, end_time):
 
-def exchange_info(symbol):
-    global exchange_info_data
+        start_time_int = start_time.astype(np.int64)
+        end_time_int = end_time.astype(np.int64)
 
-    part, symbol = symbol_decode(symbol)
+        limit = int((end_time - start_time).astype(np.int64)) // timeframe.value + 1
+        request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}&limit={limit}'
 
-    part_info = exchange_info_data.get(part)
-    if part_info is None:
-        part_info = download_exchange_info_part(part)
+        logging.debug(f'bars request {request_url}')
+        response = urllib.request.urlopen(request_url, timeout=self.config['request_timeout'])
+        used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
+        response_data = response.read()
+        logging.debug(f'used_weight={used_weight}')
 
-    return part_info['symbols'].get(symbol)
+        return response_data
 
+    def bars_online_request(self, symbol, timeframe, time_start, time_end):
 
-def online_request(api_url, symbol, timeframe, start_time, end_time):
+        try:
 
-    start_time_int = start_time.astype(np.int64)
-    end_time_int = end_time.astype(np.int64)
+            bars_online = self.bars_raw_online_request(symbol, timeframe, time_start, time_end)
 
-    limit = int((end_time - start_time).astype(np.int64)) // timeframe.value + 1
-    request_url = f'{api_url}klines?symbol={symbol.upper()}&interval={timeframe!s}&startTime={start_time_int}&endTime={end_time_int}&limit={limit}'
+        except urllib.error.HTTPError as error:
 
-    logging.debug(f'bars request {request_url}')
-    response = urllib.request.urlopen(request_url, timeout=config['request_timeout'])
-    used_weight = response.headers['X-MBX-USED-WEIGHT-1M']
-    response_data = response.read()
-    logging.debug(f'used_weight={used_weight}')
+            if error.code not in (400,):
+                self.logger.error(f'{error}, error.url={error.url}')
+                raise
 
-    return response_data
+            info = self.exchange_info(symbol)
+            if info is None:
+                raise LTIExceptionSymbolNotFound(symbol) from error
 
-
-def bars_online_request(symbol, timeframe, time_start, time_end):
-
-    try:
-
-        bars_online = bars_raw_online_request(symbol, timeframe, time_start, time_end)
-
-    except urllib.error.HTTPError as error:
-
-        if error.code not in (400,):
-            logger.error(f'{error}, error.url={error.url}')
+            self.logger.error(f'{error}, error.url={error.url}')
             raise
 
-        info = exchange_info(symbol)
-        if info is None:
-            raise LTIExceptionSymbolNotFound(symbol) from error
+        except Exception as error:
+            self.logger.error(f'{error}')
+            raise
 
-        logger.error(f'{error}, error.url={error.url}')
-        raise
+        return bars_online
 
-    except Exception as error:
-        logger.error(f'{error}')
-        raise
+    def bars_raw_online_request(self, symbol, timeframe, time_start, time_end):
+        assert time_start.dtype.name == TIME_TYPE
+        assert time_end.dtype.name == TIME_TYPE
+        assert time_start <= time_end
 
-    return bars_online
+        part, symbol = self.symbol_decode(symbol)
 
+        api_url = self.get_api_url(part)
 
-def bars_raw_online_request(symbol, timeframe, time_start, time_end):
-    assert time_start.dtype.name == TIME_TYPE
-    assert time_end.dtype.name == TIME_TYPE
-    assert time_start <= time_end
+        limit = REQUEST_BAR_LIMITS.get(part)
 
-    part, symbol = symbol_decode(symbol)
+        time, open, high, low, close, volume = [], [], [], [], [], []
 
-    api_url = get_api_url(part)
+        query_time_start = timeframe.begin_of_tf(time_start)
+        while query_time_start < time_end:
 
-    limit = REQUEST_BAR_LIMITS.get(part)
+            query_limit = min(limit, (time_end - query_time_start).astype(np.int64) // timeframe.value + 2)
+            query_time_end = query_time_start + query_limit * timeframe.value - 1
+            raw_bars_data = self.online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
+            online_bars_data = json.loads(raw_bars_data)
 
-    time, open, high, low, close, volume = [], [], [], [], [], []
+            n_bars = len(online_bars_data)
+            if n_bars == 0:
+                break
 
-    query_time_start = timeframe.begin_of_tf(time_start)
-    while query_time_start < time_end:
+            logging.info(f'Download using {self.datasource_name()} symbol {symbol} timeframe {timeframe!s} from {query_time_start}, bars: {n_bars}')
 
-        query_limit = min(limit, (time_end - query_time_start).astype(np.int64) // timeframe.value + 2)
-        query_time_end = query_time_start + query_limit * timeframe.value - 1
-        raw_bars_data = online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
-        online_bars_data = json.loads(raw_bars_data)
+            data = np.array(online_bars_data)
+            time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))
+            open.append(data[:, 1].astype(PRICE_TYPE))
+            high.append(data[:, 2].astype(PRICE_TYPE))
+            low.append(data[:, 3].astype(PRICE_TYPE))
+            close.append(data[:, 4].astype(PRICE_TYPE))
+            volume.append(data[:, 5].astype(VOLUME_TYPE))
 
-        n_bars = len(online_bars_data)
-        if n_bars == 0:
-            break
+            query_time_start = timeframe.begin_of_tf(time[-1][-1]) + timeframe.value
 
-        logging.info(f'Download using {datasource_name()} symbol {symbol} timeframe {timeframe!s} from {query_time_start}, bars: {n_bars}')
+        if len(time) == 0:
+            raise LTIExceptionQuotationDataNotFound(symbol, time_start)
 
-        data = np.array(online_bars_data)
-        time.append(data[:, 0].astype(np.int64).astype(BINANCE_TIME_TYPE).astype(TIME_TYPE))
-        open.append(data[:, 1].astype(PRICE_TYPE))
-        high.append(data[:, 2].astype(PRICE_TYPE))
-        low.append(data[:, 3].astype(PRICE_TYPE))
-        close.append(data[:, 4].astype(PRICE_TYPE))
-        volume.append(data[:, 5].astype(VOLUME_TYPE))
-
-        query_time_start = timeframe.begin_of_tf(time[-1][-1]) + timeframe.value
-
-    if len(time) == 0:
-        raise LTIExceptionQuotationDataNotFound(symbol, time_start)
-
-    return np.hstack(time), \
-           np.hstack(open),\
-           np.hstack(high),\
-           np.hstack(low),\
-           np.hstack(close),\
-           np.hstack(volume)
+        return np.hstack(time), \
+               np.hstack(open),\
+               np.hstack(high),\
+               np.hstack(low),\
+               np.hstack(close),\
+               np.hstack(volume)
 

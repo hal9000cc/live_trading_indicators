@@ -41,4 +41,3 @@ def test_ichimoku_plot(config_default, test_source, time_begin, time_end):
     ichimoku = indicators.Ichimoku(symbol, timeframe)
 
     ichimoku.show()
-    pass

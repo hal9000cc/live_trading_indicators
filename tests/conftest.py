@@ -9,7 +9,7 @@ from src import live_trading_indicators as lti
 import src.live_trading_indicators.datasources.binance as binance
 from src.live_trading_indicators.timeframe import Timeframe
 
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 
 
 @pytest.fixture

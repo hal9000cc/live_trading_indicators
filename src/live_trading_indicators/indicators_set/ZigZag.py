@@ -1,17 +1,19 @@
-"""ZigZag(delta=0.02, depth=1, type='high_low', redrawable=False)
+"""ZigZag(delta=0.02, depth=1, type='high_low', end_points=False)
 Zig-zag indicator (pivots).
 Return pivots prices and pivots types.
 Parameters:
     delta - fraction of the price change at which the corner is formed (float)
     depth - minimum distance pivots H-H and L-L
     type - price values used for corners (can be 'high_low', 'close', 'open', 'high', 'low')
-    redrawable - if True, incomplete pivots will be formed at the end"""
+    end_points - if True, incomplete pivots will be formed at the end"""
 
 import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData
 from ..exceptions import *
 from ..constants import PRICE_TYPE
+
+no_cached = True
 
 
 @njit(cache=True)
@@ -114,9 +116,9 @@ def add_last_point(pivot_types, pivots, high, low, delta, depth):
         pivots[-1] = high[-1]
 
 
-def get_indicator_out(indicators, symbol, timeframe, out_for_grow, delta=0.02, depth=1, type='high_low', redrawable=False):
+def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, delta=0.02, depth=1, type='high_low', end_points=False):
 
-    ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
+    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
 
     if type == 'high_low':
         high, low = ohlcv.high, ohlcv.low
@@ -144,12 +146,12 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, delta=0.02, d
         pivots[: i_valid] = np.nan
         pivot_types[: i_valid] = 0
 
-    if redrawable:
+    if end_points:
         add_last_point(pivot_types, pivots, high, low, delta, depth)
 
     return IndicatorData({
         'indicators': indicators,
-        'parameters': {'delta': delta, 'depth': depth, 'redrawable': redrawable},
+        'parameters': {'delta': delta, 'depth': depth, 'end_points': end_points},
         'name': 'ZigZag',
         'symbol': symbol,
         'timeframe': timeframe,

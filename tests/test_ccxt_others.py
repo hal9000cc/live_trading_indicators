@@ -44,3 +44,17 @@ def test_ccxt_extra_params(clear_data, ccxt_source, symbol, timeframe):
     ohlcv = indicators.OHLCV(symbol, timeframe)
 
     assert ohlcv.time[0] == date_begin
+
+
+def test_two_ccxt(clear_data):
+
+    date_begin, date_end = np.datetime64('2022-07-01'), np.datetime64('2022-07-02')
+
+    indicators1 = lti.Indicators('ccxt.binance', date_begin, date_end, **clear_data)
+    ohlcv1 = indicators1.OHLCV('BTC/USDT', '1h')
+
+    indicators2 = lti.Indicators('ccxt.bequant', date_begin, date_end, **clear_data)
+    ohlcv2 = indicators2.OHLCV('BTC/USDT', '1h')
+
+    assert (np.abs(ohlcv1.close - ohlcv2.close).max() < 100).all()
+

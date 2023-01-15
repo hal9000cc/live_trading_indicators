@@ -56,6 +56,8 @@ class Indicators:
         self.time_end = None
         self.source_data = None
         self.indicators_mode = None
+        self.datasource_id = None
+        self.datasource_name = None
         self.custom_indicators = self.config.get('custom_indicators')
 
         self.init_log()
@@ -122,9 +124,9 @@ class Indicators:
     def init_online_source(self, datasource_module, datasource_id, exchange_params, time_begin, time_end):
 
         self.datasource_id = datasource_id
-        self.datasource_name = datasource_module.datasource_name()
-        datasource_module.init(self.config, datasource_id, exchange_params)
-        self.source_data = datasources.SourceData(datasource_module, datasource_id, self.config)
+        online_source = datasource_module.get_source(self.config, datasource_id, exchange_params)
+        self.datasource_name = online_source.datasource_name()
+        self.source_data = datasources.SourceData(online_source, datasource_id, self.config)
 
         self.time_begin = cast_time(time_begin)
         self.time_end = cast_time(time_end, True)
@@ -312,7 +314,10 @@ class Indicators:
 
     @staticmethod
     def key_from_args(indicator, symbols, timeframe, kwargs):
-        return indicator, symbols, timeframe, tuple(kwargs.items())
+        return (indicator,
+                symbols.lower() if isinstance(symbols, str) else symbols,
+                timeframe,
+                tuple(kwargs.items()))
 
     def get_bar_data(self, symbol, timeframe, bar_for_grow=None):
 

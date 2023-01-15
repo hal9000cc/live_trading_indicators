@@ -17,7 +17,7 @@ def test_zig_zag(config_default, test_source, a_symbol, time_begin, time_end, ti
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
-    zig_zag = indicators.ZigZag(a_symbol, timeframe, delta=delta, redrawable=True)  # only pass
+    zig_zag = indicators.ZigZag(a_symbol, timeframe, delta=delta, end_points=True)  # only pass
     zig_zag = indicators.ZigZag(a_symbol, timeframe, delta=delta)
 
     ref_values = get_ref_values('get_zig_zag', ohlcv, 'point_type, retrace_high, retrace_low, zig_zag', 'HIGH_LOW', delta * 100)
@@ -46,5 +46,5 @@ def test_zig_zag_paint(config_default, test_source, symbol, time_begin, time_end
     zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta, depth=depth)
     zig_zag.show()
 
-    zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta, depth=depth, redrawable=True)
+    zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta, depth=depth, end_points=True)
     zig_zag.show()

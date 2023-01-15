@@ -8,8 +8,9 @@ import os
 import multiprocessing
 from ..indicator_data import OHLCV_day
 from ..constants import TIME_TYPE, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_SECOND
+from ..exceptions import *
 
-DATABASE_VERSION = 2
+DATABASE_VERSION = 3
 
 
 class CompressionType(IntEnum):
@@ -45,11 +46,27 @@ class Sqlite3Cache:
             return
 
         self.database_config = self.get_config()
-        if self.database_config['version'] == '1':
-            self.convert_1_2()
+        version = int(self.database_config['version'])
+
+        if version != DATABASE_VERSION:
+            self.convert_database()
             self.database_config = self.get_config()
 
         assert int(self.database_config['version']) == DATABASE_VERSION
+
+    def convert_database(self):
+
+        version = int(self.database_config['version'])
+        if version > DATABASE_VERSION:
+            raise LTIException(f'Unsupported version of the database: {version}. Update the live_trading_indicators library.')
+
+        if version == 1:
+            self.convert_1_2()
+            version = 2
+
+        if version == 2:
+            self.convert_2_3()
+            version = 3
 
     @staticmethod
     def day_to_int(day_date):
@@ -106,13 +123,13 @@ class Sqlite3Cache:
     def init_database(self):
         cursor = self.sl3base.cursor()
         cursor.executescript("""
-                
+
+            BEGIN TRANSACTION;
+                            
             CREATE TABLE config (
                 name TEXT NOT NULL,
                 value);
-                
-            INSERT INTO config(name, value) VALUES ("version", "2");
-                
+                                
             CREATE TABLE quotes (
                 source	TEXT NOT NULL,
                 symbol	TEXT NOT NULL,
@@ -126,7 +143,10 @@ class Sqlite3Cache:
                 close	BLOB,
                 volume	BLOB,
                 PRIMARY KEY(source, symbol, timeframe, day));
-
+                
+            INSERT INTO config(name, value) VALUES ("version", """ + f'"{DATABASE_VERSION}"' + """);
+            
+            COMMIT TRANSACTION;
         """)
 
     def convert_1_2(self):
@@ -172,6 +192,43 @@ class Sqlite3Cache:
 
         logging.info('Database conversion completed.')
 
+    def convert_2_3(self):
+
+        logging.info('Start database conversion from version 1 to 2...')
+        cursor = self.sl3base.cursor()
+        cursor.executescript("""
+            BEGIN TRANSACTION;
+            
+            CREATE TEMPORARY TABLE bad_names
+            AS
+            SELECT source, symbol, timeframe, day
+            FROM quotes
+            WHERE
+                symbol <> lower(symbol);
+                
+            INSERT INTO quotes(source, symbol, timeframe, day, compression_type, time, open, high, low, close, volume)
+            SELECT q.source, lower(q.symbol), q.timeframe, q.day, q.compression_type, q.time, q.open, q.high, q.low, q.close, q.volume
+            FROM
+                bad_names bn
+                JOIN quotes q ON q.source = bn.source AND q.symbol = bn.symbol AND q.timeframe = bn.timeframe AND q.day = bn.day
+            ON CONFLICT DO NOTHING;
+            
+            DELETE FROM quotes
+            WHERE ROWID IN (
+                SELECT q.ROWID
+                FROM
+                    quotes q JOIN bad_names bn ON q.source = bn.source AND q.symbol = bn.symbol AND q.timeframe = bn.timeframe AND q.day = bn.day
+            );
+            
+            DROP TABLE bad_names;
+            
+            UPDATE config SET value = '3' WHERE name = 'version';
+            
+            COMMIT TRANSACTION;
+            VACUUM;
+        """)
+        logging.info('Database conversion completed.')
+
     def save_day(self, source, symbol, timeframe, day_date, bar_data):
         assert isinstance(bar_data, OHLCV_day)
 
@@ -189,7 +246,7 @@ class Sqlite3Cache:
 
         params = {
             'source': source,
-            'symbol': symbol,
+            'symbol': symbol.lower(),
             'timeframe': timeframe,
             'day': self.day_to_int(day_date),
             'compression_type': compression_type.value
@@ -214,7 +271,7 @@ class Sqlite3Cache:
 
         params = {
             'source': source,
-            'symbol': symbol,
+            'symbol': symbol.lower(),
             'timeframe': timeframe,
             'day': self.day_to_int(day_date)
         }
