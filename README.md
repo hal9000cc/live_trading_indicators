@@ -18,8 +18,12 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.7.2
+## Version 0.7.3
 ### what's new
+#### 0.7.3
+- The quotation database has been optimized (the conversion may take some time at the first launch)
+- Fix some bugs (when ccxt is used for multiple exchanges at the same time)
+- New indicator - Williams %R
 #### 0.7.2
 - The quotation database has been optimized (the conversion may take some time at the first launch)
 - New indicator - Ichimoku
@@ -241,7 +245,8 @@ print(lti.help())
 - VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
-- ZigZag(delta=0.02, depth=1, type='high_low', redrawable=False) - Zig-zag indicator (pivots).
+- WilliamsR(period=14) - Williams %R oscillator.
+- ZigZag(delta=0.02, depth=1, type='high_low', end_points=False) - Zig-zag indicator (pivots).
 ### Specifying the period
 There are three strategies for specifying a time period:
 #### 1. The time period is specified when creating Indicators (base period)
