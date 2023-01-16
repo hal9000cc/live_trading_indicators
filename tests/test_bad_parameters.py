@@ -26,6 +26,12 @@ def test_date_begin_later_date_end(config_default, test_source):
         ohlcv = indicators.OHLCV('ethusd', '1h')
 
 
+def test_early_date(config_default):
+    with pytest.raises(LTIExceptionBadTimeParameter):
+        indicators = lti.Indicators('binance', 20160702, 20170701)
+        ohlcv = indicators.OHLCV('ethusd', '1h')
+
+
 @pytest.mark.parametrize('time_begin, time_end', [
     ('2022-07-01', '2022-07-05')
 ])

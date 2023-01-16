@@ -99,4 +99,7 @@ def test_2020_year_h(test_source, symbol, timeframe):
     indicators = lti.Indicators(test_source, log_level='DEBUG')
     ohlcv = indicators.OHLCV(symbol, timeframe, 20220101, 20221231)
 
-    pass
+
+def test_empty_day(clear_data):
+    indicators = lti.Indicators('binance', **clear_data)
+    ohlcv = indicators.OHLCV('um/btcusdt', '1h', '2017-01-01', '2017-01-01')

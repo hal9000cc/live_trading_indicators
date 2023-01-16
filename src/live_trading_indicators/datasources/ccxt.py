@@ -17,6 +17,7 @@ MAX_LIMITS = {
     'binanceusdm': 1500
 }
 
+HISTORY_START = '2010-01-01'
 
 if version.parse(ccxt.__version__) < version.parse(CCXT_VERSION_REQUIRED):
     raise LTIException(f'Requires a version of ccxt at least {CCXT_VERSION_REQUIRED}')
@@ -29,7 +30,6 @@ def get_source(config, datasource_id, exchange_params):
 class CCXTSource(OnlineSource):
 
     def __init__(self, config, datasource_full_name, extra_exchange_params):
-        #global exchange, exchange_name, timeframes, exchange_params, limit_max
 
         name_patrs = datasource_full_name.split('.')
 
@@ -38,6 +38,7 @@ class CCXTSource(OnlineSource):
 
         self.exchange_name = name_patrs[1]
         self.exchange = getattr(ccxt, self.exchange_name)()
+        self.history_start = np.datetime64(HISTORY_START)
 
         self.limit_max = MAX_LIMITS.get(self.exchange_name, 500)
         if extra_exchange_params:

@@ -14,6 +14,7 @@ SPOT_API_URL = 'https://api.binance.com/api/v3/'
 UM_API_URL = 'https://fapi.binance.com/fapi/v1/'
 CM_API_URL = 'https://dapi.binance.com/dapi/v1/'
 
+HISTORY_START = '2017-01-01'
 
 # Now request bar limit is 500 for spot and coin-m, and 1500 for usd-m.
 # Spot and usd-m apply the restriction from the start time, but coin-m do it from the end.
@@ -33,6 +34,7 @@ class BinanceSource(OnlineSource):
         self.config = config
         self.exchange_info_data = {}
         self.request_cache = {}
+        self.history_start = np.datetime64(HISTORY_START)
         self.logger = logging.getLogger(__name__.split('.')[-1])
 
     @staticmethod
@@ -116,6 +118,7 @@ class BinanceSource(OnlineSource):
         return response_data
 
     def bars_online_request(self, symbol, timeframe, time_start, time_end):
+        assert time_start <= time_end
 
         try:
 

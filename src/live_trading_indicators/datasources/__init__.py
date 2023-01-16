@@ -14,7 +14,7 @@ BLOCK_FILE_EXT = 'lti'
 
 CACHE_BLOCK_VERSION = 2
 
-DAYS_WAIT_FOR_ENTIRE = 30
+DAYS_WAIT_FOR_ENTIRE = 7
 MAX_CLIENT_TIME_ERROR = TIME_UNITS_IN_ONE_SECOND * 60 * 15
 
 BARS_FOR_INTERMEDIATE_SAVE = 10000
@@ -283,7 +283,10 @@ class SourceData:
     def get_bar_data(self, symbol, timeframe, time_begin, time_end, day_for_grow=None):
         assert time_begin is not None
         assert time_end is not None
-        assert time_end >= time_begin
+        assert time_begin <= time_end
+
+        if time_begin < self.online_source.history_start:
+            raise LTIExceptionBadTimeParameter(f'A very early date for {self.datasource_id}: {time_begin}')
 
         series = [], [], [], [], [], []
         date_end = time_end.astype('datetime64[D]')
