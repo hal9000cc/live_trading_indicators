@@ -18,8 +18,10 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.7.3
+## Version 0.8.0
 ### what's new
+#### 0.8.0
+- New indicator - MFI
 #### 0.7.3
 - The quotation database has been optimized (the conversion may take some time at the first launch)
 - Fix some bugs (when ccxt is used for multiple exchanges at the same time)
@@ -31,13 +33,6 @@ Package data from online sources is stored by default in the *.lti* folder of th
 - Migration of quote storage to sqlite3
 - Added support for three compression algorithms: gzip, bz2 and lz4 ([see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#compression_type))
 - Add the depth parameter for ZigZag indicator
-#### 0.6.3
-- New indicator - Aroon
-#### 0.6.2
-- New indicator - ZigZag
-#### 0.6.1
-- Displaying indicator charts using matplotlib - [see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/examples_show.ipynb).
-- Repeated download attempts in case of errors (request_trys [setting](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings)).
 
 [previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
 ## Installing
@@ -231,6 +226,7 @@ print(lti.help())
 - Keltner(period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma') - Keltner channel.
 - MA(period=, value='close', ma_type='sma') - Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
 - MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close') - Moving Average Convergence/Divergence.
+- MFI(period=14) - Money flow index.
 - OBV() - On Balance Volume.
 - OHLCV() - Quotes: open, high, low, close, volume.
 - OHLCVM(timeframe_low='1m', bars_on_bins=6) - Quotes and the price of the maximum volume: open, high, low, close, volume, mv_price.
