@@ -226,6 +226,7 @@ print(lti.help())
 - Keltner(period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma') - Keltner channel.
 - MA(period=, value='close', ma_type='sma') - Moving average of different types: 'sma', 'ema', 'mma', 'ema0', 'mma0'
 - MACD(period_short=, period_long=, period_signal=, ma_type='ema', ma_type_signal='sma', value='close') - Moving Average Convergence/Divergence.
+- MFI(period=14) - Money flow index.
 - OBV() - On Balance Volume.
 - OHLCV() - Quotes: open, high, low, close, volume.
 - OHLCVM(timeframe_low='1m', bars_on_bins=6) - Quotes and the price of the maximum volume: open, high, low, close, volume, mv_price.
