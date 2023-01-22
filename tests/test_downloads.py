@@ -2,6 +2,7 @@ import pytest
 import os
 import datetime as dt
 import numpy as np
+from common_test import *
 from src import live_trading_indicators as lti
 from src.live_trading_indicators.constants import TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY
 from src.live_trading_indicators.timeframe import Timeframe
@@ -100,6 +101,62 @@ def test_2020_year_h(test_source, symbol, timeframe):
     ohlcv = indicators.OHLCV(symbol, timeframe, 20220101, 20221231)
 
 
-def test_empty_day(clear_data):
-    indicators = lti.Indicators('binance', **clear_data)
-    ohlcv = indicators.OHLCV('um/btcusdt', '1h', '2017-01-01', '2017-01-01')
+@pytest.mark.parametrize('symbol, date', [
+    ('um/btcusdt', '2017-01-01'),
+    ('um/etcusdt', '2020-01-01'),
+#    ('um/etcusdt', '2020-01-16')
+])
+def test_empty_day(clear_data, symbol, date):
+
+    indicators = lti.Indicators('binance', restore_empty_bars=False, **clear_data)
+    ohlcv1 = indicators.OHLCV(symbol, '1h', date, date)
+    assert indicators.source_data.count_file_load == 0
+    assert indicators.source_data.count_datasource_get == 1
+    assert indicators.source_data.count_datasource_bars_get == 0
+
+    indicators = lti.Indicators('binance', restore_empty_bars=False, **clear_data)
+    ohlcv2 = indicators.OHLCV(symbol, '1h', date, date)
+    assert indicators.source_data.count_file_load == 1
+    assert indicators.source_data.count_datasource_get == 0
+    assert indicators.source_data.count_datasource_bars_get == 0
+
+    assert ohlcv1 == ohlcv2
+    assert ohlcv1.empty_bars_count == 24
+    assert ohlcv1.empty_bars_fraction == 1
+
+
+@pytest.mark.parametrize('symbol, date', [
+    ('um/btcusdt', '2017-01-01'),
+    ('um/etcusdt', '2020-01-01'),
+    ('um/etcusdt', '2020-01-16'),
+    ('um/etcusdt', '2017-01-16'),
+    ('um/etcusdt', '2022-01-16')
+])
+def test_empty_identical_empty(clear_data, symbol, date):
+
+    indicators = lti.Indicators('binance', restore_empty_bars=False, **clear_data)
+    ohlcv1 = indicators.OHLCV(symbol, '1h', date, date)
+
+    indicators = lti.Indicators('binance', restore_empty_bars=False, **clear_data)
+    ohlcv2 = indicators.OHLCV(symbol, '1h', date, date)
+
+    assert ohlcv1 == ohlcv2
+    assert ohlcv1.empty_bars_count == ohlcv2.empty_bars_count
+    assert ohlcv1.empty_bars_fraction == ohlcv2.empty_bars_fraction
+
+
+def test_data_skips(clear_data):
+
+    timeframe = '5m'
+    clear_data['restore_empty_bars'] = False
+    indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
+
+    ohlcv = indicators.OHLCV('btcusdt', timeframe)
+    assert np.isnan(ohlcv.close).any()
+
+    clear_data['restore_empty_bars'] = True
+    indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
+
+    ohlcv = indicators.OHLCV('btcusdt', timeframe)
+    assert not np.isnan(ohlcv.close).any()
+

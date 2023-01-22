@@ -13,6 +13,7 @@ def test_bar_data_fix_1(config_default, test_source, symbol, timeframe, date):
     time_end = time_begin
     indicators = lti.Indicators(test_source)
     source_out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    assert len(source_out) == 1
 
     out = lti.OHLCV_data(source_out.data).copy()
     out.volume[0] = 0
@@ -20,7 +21,7 @@ def test_bar_data_fix_1(config_default, test_source, symbol, timeframe, date):
     assert out.is_entire()
 
     out = lti.OHLCV_data(source_out.data).copy()
-    out.close[0] = 0
+    out.close[0] = np.nan
     with pytest.raises(LTIExceptionQuotationDataNotFound):
         out.restore_bar_data()
 
@@ -34,13 +35,13 @@ def test_bar_data_fix_2(config_default, test_source, symbol, timeframe, date):
     assert len(source_out) == 2
 
     out = lti.OHLCV_data(source_out.data).copy()
-    out.close[0] = 0
+    out.close[0] = np.nan
     out.restore_bar_data()
     assert out.is_entire()
     assert out.close[0] == out.open[1]
 
     out = lti.OHLCV_data(source_out.data).copy()
-    out.close[1] = 0
+    out.close[1] = np.nan
     out.restore_bar_data()
     assert out.is_entire()
     assert out.close[0] == out.close[1]
@@ -55,7 +56,7 @@ def test_bar_data_fix_3(config_default, test_source, symbol, timeframe, date):
     assert len(source_out) == 3
 
     out = lti.OHLCV_data(source_out.data).copy()
-    out.close[1] = 0
+    out.close[1] = np.nan
     out.restore_bar_data()
     assert out.is_entire()
     assert out.close[1] == out.close[0]
@@ -70,8 +71,8 @@ def test_bar_data_fix_4(config_default, test_source, symbol, timeframe, date):
     assert len(source_out) == 4
 
     out = lti.OHLCV_data(source_out.data).copy()
-    out.close[1] = 0
-    out.close[2] = 0
+    out.close[1] = np.nan
+    out.close[2] = np.nan
     out.restore_bar_data()
     assert out.is_entire()
     assert out.close[1] == out.close[0] and out.close[2] == out.close[0]

@@ -26,7 +26,7 @@ class SourceData:
 
         self.config = config
         self.cach_folder = path.join(self.config['cache_folder'], online_source.datasource_name())
-        self.request_trys = int(self.config['request_trys'])
+        #self.request_trys = int(self.config['request_trys'])
 
         self.online_source = online_source
         self.datasource_id = datasource_id
@@ -85,8 +85,8 @@ class SourceData:
         if bar_data.is_incomplete_day:
             return
 
-        if bar_data.is_empty():
-            return
+        # if bar_data.is_empty():
+        #     return
 
         if not bar_data.is_entire():
             if (np.datetime64(now, 'D') - day_date).astype(np.int64) < DAYS_WAIT_FOR_ENTIRE:
@@ -170,6 +170,7 @@ class SourceData:
 
     def bars_online_request_with_grow(self, symbol, timeframe, query_time_start, query_time_end, day_for_grow):
 
+        logging.debug(f'bars_online_request_with_grow {symbol} {timeframe!s} {query_time_start} {query_time_end}')
         if day_for_grow is not None and day_for_grow.time[0] == query_time_start:
             query_time_start = day_for_grow.time[-1]
             bars_data = self.online_source.bars_online_request(symbol, timeframe, query_time_start, query_time_end)
@@ -187,7 +188,8 @@ class SourceData:
                        day_for_grow.low, day_for_grow.close, day_for_grow.volume
         else:
             bars_data = self.online_source.bars_online_request(symbol, timeframe, query_time_start, query_time_end)
-            self.count_datasource_bars_get += len(bars_data[0])
+            if bars_data is not None:
+                self.count_datasource_bars_get += len(bars_data[0])
 
         return bars_data
 
@@ -204,16 +206,7 @@ class SourceData:
         if query_time_start > query_time_end:
             return []
 
-        for i_try in range(self.request_trys):
-            try:
-                bars_data = self.bars_online_request_with_grow(symbol, timeframe, query_time_start, query_time_end, day_for_grow)
-                break
-            except LTIException:
-                raise
-            except Exception as error:
-                logging.error(error)
-                if i_try >= self.request_trys - 1:
-                    raise
+        bars_data = self.bars_online_request_with_grow(symbol, timeframe, query_time_start, query_time_end, day_for_grow)
 
         downloaded_days = []
         day_date = date_start
@@ -221,26 +214,31 @@ class SourceData:
 
             time_end_day = (day_date + 1).astype(TIME_TYPE)
             time_start_day = day_date.astype(TIME_TYPE)
-            i_day_start = np.searchsorted(bars_data[0], time_start_day)
-            i_day_end = np.searchsorted(bars_data[0], time_end_day)
+            if bars_data is None:
+                is_incomplete_day = day_date >= last_bar_time_of_timeframe
+                day_data = OHLCV_day.empty_day(symbol, timeframe, self.datasource_id, day_date, is_incomplete_day)
+            else:
+                i_day_start = np.searchsorted(bars_data[0], time_start_day)
+                i_day_end = np.searchsorted(bars_data[0], time_end_day)
 
-            is_incomplete_day = i_day_end >= len(bars_data[0]) and len(bars_data[0]) > 0 and bars_data[0][-1] >= last_bar_time_of_timeframe
+                is_incomplete_day = i_day_end >= len(bars_data[0]) and len(bars_data[0]) > 0 and bars_data[0][-1] >= last_bar_time_of_timeframe
 
-            day_data = OHLCV_day({
-                'symbol': symbol,
-                'timeframe': timeframe,
-                'source': self.datasource_id,
-                'is_incomplete_day': is_incomplete_day,
-                'time': bars_data[0][i_day_start: i_day_end],
-                'open': bars_data[1][i_day_start: i_day_end],
-                'high': bars_data[2][i_day_start: i_day_end],
-                'low': bars_data[3][i_day_start: i_day_end],
-                'close': bars_data[4][i_day_start: i_day_end],
-                'volume': bars_data[5][i_day_start: i_day_end]
-            })
+                day_data = OHLCV_day({
+                    'symbol': symbol,
+                    'timeframe': timeframe,
+                    'source': self.datasource_id,
+                    'is_incomplete_day': is_incomplete_day,
+                    'time': bars_data[0][i_day_start: i_day_end],
+                    'open': bars_data[1][i_day_start: i_day_end],
+                    'high': bars_data[2][i_day_start: i_day_end],
+                    'low': bars_data[3][i_day_start: i_day_end],
+                    'close': bars_data[4][i_day_start: i_day_end],
+                    'volume': bars_data[5][i_day_start: i_day_end]
+                })
 
-            day_data.fix_errors(day_date)
-            day_data.check_day_data(symbol, timeframe, day_date)
+                day_data.fix_errors(day_date)
+                day_data.check_day_data(symbol, timeframe, day_date)
+
             self.save_to_cache_verified(symbol, timeframe, day_data, day_date)
             downloaded_days.append(day_data)
 

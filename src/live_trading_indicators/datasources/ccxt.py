@@ -39,6 +39,7 @@ class CCXTSource(OnlineSource):
         self.exchange_name = name_patrs[1]
         self.exchange = getattr(ccxt, self.exchange_name)()
         self.history_start = np.datetime64(HISTORY_START)
+        self.request_trys = int(config['request_trys'])
 
         self.limit_max = MAX_LIMITS.get(self.exchange_name, 500)
         if extra_exchange_params:
@@ -84,7 +85,15 @@ class CCXTSource(OnlineSource):
             since = int(since_time.astype('datetime64[ms]').astype(np.int64))
             limit = min(int((time_end - since_time).astype(np.int64) // timeframe.value + 1), self.limit_max)
 
-            downloaded_ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe_ccxt, since, limit, params=self.exchange_params)
+            for i_try in range(self.request_trys):
+                try:
+                    downloaded_ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe_ccxt, since, limit, params=self.exchange_params)
+                    break
+                except TimeoutError as error:
+                    logging.error(error)
+                    if i_try >= self.request_trys - 1:
+                        raise
+                    logging.info('Repeat request...')
 
             n_bars = len(downloaded_ohlcv)
             if n_bars == 0:

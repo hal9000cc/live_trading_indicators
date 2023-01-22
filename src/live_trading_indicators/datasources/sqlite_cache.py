@@ -252,10 +252,9 @@ class Sqlite3Cache:
             'compression_type': compression_type.value
         }
 
+        data_is_empty = bar_data.is_empty()
         for data_name in ('time', 'open', 'high', 'low', 'close', 'volume'):
-            blob_data = self.compress_numpy(bar_data.data[data_name], compression_type)
-            assert isinstance(blob_data, bytes)
-            params[data_name] = blob_data
+            params[data_name] = b'' if data_is_empty else self.compress_numpy(bar_data.data[data_name], compression_type)
 
         cursor = self.sl3base.cursor()
 
@@ -289,6 +288,9 @@ class Sqlite3Cache:
         day_data = query_result.fetchone()
         if day_data is None:
             return None
+
+        if len(day_data[0]) == 0:
+            return OHLCV_day.empty_day(symbol, timeframe, source, day_date, False)
 
         compression_type = CompressionType(day_data[6])
 

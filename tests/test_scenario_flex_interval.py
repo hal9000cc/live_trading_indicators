@@ -12,6 +12,7 @@ def test_flex_1(clear_data, test_source, ohlcv_set):
     time_begin = cast_time(ohlcv_set[2])
     data_set = ohlcv_set[3]
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, **clear_data)
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_begin + np.timedelta64(50, 'h'))
@@ -52,6 +53,7 @@ def test_flex_2(clear_data, test_source, ohlcv_set):
     time_begin = cast_time(ohlcv_set[2])
     data_set = ohlcv_set[3]
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, **clear_data)
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin + np.timedelta64(1, 'h'), time_begin + np.timedelta64(1, 'h'))
@@ -74,6 +76,7 @@ def test_flex_3(clear_data, test_source, symbol, a_timeframe_short):
 
     date = np.datetime64('2022-07-01')
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, **clear_data)
     ohlcv = indicators.OHLCV(symbol, a_timeframe_short, date, date)
     assert len(ohlcv.time) == TIME_UNITS_IN_ONE_DAY / a_timeframe_short.value
@@ -86,6 +89,7 @@ def test_flex_3(clear_data, test_source, symbol, a_timeframe_short):
     assert ohlcv1.time[-1] == a_timeframe_short.begin_of_tf(np.datetime64(date + 2, TIME_TYPE_UNIT) - 1)
     assert ohlcv == ohlcv1[:len(ohlcv)]
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, **clear_data)
     ohlcv2 = indicators.OHLCV(symbol, a_timeframe_short, date, date)
     assert ohlcv2 == ohlcv
@@ -107,6 +111,7 @@ def test_flex_4(clear_data, test_source, symbol, a_timeframe_short):
     date = np.datetime64('2022-07-01', TIME_TYPE_UNIT)
     date_b = a_timeframe_short.begin_of_tf(date + offset)
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, **clear_data)
     ohlcv = indicators.OHLCV(symbol, a_timeframe_short, date + offset, a_timeframe_short.begin_of_tf(date + offset + TIME_UNITS_IN_ONE_DAY) - 1)
     assert len(ohlcv.time) == TIME_UNITS_IN_ONE_DAY / a_timeframe_short.value
@@ -136,6 +141,6 @@ def test_flex_4(clear_data, test_source, symbol, a_timeframe_short):
 @pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
 def test_flex_5(config_default, test_source, symbol, a_timeframe_short):
 
-    indicators = lti.Indicators('binance')
+    indicators = lti.Indicators('binance', log_level='DEBUG')
     sma15 = indicators.SMA(symbol, '1h', 20220905, 20220915, period=15)
 

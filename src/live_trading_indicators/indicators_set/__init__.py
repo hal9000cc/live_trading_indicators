@@ -368,9 +368,9 @@ class Indicators:
         if self.config['endpoints_required']:
             if len(bar_data) == 0:
                 raise LTIExceptionQuotationDataNotFound(bar_data.symbol)
-            if bar_data.close[0] == 0:
+            if np.isnan(bar_data.close[0]):
                 raise LTIExceptionQuotationDataNotFound(bar_data.symbol, bar_data.time[0])
-            if bar_data.close[-1] == 0:
+            if np.isnan(bar_data.close[-1]):
                 raise LTIExceptionQuotationDataNotFound(bar_data.symbol, bar_data.close[-1])
 
         max_empty_bars_fraction, max_empty_bars_consecutive = self.config['max_empty_bars_fraction'], self.config[

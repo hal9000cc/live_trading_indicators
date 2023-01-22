@@ -32,14 +32,44 @@ def test_early_date(config_default):
         ohlcv = indicators.OHLCV('ethusd', '1h')
 
 
-@pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-05')
-])
-def test_bad_data(config_default, test_source, a_symbol, time_begin, time_end):
+def test_bad_data(config_default):
 
     timeframe = '5m'
 
-    indicators = lti.Indicators(test_source, '2010-07-01', time_end, **config_default)
+    config_default['endpoints_required'] = True
+    indicators = lti.Indicators('binance', '2018-07-01', '2018-07-01', **config_default)
 
     with pytest.raises(LTIExceptionQuotationDataNotFound):
-        ohlcv = indicators.OHLCV(a_symbol, timeframe)
+        ohlcv = indicators.OHLCV('um/ethusdt', timeframe)
+
+
+def test_bad_data1(config_default):
+
+    timeframe = '5m'
+
+    config_default['endpoints_required'] = False
+    indicators = lti.Indicators('binance', **config_default)
+
+    with pytest.raises(LTIExceptionQuotationDataNotFound):
+        ohlcv = indicators.OHLCV('um/etcusdt', timeframe, '2020-01-15', '2020-01-15')
+
+    indicators = lti.Indicators('binance', '2020-01-15', '2020-01-15', **config_default)
+
+    with pytest.raises(LTIExceptionQuotationDataNotFound):
+        ohlcv = indicators.OHLCV('um/etcusdt', timeframe)
+
+
+def test_bad_data1(config_default):
+
+    timeframe = '5m'
+
+    config_default['endpoints_required'] = True
+    indicators = lti.Indicators('binance', **config_default)
+
+    with pytest.raises(LTIExceptionQuotationDataNotFound):
+        ohlcv = indicators.OHLCV('um/etcusdt', timeframe, '2020-01-15', '2020-01-15')
+
+    indicators = lti.Indicators('binance', '2020-01-15', '2020-01-15', **config_default)
+
+    with pytest.raises(LTIExceptionQuotationDataNotFound):
+        ohlcv = indicators.OHLCV('um/etcusdt', timeframe)

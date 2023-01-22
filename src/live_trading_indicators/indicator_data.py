@@ -201,7 +201,13 @@ class TimeframeData:
         verifiable_keys_not_series = {'timeframe'}
         for key, value in self.data.items():
             if type(value) == np.ndarray:
-                if (other.data.get(key) != value).any():
+                other_value = other.data.get(key)
+                if type(other_value) != np.ndarray:
+                    return False
+                is_nan = np.isnan(value)
+                if (np.isnan(other_value) != is_nan).any():
+                    return False
+                if (other_value[~is_nan] != value[~is_nan]).any():
                     return False
             else:
                 if key in verifiable_keys_not_series and other.data.get(key) != value:
@@ -260,23 +266,6 @@ class OHLCV_data(TimeframeData):
     def __repr__(self):
         return self.__str__()
 
-    def clear_day(self, date):
-
-        assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
-        n_bars = TIME_UNITS_IN_ONE_DAY // self.timeframe.value
-        self.first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
-
-        self.data.update({
-            'time': np.array([self.first_bar_time + self.timeframe.value * i for i in range(n_bars)]),
-            'open': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'high': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'low': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'close': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
-        })
-
-        self.end_bar_time = self.data['time'][-1]
-
     def fix_time(self, time_need):
 
         if set(self.time) - set(time_need):
@@ -288,11 +277,11 @@ class OHLCV_data(TimeframeData):
         logging.warning(f'fixing time for {self.symbol}, timeframe {self.timeframe!s}, date {self.time[0].astype("datetime64[D]")}')
         n_bars = len(time_need)
         tf_time = time_need
-        tf_open = np.zeros(n_bars, dtype=PRICE_TYPE)
-        tf_high = np.zeros(n_bars, dtype=PRICE_TYPE)
-        tf_low = np.zeros(n_bars, dtype=PRICE_TYPE)
-        tf_close = np.zeros(n_bars, dtype=PRICE_TYPE)
-        tf_volume = np.zeros(n_bars, dtype=VOLUME_TYPE)
+        tf_open = np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE)
+        tf_high = np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE)
+        tf_low = np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE)
+        tf_close = np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE)
+        tf_volume = np.full(n_bars, 0, dtype=PRICE_TYPE)
 
         ix_time = np.searchsorted(tf_time, self.time)
         tf_open[ix_time] = self.open
@@ -313,10 +302,10 @@ class OHLCV_data(TimeframeData):
         return True
 
     def is_entire(self):
-        return (self.close > 0).all()
+        return not np.isnan(self.close).any()
 
     def is_empty(self):
-        return (self.close == 0).all()
+        return np.isnan(self.close).all()
 
     def suppliment(self, bar_data2):
 
@@ -333,7 +322,7 @@ class OHLCV_data(TimeframeData):
         if n_bars == 0:
             raise LTIExceptionEmptyBarData()
 
-        bx_empty_bars = self.close == 0
+        bx_empty_bars = np.isnan(self.close)
         n_empty_bars = bx_empty_bars.sum()
 
         empty_bars_fraction = n_empty_bars / n_bars
@@ -349,14 +338,17 @@ class OHLCV_data(TimeframeData):
     def restore_bar_data(self):
 
         n_bars = len(self.time)
-        bx_empty_bars = self.close == 0
+        bx_empty_bars = np.isnan(self.close)
         n_empty_bars = bx_empty_bars.sum()
 
         if n_empty_bars == 0:
             return
 
+        if n_empty_bars == n_bars:
+            raise LTIExceptionQuotationDataNotFound(self.symbol, self.first_bar_time)
+
         if n_bars < 2:
-            raise LTIExceptionQuotationDataNotFound(self.symbol, self.data)
+            raise LTIExceptionQuotationDataNotFound(self.symbol, self.first_bar_time)
 
         ix_change = np.hstack((
             np.zeros(1, dtype=int),
@@ -366,11 +358,12 @@ class OHLCV_data(TimeframeData):
 
         for i, point in enumerate(ix_change[:-1]):
 
-            if self.close[point] > 0:
+            if not np.isnan(self.close[point]):
                 continue
 
             if point == 0:
-                price = self.open[ix_change[i + 1]]
+                #price = self.open[ix_change[i + 1]]
+                price = np.nan
             else:
                 price = self.close[point - 1]
 
@@ -398,7 +391,7 @@ class OHLCV_day(OHLCV_data):
 
     def check_day_data(self, symbol, timeframe, day_date):
 
-        self.check_series()
+        self.check_series(True)
 
         error = None
         first_time = self.time[0]
@@ -459,8 +452,8 @@ class OHLCV_day(OHLCV_data):
             return
 
         bx_bad_bars = \
-            (self.open < 0) | \
-            (self.close < 0) | \
+            (self.open <= 0) | \
+            (self.close <= 0) | \
             (self.high < self.open) | \
             (self.high < self.close) | \
             (self.low > self.open) | \
@@ -468,14 +461,15 @@ class OHLCV_day(OHLCV_data):
             (self.volume < 0)
 
         if bx_bad_bars.sum():
-            for value_name in ('open', 'high', 'low', 'close', 'volume'):
-                self.data[value_name][bx_bad_bars] = 0
+            self.data['volume'][bx_bad_bars] = 0
+            for value_name in ('open', 'high', 'low', 'close'):
+                self.data[value_name][bx_bad_bars] = UNKNOWN_PRICE
 
         self.first_bar_time = self.data['time'][0]
         self.end_bar_time = self.data['time'][-1]
 
     @staticmethod
-    def empty_day(symbol, timeframe, date, is_incomplete_day):
+    def empty_day(symbol, timeframe, source, date, is_incomplete_day):
         assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
         n_bars = TIME_UNITS_IN_ONE_DAY // timeframe.value
         first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
@@ -483,71 +477,32 @@ class OHLCV_day(OHLCV_data):
         return OHLCV_day({
             'symbol': symbol,
             'timeframe': timeframe,
+            'source': source,
             'is_incomplete_day': is_incomplete_day,
             'time': np.array([first_bar_time + np.timedelta64(i, TIME_TYPE_UNIT) * timeframe.value for i in range(n_bars)]),
-            'open': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'high': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'low': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'close': np.zeros(n_bars, dtype=PRICE_TYPE),
-            'volume': np.zeros(n_bars, dtype=VOLUME_TYPE)
+            'open': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'high': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'low': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'close': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'volume': np.full(n_bars, 0, dtype=VOLUME_TYPE)
         })
 
-    @staticmethod
-    def from_ticks(tick_data, symbol, timeframe, date):
+    def clear_day(self, date):
 
-        assert type(date) == dt.date
+        assert type(date) == np.datetime64 and date.dtype.name == 'datetime64[D]'
+        n_bars = TIME_UNITS_IN_ONE_DAY // self.timeframe.value
+        self.first_bar_time = np.datetime64(date, TIME_TYPE_UNIT)
 
-        day_start_ms = np.datetime64(date).astype('datetime64[ms]').astype(np.int64)
-        step_ms = timeframe.value * 1000
-        n_candles = TIME_UNITS_IN_ONE_DAY // timeframe.value
-
-        tick_time, tick_price, tick_volumes = tick_data.time, tick_data.price, tick_data.volume
-
-        if len(tick_price) == 0:
-            logging.warning(f'Bad ticks file - empty day, no ticks. Symbol {symbol}, date {date.date()}')
-            return None
-
-        if (tick_time[:-1] > tick_time[1:]).any():
-            logging.warning(f'Bad ticks file - empty day, no ticks. Symbol {symbol}, date {date.date()}')
-            return None
-
-        first_price = tick_price[0]
-
-        timeframe_starts = (day_start_ms + np.arange(n_candles) * step_ms).astype('datetime64[ms]')
-        ix_tf_end = np.searchsorted(tick_time, timeframe_starts)[1:]
-        interval_prices = np.split(tick_price, ix_tf_end)
-        interval_volumes = np.split(tick_volumes, ix_tf_end)
-
-        tf_open, tf_high, tf_low, tf_close, tf_volume = \
-            np.zeros(n_candles, dtype=PRICE_TYPE), \
-            np.zeros(n_candles, dtype=PRICE_TYPE), \
-            np.zeros(n_candles, dtype=PRICE_TYPE), \
-            np.zeros(n_candles, dtype=PRICE_TYPE), \
-            np.zeros(n_candles, dtype=VOLUME_TYPE)
-
-        tf_time = timeframe_starts
-
-        for i_tf in range(n_candles):
-
-            if len(interval_prices[i_tf]) == 0: continue
-
-            tf_open[i_tf] = interval_prices[i_tf][0]
-            tf_high[i_tf] = interval_prices[i_tf].max()
-            tf_low[i_tf] = interval_prices[i_tf].min()
-            tf_close[i_tf] = interval_prices[i_tf][-1]
-            tf_volume[i_tf] = interval_volumes[i_tf].sum()
-
-        volume_round = VOLUME_TYPE_PRECISION - int(np.ceil(np.log(tf_volume.max()) / np.log(10)))
-        return OHLCV_day({
-            'symbol': symbol,
-            'timeframe': timeframe,
-            'time': tf_time,
-            'open': tf_open,
-            'high': tf_high,
-            'low': tf_low,
-            'close': tf_close,
-            'volume': np.round(tf_volume, volume_round),
+        self.data.update({
+            'time': np.array([self.first_bar_time + self.timeframe.value * i for i in range(n_bars)]),
+            'open': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'high': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'low': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'close': np.full(n_bars, UNKNOWN_PRICE, dtype=PRICE_TYPE),
+            'volume': np.full(n_bars, 0, dtype=VOLUME_TYPE)
         })
+
+        self.end_bar_time = self.data['time'][-1]
 
 
 class IndicatorData(TimeframeData):

@@ -60,8 +60,11 @@ def test_bar_data_fix_bad(config_default, test_source, symbol, timeframe, date):
 
 
 @pytest.mark.parametrize('symbol, timeframe, date, skips', [
+    ('um/ethusdt', lti.Timeframe.t1h, 20220901, [0, 2, 3]),
+    ('um/ethusdt', lti.Timeframe.t1h, 20220901, [1, 2]),
     ('um/ethusdt', lti.Timeframe.t1h, 20220901, [3]),
     ('um/ethusdt', lti.Timeframe.t1h, 20220901, [0, 5, 6]),
+    ('um/ethusdt', lti.Timeframe.t1h, 20220901, [5, 6]),
     ('um/ethusdt', lti.Timeframe.t1h, 20220901, [-1]),
     ('um/ethusdt', lti.Timeframe.t1h, 20220901, [0, -1]),
 ])
@@ -90,6 +93,9 @@ def test_bar_data_fix_skips(config_default, test_source, symbol, timeframe, date
     assert not out.is_empty()
 
     out.restore_bar_data()
-    assert out.is_entire()
+    if 0 in skips:
+        assert not np.isnan(out.close[1:]).any()
+    else:
+        assert out.is_entire()
 
 

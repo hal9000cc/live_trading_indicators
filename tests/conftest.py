@@ -159,6 +159,7 @@ def clear_data():
         'cache_folder' : cache_folder,
         'sources_folder': sources_folder,
         'log_level': LOG_LEVEL,
+        'timeout': 30,
         'quotation_database': path.join(data_path, uuid.uuid4().hex)
     }
     shutil.rmtree(data_path, ignore_errors=True)

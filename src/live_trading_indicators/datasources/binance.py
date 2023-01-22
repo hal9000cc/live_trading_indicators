@@ -35,6 +35,7 @@ class BinanceSource(OnlineSource):
         self.exchange_info_data = {}
         self.request_cache = {}
         self.history_start = np.datetime64(HISTORY_START)
+        self.request_trys = int(config['request_trys'])
         self.logger = logging.getLogger(__name__.split('.')[-1])
 
     @staticmethod
@@ -161,7 +162,17 @@ class BinanceSource(OnlineSource):
 
             query_limit = min(limit, (time_end - query_time_start).astype(np.int64) // timeframe.value + 2)
             query_time_end = query_time_start + query_limit * timeframe.value - 1
-            raw_bars_data = self.online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
+
+            for i_try in range(self.request_trys):
+                try:
+                    raw_bars_data = self.online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
+                    break
+                except TimeoutError as error:
+                    logging.error(error)
+                    if i_try >= self.request_trys - 1:
+                        raise
+                    logging.info('Repeat request...')
+
             online_bars_data = json.loads(raw_bars_data)
 
             n_bars = len(online_bars_data)
@@ -181,7 +192,7 @@ class BinanceSource(OnlineSource):
             query_time_start = timeframe.begin_of_tf(time[-1][-1]) + timeframe.value
 
         if len(time) == 0:
-            raise LTIExceptionQuotationDataNotFound(symbol, time_start)
+            return None
 
         return np.hstack(time), \
                np.hstack(open),\

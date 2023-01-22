@@ -14,6 +14,7 @@ def test_fix_wo_time(clear_data, test_source, ohlcv_set):
     data_set = ohlcv_set[3]
 
     time_end = time_begin + np.timedelta64(50, 'h')
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, time_begin, time_end, **clear_data)
     count_file_load = indicators.source_data.count_file_load
     count_datasource_get = indicators.source_data.count_datasource_get
@@ -57,6 +58,7 @@ def test_fix_with_time(clear_data, test_source, ohlcv_set):
     time_begin = cast_time(ohlcv_set[2])
     data_set = ohlcv_set[3]
 
+    clear_data['log_level'] = 'DEBUG'
     indicators = lti.Indicators(test_source, time_begin - np.timedelta64(30), time_begin + np.timedelta64(50, 'h'), **clear_data)
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_begin + len(data_set[0]) * timeframe.value - 1)
@@ -78,7 +80,7 @@ def test_fix_with_time(clear_data, test_source, ohlcv_set):
 
 def test_fix_wo_time_many_symbols(config_default, test_source, a_symbol):
 
-    indicators = lti.Indicators(test_source, 20220701, 20220705)
+    indicators = lti.Indicators(test_source, 20220701, 20220705, log_level='DEBUG')
 
     ohlcv = indicators.OHLCV(a_symbol, '1m')
 
@@ -104,9 +106,11 @@ def fortest_fix_with_time_chec_boounds(config, source, symbol, timeframe):
 
 @pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
 def test_fix_with_time_chec_boounds_cl(clear_data, test_source, symbol, a_timeframe):
+    clear_data['log_level'] = 'DEBUG'
     fortest_fix_with_time_chec_boounds(clear_data, test_source, symbol, a_timeframe)
 
 
 @pytest.mark.parametrize('symbol', ['ethusdt', 'um/ethusdt', 'cm/ethusd_perp'])
 def test_fix_with_time_chec_boounds_cf(config_default, test_source, symbol, a_timeframe):
+    config_default['log_level'] = 'DEBUG'
     fortest_fix_with_time_chec_boounds(config_default, test_source, symbol, a_timeframe)

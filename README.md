@@ -337,7 +337,7 @@ If True, outputs log messages to standard output. Default: True.
 #### log_level
 Log registration level. Default: INFO.
 #### request_timeout
-Timeout of requests to download quotes, seconds. Default: 10.
+Timeout of requests to download quotes, seconds. Default: 30.
 #### request_trys
 The number of attempts to download quotes. Default: 3.
 #### quotation_database

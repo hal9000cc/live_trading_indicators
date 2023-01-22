@@ -1,6 +1,10 @@
+import numpy as np
+
 PRICE_TYPE = float
 VOLUME_TYPE = float
 VOLUME_TYPE_PRECISION = 15
+
+UNKNOWN_PRICE = np.nan
 
 TIME_TYPE = 'datetime64[ms]'
 TIME_TYPE_UNIT = 'ms'
