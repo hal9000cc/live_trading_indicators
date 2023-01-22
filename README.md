@@ -23,6 +23,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 #### 0.7.4
 - New indicator - MFI
 - fix some bugs
+- Change some default [settings](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings) during a new installation.
 #### 0.7.3
 - The quotation database has been optimized (the conversion may take some time at the first launch)
 - Fix some bugs (when ccxt is used for multiple exchanges at the same time)
