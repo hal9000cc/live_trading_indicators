@@ -22,6 +22,8 @@ Package data from online sources is stored by default in the *.lti* folder of th
 ### what's new
 #### 0.8.0
 - New indicator - MFI
+- fix some bugs
+- 
 #### 0.7.3
 - The quotation database has been optimized (the conversion may take some time at the first launch)
 - Fix some bugs (when ccxt is used for multiple exchanges at the same time)
@@ -321,11 +323,11 @@ Directory for storing quotation data.
 #### log_folder
 Directory of log files.
 #### endpoints_required
-Control of the presence of the first and last bar in the selected date range. In the absence of the first or last bar, LTIExceptionQuotationDataNotFound is raised. Default: True.
+Control of the presence of the first and last bar in the selected date range. In the absence of the first or last bar, LTIExceptionQuotationDataNotFound is raised. Default: False.
 #### max_empty_bars_fraction
-The maximum percentage of lost bars, if exceeded, an error will occur.
+The maximum fraction of lost bars, if exceeded, an error will occur. Default: 1 (100% empty bars are allowed).
 #### max_empty_bars_consecutive
-The maximum number of lost bars in a row, if exceeded, LTIExceptionTooManyEmptyBars will be raised.
+The maximum number of lost bars in a row, if exceeded, LTIExceptionTooManyEmptyBars will be raised. Default: -1 (any number of empty bars in a row is allowed).
 #### restore_empty_bars
 If True, it restores the lost bars (open=close=close of the previous one, volume=0). The control of the number of lost bars (max_empty_bars_fraction, max_empty_bars_consecutive) is performed BEFORE recovery. Default: True.
 #### print_log
