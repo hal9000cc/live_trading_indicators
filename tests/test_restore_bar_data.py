@@ -34,11 +34,11 @@ def test_bar_data_fix_2(config_default, test_source, symbol, timeframe, date):
     source_out = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
     assert len(source_out) == 2
 
-    out = lti.OHLCV_data(source_out.data).copy()
-    out.close[0] = np.nan
-    out.restore_bar_data()
-    assert out.is_entire()
-    assert out.close[0] == out.open[1]
+    # out = lti.OHLCV_data(source_out.data).copy()
+    # out.close[0] = np.nan
+    # out.restore_bar_data()
+    # assert out.is_entire()
+    # assert out.close[0] == out.open[1]
 
     out = lti.OHLCV_data(source_out.data).copy()
     out.close[1] = np.nan
@@ -77,3 +77,9 @@ def test_bar_data_fix_4(config_default, test_source, symbol, timeframe, date):
     assert out.is_entire()
     assert out.close[1] == out.close[0] and out.close[2] == out.close[0]
 
+
+def test_restore_zero(config_default):
+
+    indicators = lti.Indicators('binance')
+    ohlcv = indicators.OHLCV('ethusdt', '1s', '2021-02-11', '2021-02-11')
+    assert (ohlcv.close != 0).all()

@@ -37,6 +37,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'timeframe': timeframe,
         'time': ohlcv.time,
         'mfi': mfi,
-        'charts': (None, 'mfi, level20:level=20, level80:level=80, ymin:ymin=0, ymax:ymax=100'),
+        'charts': (None, 'mfi, level20:level=20, level80:level=80, ymax:ymax=100, ymin:ymin=0'),
         'allowed_nan': True
     })

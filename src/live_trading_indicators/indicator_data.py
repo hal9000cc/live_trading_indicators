@@ -338,6 +338,7 @@ class OHLCV_data(TimeframeData):
     def restore_bar_data(self):
 
         n_bars = len(self.time)
+
         bx_empty_bars = np.isnan(self.close)
         n_empty_bars = bx_empty_bars.sum()
 

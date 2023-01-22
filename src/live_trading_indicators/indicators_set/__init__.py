@@ -354,6 +354,7 @@ class Indicators:
             time_end = bar_data.time[-1] + (timeframe.value if self.with_incomplete_bar else -1)
             bar_data = bar_data[: time_end + timeframe.value]
 
+        bar_data.close[bar_data.close == 0] = np.nan  # for old version compatibility
         self.check_bar_data(bar_data)
 
         if self.config['restore_empty_bars']:
