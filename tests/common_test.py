@@ -47,7 +47,7 @@ def get_ref_values(name, ohlcv, series, *args):
             ref_values = pickle.load(file)
     else:
 
-        from stock_indicators import Quote, EndType, indicators as si
+        from stock_indicators import Quote, EndType, ChandelierType, indicators as si
 
         def ohlcv2quote(ohlcv):
             time = ohlcv.time.astype(dt.datetime)
@@ -69,6 +69,10 @@ def get_ref_values(name, ohlcv, series, *args):
         if name == 'get_zig_zag':
             args = list(args)
             args[0] = EndType[args[0]]
+            args = tuple(args)
+        elif name == 'get_chandelier':
+            args = list(args)
+            args[2] = ChandelierType[args[2]]
             args = tuple(args)
 
         ind_data = fun(ohlcv2quote(ohlcv), *args)

@@ -148,15 +148,41 @@ def test_empty_identical_empty(clear_data, symbol, date):
 def test_data_skips(clear_data):
 
     timeframe = '5m'
+
     clear_data['restore_empty_bars'] = False
     indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
 
-    ohlcv = indicators.OHLCV('btcusdt', timeframe)
-    assert np.isnan(ohlcv.close).any()
+    ohlcv1 = indicators.OHLCV('btcusdt', timeframe)
+    assert np.isnan(ohlcv1.close).any()
 
     clear_data['restore_empty_bars'] = True
     indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
 
-    ohlcv = indicators.OHLCV('btcusdt', timeframe)
-    assert not np.isnan(ohlcv.close).any()
+    ohlcv2 = indicators.OHLCV('btcusdt', timeframe)
+    assert not np.isnan(ohlcv2.close).any()
 
+    clear_data['restore_empty_bars'] = False
+    indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
+
+    ohlcv3 = indicators.OHLCV('btcusdt', timeframe)
+    assert np.isnan(ohlcv3.close).any()
+
+    clear_data['restore_empty_bars'] = True
+    indicators = lti.Indicators('binance', '2018-07-04', '2018-07-04', **clear_data)
+
+    ohlcv4 = indicators.OHLCV('btcusdt', timeframe)
+    assert not np.isnan(ohlcv4.close).any()
+
+    assert ohlcv1 == ohlcv3
+    assert ohlcv2 == ohlcv4
+
+
+def test_data_skips1(clear_data):
+
+    indicators = lti.Indicators('binance', **clear_data)
+    ohlcv1 = indicators.OHLCV('um/ethusdt', '1d', '2019-01-01', '2022-12-31')
+
+    indicators = lti.Indicators('binance', **clear_data)
+    ohlcv2 = indicators.OHLCV('um/ethusdt', '1d', '2019-01-01', '2022-12-31')
+
+    assert ohlcv1 == ohlcv2

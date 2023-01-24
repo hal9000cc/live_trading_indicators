@@ -223,18 +223,21 @@ class SourceData:
 
                 is_incomplete_day = i_day_end >= len(bars_data[0]) and len(bars_data[0]) > 0 and bars_data[0][-1] >= last_bar_time_of_timeframe
 
-                day_data = OHLCV_day({
-                    'symbol': symbol,
-                    'timeframe': timeframe,
-                    'source': self.datasource_id,
-                    'is_incomplete_day': is_incomplete_day,
-                    'time': bars_data[0][i_day_start: i_day_end],
-                    'open': bars_data[1][i_day_start: i_day_end],
-                    'high': bars_data[2][i_day_start: i_day_end],
-                    'low': bars_data[3][i_day_start: i_day_end],
-                    'close': bars_data[4][i_day_start: i_day_end],
-                    'volume': bars_data[5][i_day_start: i_day_end]
-                })
+                if i_day_start == i_day_end:
+                    day_data = OHLCV_day.empty_day(symbol, timeframe, self.datasource_id, day_date, is_incomplete_day)
+                else:
+                    day_data = OHLCV_day({
+                        'symbol': symbol,
+                        'timeframe': timeframe,
+                        'source': self.datasource_id,
+                        'is_incomplete_day': is_incomplete_day,
+                        'time': bars_data[0][i_day_start: i_day_end],
+                        'open': bars_data[1][i_day_start: i_day_end],
+                        'high': bars_data[2][i_day_start: i_day_end],
+                        'low': bars_data[3][i_day_start: i_day_end],
+                        'close': bars_data[4][i_day_start: i_day_end],
+                        'volume': bars_data[5][i_day_start: i_day_end]
+                    })
 
                 day_data.fix_errors(day_date)
                 day_data.check_day_data(symbol, timeframe, day_date)
