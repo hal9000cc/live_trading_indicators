@@ -48,6 +48,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=22, mu
         'time': ohlcv.time,
         'exit_short': exit_short,
         'exit_long': exit_long,
-        'charts': ('exit_short, exit_long'),
+        'charts': ('exit_short, exit_long',),
         'allowed_nan': True
     })
