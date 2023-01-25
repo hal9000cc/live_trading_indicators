@@ -18,8 +18,11 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.7.4
+## Version 0.7.5
 ### what's new
+#### 0.7.5
+- New indicator - Chandelier
+- Fix some bugs
 #### 0.7.4
 - New indicator - MFI
 - Fix some bugs
