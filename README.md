@@ -18,8 +18,11 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 0.7.4
+## Version 0.7.5
 ### what's new
+#### 0.7.5
+- New indicator - Chandelier
+- Fix some bugs
 #### 0.7.4
 - New indicator - MFI
 - Fix some bugs
@@ -223,6 +226,7 @@ print(lti.help())
 - Awesome(period_fast=5, period_slow=34, ma_type_fast='smw', ma_type_slow='sma', normalized=False) - Awesome oscillator.
 - BollingerBands(period=20, deviation=2, ma_type='sma', value='close') - Bollinger bands.
 - CCI(period=) - Commodity channel index.
+- Chandelier(period=22, multiplier=3, use_close=False) - Chandelier Exit.
 - EMA(period=, value='close') - Exponential moving average.
 - Ichimoku(period_short=9, period_mid=26, period_long=52, offset_senkou=26, offset_chikou=26) - Ichimoku indicator.
 - Keltner(period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma') - Keltner channel.
