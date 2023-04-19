@@ -61,7 +61,7 @@ class CCXTSource(OnlineSource):
                     pass
 
     def datasource_name(self):
-        return f'xxct.{self.exchange_name}'
+        return f'ccxt.{self.exchange_name}'
 
     @staticmethod
     def get_store_names(symbol):
