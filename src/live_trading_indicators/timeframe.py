@@ -1,7 +1,7 @@
 from enum import IntEnum
 import numpy as np
 import datetime as dt
-from .constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_SECOND
+from .constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_SECOND, TIME_UNITS_NAME_FOR_TIMEDELTA
 from .exceptions import LTIExceptionBadTimeframeValue
 
 
@@ -30,6 +30,9 @@ class Timeframe(IntEnum):
     def begin_of_tf(self, time):
         assert time is not None
         return (np.datetime64(time, TIME_TYPE_UNIT).astype(np.int64) // self.value * self.value).astype(TIME_TYPE)
+
+    def timedelta(self):
+        return dt.timedelta(**{TIME_UNITS_NAME_FOR_TIMEDELTA: self.value})
 
     @staticmethod
     def cast(value):

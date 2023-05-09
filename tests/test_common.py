@@ -1,5 +1,6 @@
 import pytest
 import numpy
+import datetime as dt
 from src.live_trading_indicators import Timeframe, help
 from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND
 from src.live_trading_indicators.exceptions import *
@@ -24,6 +25,11 @@ def test_list():
     assert 'ADL' in indicators_list
     assert 'RSI' in indicators_list
     assert 'VWMA' in indicators_list
+
+
+def test_timeframe_timedelta():
+    assert Timeframe.cast('1h').timedelta() == dt.timedelta(hours=1)
+    assert Timeframe.cast('5m').timedelta() == dt.timedelta(minutes=5)
 
 
 def test_custom_indicator(config_default):

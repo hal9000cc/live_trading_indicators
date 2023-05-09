@@ -94,7 +94,7 @@ def calc_pivots(direction, high, low, delta, pivots, pivot_types, depth, checkin
 
 
 @njit(cache=True)
-def add_last_point(pivot_types, pivots, high, low, delta, depth):
+def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
 
     n_bars = len(high)
 
@@ -108,17 +108,52 @@ def add_last_point(pivot_types, pivots, high, low, delta, depth):
     if last_pivot_type == 0:
         return
 
+    if i_last_point + depth >= n_bars:
+        return
+
     if last_pivot_type > 0:
-        pivot_types[-1] = -1
-        pivots[-1] = low[-1]
+
+        v_max = high[i_last_point]
+        i_min = i_last_point + depth + np.argmin(low[i_last_point + depth:])
+        v_min = low[i_min]
+
+        pivot_types[i_min] = -1
+        pivots[i_min] = v_min
+
+        if (v_max - v_min) / v_max < delta:
+            return
+
+        if i_min + depth > n_bars:
+            return
+
+        i_current_max = i_min + np.argmin(high[i_min + depth:])
+        pivot_types[i_current_max] = 1
+        pivots[i_current_max] = high[i_current_max]
+
     else:
-        pivot_types[1] = 1
-        pivots[-1] = high[-1]
+
+        v_min = low[i_last_point]
+        i_max = i_last_point + depth + np.argmax(high[i_last_point + depth:])
+        v_max = high[i_max]
+
+        pivot_types[i_max] = 1
+        pivots[i_max] = v_max
+
+        if (v_max - v_min) / v_min < delta:
+            return
+
+        if i_max + depth > n_bars:
+            return
+
+        i_current_min = i_max + np.argmin(low[i_max + depth:])
+        pivot_types[i_current_min] = -1
+        pivots[i_current_min] = low[i_current_min]
 
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, delta=0.02, depth=1, type='high_low', end_points=False):
 
     ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    close = ohlcv.data['close']
 
     if type == 'high_low':
         high, low = ohlcv.high, ohlcv.low
@@ -135,19 +170,21 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, delta
     calc_pivots(-1, high, low, delta, pivots, pivot_types, depth, False)
     i_valid = calc_pivots(1, high, low, delta, pivots, pivot_types, depth, True)
 
-    if i_valid is not None:
+    if not end_points and i_valid is not None:
         if pivot_types[i_valid] > 0:
-            if (pivots[i_valid] - low[: i_valid].min()) / pivots[i_valid] < delta:
+            prev_min = low[: i_valid].min()
+            if (pivots[i_valid] - prev_min) / prev_min < delta:
                 i_valid += 1
         else:
-            if (high[: i_valid].max() - pivots[i_valid]) / pivots[i_valid] < delta:
+            prev_max = high[: i_valid].max()
+            if (prev_max - pivots[i_valid]) / prev_max < delta:
                 i_valid += 1
 
         pivots[: i_valid] = np.nan
         pivot_types[: i_valid] = 0
 
     if end_points:
-        add_last_point(pivot_types, pivots, high, low, delta, depth)
+        add_last_point(pivot_types, pivots, high, low, close, delta, depth)
 
     return IndicatorData({
         'indicators': indicators,

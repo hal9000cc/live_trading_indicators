@@ -30,7 +30,34 @@ def test_zig_zag(config_default, test_source, a_symbol, time_begin, time_end, ti
 
     #assert compare_with_nan(zig_zag.pivot_types[i_start_check:], ref_point_type[i_start_check:])
     (zig_zag.pivot_types[i_start_check:] != ref_point_type[i_start_check:]).sum() / len(zig_zag) < 0.02
- 
+
+
+@pytest.mark.parametrize('source, symbol, time_begin, time_end, timeframe, delta', [
+    ('ccxt.binanceusdm', 'BTCUSDT', '2019-09-08', '2023-05-08', '1d', 0.5)
+])
+def test_zig_zag1(config_default, source, symbol, time_begin, time_end, timeframe, delta):
+
+    indicators = lti.Indicators(source, time_begin, time_end)
+    ohlcv = indicators.OHLCV(symbol, timeframe)
+    zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta, end_points=True)  # only pass
+
+    # dataframe = zig_zag.pandas()
+    # dataframe = dataframe[dataframe['pivot_types'].values != 0]
+    # print(dataframe)
+
+    zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta)
+
+    ref_values = get_ref_values('get_zig_zag', ohlcv, 'point_type, retrace_high, retrace_low, zig_zag', 'HIGH_LOW', delta * 100)
+
+    ref_point_type = np.zeros(len(ref_values.point_type), dtype=np.int8)
+    ref_point_type[ref_values.point_type == 'H'] = 1
+    ref_point_type[ref_values.point_type == 'L'] = -1
+
+    i_start_check = np.flatnonzero(zig_zag.pivot_types != 0)[2]
+
+    #assert compare_with_nan(zig_zag.pivot_types[i_start_check:], ref_point_type[i_start_check:])
+    (zig_zag.pivot_types[i_start_check:] != ref_point_type[i_start_check:]).sum() / len(zig_zag) < 0.02
+
 
 @pytest.mark.parametrize('time_begin, time_end, timeframe, delta, depth, symbol', [
     ('2022-07-07', '2022-07-08', '1h', 0.02, 1, 'um/ethusdt'),
