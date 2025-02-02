@@ -18,12 +18,13 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-22', 15, 5, 3),
     ('2022-07-01', '2022-07-22', 14, 5, 3),
     ('2022-07-01', '2022-07-22', 13, 5, 3),
-    ('2022-07-01', '2022-07-22', 12, 5, 3)
+    ('2022-07-01', '2022-07-22', 12, 5, 3),
+    ((dt.datetime.utcnow() - dt.timedelta(days=5)).date(), None, 2, 5, 3)  # live
 ])
 def test_stohastic(config_default, test_source, test_symbol, time_begin, time_end, period, period_d, smooth, a_big_timeframe):
 
-    indicators = lti.Indicators(test_source)
-    ohlcv = indicators.OHLCV(test_symbol, a_big_timeframe, time_begin, time_end)
+    indicators = lti.Indicators(test_source, time_begin, time_end)
+    ohlcv = indicators.OHLCV(test_symbol, a_big_timeframe)
     stochastic = indicators.Stochastic(test_symbol, a_big_timeframe, time_begin, time_end, period=period, period_d=period_d, smooth=smooth)
 
     ref_values = get_ref_values('get_stoch', ohlcv, 'd, k, oscillator', period, period_d, smooth)
@@ -35,7 +36,8 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
 
 
 @pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-05')
+    ('2022-07-01', '2022-07-05'),
+    ((dt.datetime.utcnow() - dt.timedelta(days=4)).date(), None)  # live
 ])
 def test_stockhastic_plot(config_default, test_source, test_symbol, time_begin, time_end):
 

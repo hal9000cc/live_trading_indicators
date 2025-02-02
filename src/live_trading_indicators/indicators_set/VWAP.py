@@ -8,7 +8,7 @@ no_cached = True
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
 
-    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    ohlcv = indicators.OHLCV.data(symbol, timeframe, time_begin, time_end)
 
     typical_price = (ohlcv.close + ohlcv.high + ohlcv.low) / 3
     volume_sum = np.cumsum(ohlcv.volume)

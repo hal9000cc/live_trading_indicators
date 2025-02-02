@@ -550,7 +550,7 @@ class IndicatorData(TimeframeData):
         if indicators is None:
             raise LTIException('Can\'t get the prices. The Indicators object has been destroyed.')
 
-        return indicators.OHLCV(self.symbol, self.timeframe, self.first_bar_time, self.end_bar_time)
+        return indicators.OHLCV.data(self.symbol, self.timeframe, self.first_bar_time, self.end_bar_time)
 
     def plot(self):
         return extra_module('.plotting').indicator_data_plot(self)

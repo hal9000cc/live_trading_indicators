@@ -9,7 +9,8 @@ from src.live_trading_indicators import Timeframe
     ('2022-07-01', '2022-07-10', 2, 2, Timeframe.t5m),
     ('2022-07-01', '2022-07-10', 20, 1, Timeframe.t5m),
     ('2022-07-01', '2022-07-10', 20, 3, Timeframe.t5m),
-    ('2022-07-01', '2022-07-05', 4, 2, Timeframe.t1h)
+    ('2022-07-01', '2022-07-05', 4, 2, Timeframe.t1h),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 4, 2, Timeframe.t1h)  # live
 ])
 def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, time_end, period, deviation, timeframe):
 
@@ -28,7 +29,8 @@ def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, t
 
 
 @pytest.mark.parametrize('time_begin, time_end, sma_period', [
-    ('2022-07-01', '2022-07-07', 2)
+    ('2022-07-01', '2022-07-07', 2),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 5)  # live
 ])
 def test_bollinger_bands_plot(config_default, test_source, time_begin, time_end, sma_period):
 

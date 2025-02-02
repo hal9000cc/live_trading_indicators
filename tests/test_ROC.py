@@ -5,7 +5,8 @@ import src.live_trading_indicators as lti
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
     ('2022-07-01', '2022-07-10', 2),
-    ('2022-07-01', '2022-07-10', 14)
+    ('2022-07-01', '2022-07-10', 14),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 7)  # live
 ])
 def test_roc(config_default, test_source, test_symbol, time_begin, time_end, period):
 

@@ -10,7 +10,7 @@ from src.live_trading_indicators.exceptions import *
     ('binanceusdm', 'ETH/USDT', '1h'),
     ('binance', 'ETH/USDT', '1h'),
 #    ('ascendex', 'ETH/USDT', '1h'),
-    ('bequant', 'ETH/USDT', '1h'),
+    ('bitget', 'ETH/USDT', '1h'),
     #('okx', 'ETH/USDT', '1h')
 ])
 def test_ccxt_sources(clear_data, ccxt_source, symbol, timeframe):
@@ -30,7 +30,7 @@ def test_ccxt_sources(clear_data, ccxt_source, symbol, timeframe):
     ('binanceusdm', 'ETH/USDT', '1h'),
     ('binance', 'ETH/USDT', '1h'),
     #('ascendex', 'ETH/USDT', '1h'),
-    ('bequant', 'ETH/USDT', '1h'),
+    ('bitget', 'ETH/USDT', '1h'),
 ])
 def test_ccxt_extra_params(clear_data, ccxt_source, symbol, timeframe):
 
@@ -53,7 +53,7 @@ def test_two_ccxt(clear_data):
     indicators1 = lti.Indicators('ccxt.binance', date_begin, date_end, **clear_data)
     ohlcv1 = indicators1.OHLCV('BTC/USDT', '1h')
 
-    indicators2 = lti.Indicators('ccxt.bequant', date_begin, date_end, **clear_data)
+    indicators2 = lti.Indicators('ccxt.bybit', date_begin, date_end, **clear_data)
     ohlcv2 = indicators2.OHLCV('BTC/USDT', '1h')
 
     assert (np.abs(ohlcv1.close - ohlcv2.close).max() < 100).all()

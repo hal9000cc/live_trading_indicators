@@ -289,14 +289,19 @@ class Indicators:
 
         use_time_begin, use_time_end = self.check_call_time_intervals(time_begin, time_end, timeframe)
 
+        return self.get_indicator_out_raw(indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, use_time_begin, use_time_end)
+
+    def get_indicator_out_raw(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin,
+                          time_end):
+
         no_cached = hasattr(indicator_module, 'no_cached') and indicator_module.no_cached
 
         if no_cached:
-            out = indicator_module.get_indicator_out(self, symbols, timeframe, use_time_begin, use_time_end,
+            out = indicator_module.get_indicator_out(self, symbols, timeframe, time_begin, time_end,
                                                      **indicator_kwargs)
         else:
             out = self.get_indicator_out_cached(indicator_name, indicator_module, symbols, timeframe, indicator_kwargs,
-                                                use_time_begin, use_time_end)
+                                                time_begin, time_end)
 
         return out
 
@@ -427,9 +432,16 @@ class IndicatorProxy(ABC):
     def full_data(self, symbols, timeframe, **kwargs):
 
         time_begin = np.datetime64(np.datetime64(self.indicators.time_begin, 'D'), TIME_TYPE_UNIT)
-        time_end = np.datetime64(np.datetime64(self.indicators.time_end, 'D') + 1, TIME_TYPE_UNIT) - 1
+
+        time_end = None if self.indicators.indicators_mode == IndicatorsMode.live else\
+            np.datetime64(np.datetime64(self.indicators.time_end, 'D') + 1, TIME_TYPE_UNIT) - 1
 
         return self.indicators.get_indicator_out(self.indicator_name, self.indicator_module, symbols, timeframe,
+                                                 kwargs, time_begin, time_end)
+
+    def data(self, symbols, timeframe, time_begin, time_end, **kwargs):
+
+        return self.indicators.get_indicator_out_raw(self.indicator_name, self.indicator_module, symbols, timeframe,
                                                  kwargs, time_begin, time_end)
 
 

@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 requirements = [
-    'construct<=2.10.0',
-    'numba<=0.56.3',
-    'lz4<=4.3.2']
+    'construct<=2.10.70',
+    'numba<=0.60.0',
+    'lz4<=4.4.3']
 
 setuptools.setup(
     name='live_trading_indicators',
@@ -34,16 +34,15 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Development Status :: 4 - Beta",
         "Topic :: Office/Business :: Financial :: Investment"
     ],
     install_requires=requirements,
-    extra_requires=['ccxt<=2.2.92', 'pandas<=1.5.0', 'matplotlib<=3.5.1'],
-    python_requires='>=3.7',
+    extra_requires=['ccxt<=4.4.52', 'pandas<=2.2.3', 'matplotlib<=3.9.4'],
+    python_requires='>=3.9',
 )

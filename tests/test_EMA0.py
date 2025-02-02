@@ -7,7 +7,8 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 3),
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-31', 22),
-    ('2022-07-01', '2022-07-22', 22)
+    ('2022-07-01', '2022-07-22', 22),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 5)  # live
 ])
 def test_ema0(config_default, test_source, test_symbol, time_begin, time_end, period):
 

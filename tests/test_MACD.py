@@ -7,7 +7,8 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 2, 3, 1),
     ('2022-07-01', '2022-07-10', 2, 3, 2),
     ('2022-07-01', '2022-07-10', 14, 21, 3),
-    ('2022-07-01', '2022-07-10', 8, 14, 1)
+    ('2022-07-01', '2022-07-10', 8, 14, 1),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 8, 14, 2)  # live
 ])
 def test_macd(config_default, test_source, test_symbol, time_begin, time_end,
               period_short, period_long, period_signal):

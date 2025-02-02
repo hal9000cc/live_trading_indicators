@@ -107,13 +107,13 @@ class CCXTSource(OnlineSource):
             since_time = timeframe.begin_of_tf(np.datetime64(int(downloaded_ohlcv[-1][0]), 'ms').astype(TIME_TYPE)) + timeframe.value
 
         if len(ohlcv) == 0:
-            bar_data = np.zeros([0, 6], dtype=np.object)
+            bar_data = [(), (), (), (), (), ()]
         else:
-            bar_data = np.array(ohlcv, dtype=np.object)
+            bar_data = [field for field in zip(*ohlcv)]
 
-        return np.array(bar_data[:, 0].astype(np.int64), dtype='datetime64[ms]').astype(TIME_TYPE), \
-               np.array(bar_data[:, 1], dtype=PRICE_TYPE), \
-               np.array(bar_data[:, 2], dtype=PRICE_TYPE), \
-               np.array(bar_data[:, 3], dtype=PRICE_TYPE), \
-               np.array(bar_data[:, 4], dtype=PRICE_TYPE), \
-               np.array(bar_data[:, 5], dtype=VOLUME_TYPE)
+        return np.array(bar_data[0], dtype='datetime64[ms]'), \
+               np.array(bar_data[1], dtype=PRICE_TYPE), \
+               np.array(bar_data[2], dtype=PRICE_TYPE), \
+               np.array(bar_data[3], dtype=PRICE_TYPE), \
+               np.array(bar_data[4], dtype=PRICE_TYPE), \
+               np.array(bar_data[5], dtype=VOLUME_TYPE)

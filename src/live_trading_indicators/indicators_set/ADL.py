@@ -12,7 +12,7 @@ no_cached = True
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_period=None, ma_type='sma'):
 
-    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    ohlcv = indicators.OHLCV.data(symbol, timeframe, time_begin, time_end)
 
     np.seterr(invalid='ignore')
     hl_range = ohlcv.high - ohlcv.low

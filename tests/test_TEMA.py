@@ -7,7 +7,8 @@ import src.live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 1),
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-10', 22),
-    ('2022-07-01', '2022-07-10', 14)
+    ('2022-07-01', '2022-07-10', 14),
+    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14)  # live
 ])
 def test_tema(config_default, test_source, test_symbol, time_begin, time_end, period):
 

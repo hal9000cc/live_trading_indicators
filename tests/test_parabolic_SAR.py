@@ -9,7 +9,8 @@ import src.live_trading_indicators as lti
     ('2022-07-03', '2022-07-10', 0.02, 0.3, 0.01),
     ('2022-07-04', '2022-07-10', 0.02, 0.2, 0.02),
     ('2022-07-05', '2022-07-10', 0.01, 0.2, 0.02),
-    ('2022-07-06', '2022-07-10', 0.02, 0.3, 0.01)
+    ('2022-07-06', '2022-07-10', 0.02, 0.3, 0.01),
+    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 0.02, 0.3, 0.02)  # live
 ])
 def test_parabolic_SAR(config_default, test_source, test_symbol, time_begin, time_end, start, maximum, increment):
 

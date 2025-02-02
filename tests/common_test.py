@@ -80,6 +80,7 @@ def get_ref_values(name, ohlcv, series, *args):
         for series_name in series.split(','):
             ref_values[series_name.strip()] = stocks2numpy(ind_data, series_name.strip())
 
+    if time_end.tolist() < (dt.datetime.utcnow() - dt.timedelta(days=14)).date():
         with open(ref_file_name, 'wb') as file:
             pickle.dump(ref_values, file, 4)
 

@@ -93,7 +93,7 @@ def calc_pivots(direction, high, low, delta, pivots, pivot_types, depth, checkin
             direction = 1
 
 
-@njit(cache=True)
+#@njit(cache=True)
 def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
 
     n_bars = len(high)
@@ -123,7 +123,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
         if (v_max - v_min) / v_max < delta:
             return
 
-        if i_min + depth > n_bars:
+        if i_min + depth >= n_bars:
             return
 
         i_current_max = i_min + np.argmin(high[i_min + depth:])
@@ -142,7 +142,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
         if (v_max - v_min) / v_min < delta:
             return
 
-        if i_max + depth > n_bars:
+        if i_max + depth >= n_bars:
             return
 
         i_current_min = i_max + np.argmin(low[i_max + depth:])
@@ -152,7 +152,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, delta=0.02, depth=1, type='high_low', end_points=False):
 
-    ohlcv = indicators.OHLCV(symbol, timeframe, time_begin, time_end)
+    ohlcv = indicators.OHLCV.data(symbol, timeframe, time_begin, time_end)
     close = ohlcv.data['close']
 
     if type == 'high_low':

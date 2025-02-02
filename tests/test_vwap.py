@@ -5,7 +5,8 @@ import src.live_trading_indicators as lti
 
 @pytest.mark.parametrize('time_begin, time_end, sma_period', [
     ('2022-07-01', '2022-07-05', 2),
-    ('2022-07-01', '2022-07-05', 14)
+    ('2022-07-01', '2022-07-05', 14),
+    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14)  # live
 ])
 def test_vwap1(config_default, test_source, a_symbol, time_begin, time_end, sma_period):
 
