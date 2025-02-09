@@ -278,11 +278,26 @@ class Indicators:
             out_valid = indicator_module.get_indicator_out(self, symbols, timeframe, out_for_grow, **indicator_kwargs)
             self.put_out_to_cache(indicator_name, symbols, timeframe, indicator_kwargs, out_valid)
 
+        time_begin_slice = time_begin
         if self.indicators_mode != IndicatorsMode.live and self.indicators_mode != IndicatorsMode.offline:
-            if time_begin < out_valid.time[0] or out_valid.time[-1] + timeframe.value < time_end:
-                raise LTIExceptionOutOfThePeriod()
 
-        return out_valid[time_begin: time_end + timeframe.value]
+            if out_valid.time[-1] + timeframe.value < time_end:
+                if timeframe.value <= TIME_UNITS_IN_ONE_DAY:
+                    raise LTIExceptionOutOfThePeriod()
+                else:
+                    if out_valid.time[-1] < timeframe.begin_of_tf(time_end) - timeframe.value:
+                        raise LTIExceptionOutOfThePeriod()
+
+            if time_begin < out_valid.time[0]:
+                if timeframe.value <= TIME_UNITS_IN_ONE_DAY:
+                    raise LTIExceptionOutOfThePeriod()
+                else:
+                    if timeframe.begin_of_tf(time_begin) + timeframe.value < out_valid.time[0]:
+                        raise LTIExceptionOutOfThePeriod()
+                    else:
+                        time_begin_slice = timeframe.begin_of_tf(time_begin) + timeframe.value
+
+        return out_valid[time_begin_slice: time_end + timeframe.value]
 
     def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin,
                           time_end):

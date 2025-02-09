@@ -46,3 +46,6 @@ def test_ema(config_default, test_source, test_symbol, time_begin, time_end, per
 
     ref_values = get_ref_values('get_ema', ohlcv, 'ema', period)
     assert compare_with_nan(ima.move_average, ref_values.ema)
+
+
+

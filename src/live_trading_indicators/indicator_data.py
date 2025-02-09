@@ -29,8 +29,13 @@ class TimeframeData:
 
         assert 'time' in data_dict.keys()
 
-        if len(data_dict['time']) == 0:
+        time_len = len(data_dict['time'])
+        if time_len == 0:
             raise LTIExceptionEmptyBarData()
+
+        for key, value in data_dict.items():
+            if key in ('open', 'high', 'low', 'close', 'volume'):
+                assert len(value) == time_len
 
         self.first_bar_time = self.data['time'][0]
         self.end_bar_time = self.data['time'][-1]

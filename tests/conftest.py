@@ -49,18 +49,6 @@ def test_ccxt_symbols():
     return ['BTC/USDT', 'ETH/USDT', 'ETC/USDT']
 
 
-# def test_ccxt_sources():
-#
-#     exchanges = []
-#
-#     for exchange_name in ccxt.exchanges:
-#         exchange = getattr(ccxt, exchange_name)()
-#         if exchange.has['fetchOHLCV']:
-#             exchanges.append(exchange_name)
-#
-#     return exchanges
-
-
 def test_timeframes():
 
     timeframes = []
