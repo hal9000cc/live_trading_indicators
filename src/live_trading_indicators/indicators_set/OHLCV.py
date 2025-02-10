@@ -2,7 +2,6 @@
 Quotes: open, high, low, close, volume."""
 import numpy as np
 
-import src.live_trading_indicators
 from ..constants import PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_DAY
 from ..indicator_data import OHLCV_data
 from ..timeframe import Timeframe
