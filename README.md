@@ -247,6 +247,7 @@ print(lti.help())
 - VWAP() - Volume-weighted average price.
 - VWMA(period=, value='close') - Volume Weighted Moving Average.
 - VolumeClusters(timeframe_low='1m', bars_on_bins=6) - OHLCVM and volume clusters is determined by the lower timeframe.
+- VolumeOsc(period_long=5, period_short=10, ma_type='ema') - Volume oscillator.
 - WilliamsR(period=14) - Williams %R oscillator.
 - ZigZag(delta=0.02, depth=1, type='high_low', end_points=False) - Zig-zag indicator (pivots).
 ### Specifying the period
