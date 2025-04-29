@@ -1,5 +1,8 @@
 import setuptools
-from src.live_trading_indicators import __version__ as version
+
+import re
+with open("src/live_trading_indicators/__init__.py") as f:
+    version = re.search(r'__version__ = ["\'](.+)["\']', f.read()).group(1)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -43,6 +46,6 @@ setuptools.setup(
         "Topic :: Office/Business :: Financial :: Investment"
     ],
     install_requires=requirements,
-    extra_requires=['ccxt<=4.4.52', 'pandas<=2.2.3', 'matplotlib<=3.9.4'],
+    extra_require=['ccxt<=4.4.52', 'pandas<=2.2.3', 'matplotlib<=3.9.4'],
     python_requires='>=3.9',
 )
