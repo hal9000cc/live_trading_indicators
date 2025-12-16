@@ -120,7 +120,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
         pivot_types[i_min] = -1
         pivots[i_min] = v_min
 
-        if (v_max - v_min) / v_max < delta:
+        if (v_min - v_max) / v_max < delta:
             return
 
         if i_min + depth >= n_bars:
