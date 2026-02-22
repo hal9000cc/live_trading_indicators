@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "live_trading_indicators"
+dynamic = ["version"]
+description = "A package for obtaining quotation data from various sources and saving them to a database. Quotes can be quickly extracted and used for calculations and forecasts. It is possible to receive and process data in real time. There are a significant number of ready-to-use indicators. The integrity of the data stored in the database is carefully monitored."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Aleksandr Kuznetsov", email = "hal@hal9000.cc"}
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+keywords = ["trading", "indicators", "technical-analysis", "crypto", "binance", "ccxt"]
+dependencies = [
+    "construct>=2.10.70",
+    "numba>=0.60.0",
+    "lz4>=4.4.3",
+]
+
+[project.optional-dependencies]
+ccxt = ["ccxt>=2.2.92"]
+pandas = ["pandas>=1.0.0"]
+plotting = ["matplotlib>=3.5.1"]
+all = [
+    "ccxt>=2.2.92",
+    "pandas>=1.0.0",
+    "matplotlib>=3.5.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/hal9000cc/live_trading_indicators"
+Repository = "https://github.com/hal9000cc/live_trading_indicators"
+Issues = "https://github.com/hal9000cc/live_trading_indicators/issues"
+Discussions = "https://github.com/hal9000cc/live_trading_indicators/discussions"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "live_trading_indicators.__version__"}
+

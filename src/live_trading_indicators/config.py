@@ -59,8 +59,7 @@ def config_save(config):
 def get_logging_config(config):
 
     log_folder = config['log_folder']
-    if not os.path.isdir(log_folder):
-        os.makedirs(log_folder)
+    os.makedirs(log_folder, exist_ok=True)
 
     return {
         'version': 1,
