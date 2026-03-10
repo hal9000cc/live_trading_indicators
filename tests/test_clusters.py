@@ -1,7 +1,7 @@
 import pytest
 from common_test import *
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.timeframe import Timeframe
+import live_trading_indicators as lti
+from live_trading_indicators.timeframe import Timeframe
 
 
 @pytest.mark.parametrize('time_begin, time_end', [

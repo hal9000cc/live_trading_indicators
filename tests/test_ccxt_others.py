@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('ccxt_source, symbol, timeframe', [

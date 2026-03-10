@@ -1,5 +1,5 @@
 import timeit
-import src.live_trading_indicators as lti
+import live_trading_indicators as lti
 
 
 def bench_test():

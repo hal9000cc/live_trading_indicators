@@ -4,12 +4,13 @@ import pandas as pd
 import numpy as np
 import uuid
 import shutil
-from src.live_trading_indicators.constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE
-from src import live_trading_indicators as lti
-import src.live_trading_indicators.datasources.binance as binance
-from src.live_trading_indicators.timeframe import Timeframe
+from live_trading_indicators.constants import PRICE_TYPE, VOLUME_TYPE, TIME_TYPE
+import live_trading_indicators as lti
+import live_trading_indicators.datasources.binance as binance
+from live_trading_indicators.timeframe import Timeframe
 
 LOG_LEVEL = 'INFO'
+TESTS_DATA_DIR = path.join(path.dirname(__file__), 'data')
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ def ohlcv_set(files, timeframe, symbol, date_start):
 
     dfs = []
     for file in files:
-        filename = path.join('data', file)
+        filename = path.join(TESTS_DATA_DIR, file)
         df = pd.read_csv(filename, header=None)
         if df[df.columns[0]].dtype != np.int64:
             df = pd.read_csv(filename)

@@ -1,7 +1,7 @@
 import pytest
 from common_test import *
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.cast_input_params import cast_time
+import live_trading_indicators as lti
+from live_trading_indicators.cast_input_params import cast_time
 
 
 def test_offline_source(config_default, test_source, ohlcv_set):

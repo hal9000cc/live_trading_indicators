@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY
+import live_trading_indicators as lti
+from live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY
 
 
 def test_check_bar_data(config_default, test_source, test_symbol, a_big_timeframe):

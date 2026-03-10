@@ -3,6 +3,8 @@ import numpy as np
 import os
 import pickle
 
+TESTS_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
 
 def compare_with_nan(value1, value2, accuracy=1e-08):
 
@@ -34,7 +36,7 @@ def get_descript(args):
 
 def get_ref_values(name, ohlcv, series, *args):
 
-    data_folder = os.path.join(os.getcwd(), 'data')
+    data_folder = TESTS_DATA_DIR
 
     symbol = ohlcv.symbol.replace('/', '_')
     time_begin = ohlcv.time[0].astype('datetime64[D]')

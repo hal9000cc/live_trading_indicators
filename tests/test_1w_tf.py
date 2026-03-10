@@ -1,11 +1,11 @@
 import pytest
-import src.live_trading_indicators
+import live_trading_indicators
 from common_test import *
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY
-from src.live_trading_indicators.timeframe import Timeframe
-from src.live_trading_indicators.cast_input_params import cast_time
-from src.live_trading_indicators.exceptions import LTIExceptionTooLittleData
+import live_trading_indicators as lti
+from live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY
+from live_trading_indicators.timeframe import Timeframe
+from live_trading_indicators.cast_input_params import cast_time
+from live_trading_indicators.exceptions import LTIExceptionTooLittleData
 
 @pytest.mark.parametrize('date, week_start', [
     ('2025-02-08', '2025-02-03'),

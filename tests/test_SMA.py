@@ -1,8 +1,8 @@
 import datetime as dt
 import numpy as np
 import pytest
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [

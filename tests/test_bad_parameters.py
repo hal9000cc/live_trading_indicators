@@ -1,6 +1,6 @@
 import pytest
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.exceptions import *
 
 
 def test_bad_source(config_default):

@@ -3,10 +3,10 @@ import os
 import datetime as dt
 import numpy as np
 from common_test import *
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.constants import TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY
-from src.live_trading_indicators.timeframe import Timeframe
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.constants import TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY
+from live_trading_indicators.timeframe import Timeframe
+from live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('time_begin, time_end', [

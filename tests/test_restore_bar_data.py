@@ -1,10 +1,10 @@
 import pytest
 import importlib
 import numpy as np
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.cast_input_params import cast_time
-from src.live_trading_indicators.constants import TIME_TYPE
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.cast_input_params import cast_time
+from live_trading_indicators.constants import TIME_TYPE
+from live_trading_indicators.exceptions import *
 
 
 @pytest.mark.parametrize('symbol, timeframe, date', [('um/ethusdt', lti.Timeframe.t1h, 20220901)])

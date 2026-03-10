@@ -2,7 +2,7 @@ import timeit
 
 import pytest
 
-import src.live_trading_indicators as lti
+import live_trading_indicators as lti
 
 
 def test_benchmark():

@@ -1,6 +1,6 @@
 import pytest
-import src.live_trading_indicators as lti
-from src.live_trading_indicators.move_average import ma_calculate, MA_Type
+import live_trading_indicators as lti
+from live_trading_indicators.move_average import ma_calculate, MA_Type
 from common_test import *
 
 @pytest.mark.parametrize("time_begin, time_end, period_short", [

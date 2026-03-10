@@ -1,11 +1,11 @@
 import pytest
 import numpy
 import datetime as dt
-from src.live_trading_indicators import Timeframe, help
-from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND
-from src.live_trading_indicators.exceptions import *
-import src.live_trading_indicators as lti
-from src.live_trading_indicators import IndicatorData
+from live_trading_indicators import Timeframe, help
+from live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND
+from live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators import IndicatorData
 
 
 def test_timeframe_cast():

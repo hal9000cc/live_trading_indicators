@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 import datetime as dt
 import time
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY
+import live_trading_indicators as lti
+from live_trading_indicators.constants import TIME_TYPE, TIME_TYPE_UNIT, TIME_UNITS_IN_ONE_DAY
 
 
 @pytest.mark.parametrize('timeframe', [lti.Timeframe.t1m, lti.Timeframe.t1h])

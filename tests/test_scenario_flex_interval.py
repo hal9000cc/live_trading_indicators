@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.cast_input_params import cast_time
-from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND, TIME_UNITS_IN_ONE_DAY, TIME_TYPE_UNIT
+import live_trading_indicators as lti
+from live_trading_indicators.cast_input_params import cast_time
+from live_trading_indicators.constants import TIME_UNITS_IN_ONE_SECOND, TIME_UNITS_IN_ONE_DAY, TIME_TYPE_UNIT
 
 
 def test_flex_1(clear_data, test_source, ohlcv_set):

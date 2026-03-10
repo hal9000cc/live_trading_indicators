@@ -1,7 +1,7 @@
 import pytest
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.exceptions import *
-from src.live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
+import live_trading_indicators as lti
+from live_trading_indicators.exceptions import *
+from live_trading_indicators.constants import TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
 
 
 @pytest.mark.parametrize('symbol', ['etcusdt', 'um/etcusdt', 'cm/ethusd_perp'])

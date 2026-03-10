@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import os.path as path
 import hashlib
-from src.live_trading_indicators.datasources.blocks_cache import BlockCache
+from live_trading_indicators.datasources.blocks_cache import BlockCache
 
 
 def get_data(i_block):

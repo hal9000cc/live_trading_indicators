@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-from src import live_trading_indicators as lti
-from src.live_trading_indicators.cast_input_params import cast_time
-from src.live_trading_indicators.constants import TIME_TYPE_UNIT
-from src.live_trading_indicators.exceptions import *
+import live_trading_indicators as lti
+from live_trading_indicators.cast_input_params import cast_time
+from live_trading_indicators.constants import TIME_TYPE_UNIT
+from live_trading_indicators.exceptions import *
 
 
 def test_fix_wo_time(clear_data, test_source, ohlcv_set):

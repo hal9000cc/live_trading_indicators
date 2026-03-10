@@ -1,5 +1,5 @@
 import pytest
-from src import live_trading_indicators as lti
+import live_trading_indicators as lti
 
 
 @pytest.mark.parametrize('symbol_binance, symbol_ccxt_binance, source_ccxt', [
