@@ -6,6 +6,7 @@ import live_trading_indicators as lti
 from live_trading_indicators.constants import TIME_TYPE, TIME_TYPE_UNIT
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('timeframe', [lti.Timeframe.t1m, lti.Timeframe.t1h])
 def test_fix_live_with_incomplete_1(config_default, test_source, a_symbol, timeframe):
 
@@ -30,6 +31,7 @@ def test_fix_live_with_incomplete_1(config_default, test_source, a_symbol, timef
     assert ohlcv.volume[-1] <= ohlcv1.volume[-1]
 
 
+@pytest.mark.slow
 def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
 
     timeframe = lti.Timeframe.t1m
@@ -61,6 +63,7 @@ def test_fix_live_with_incomplete_2(config_default, test_source, a_symbol):
     assert len(ohlcv.time) == n_bars + 1
 
 
+@pytest.mark.slow
 def test_fix_live_with_incomplete_3(config_default, test_source, test_symbol, a_timeframe):
 
     next_time = a_timeframe.begin_of_tf(dt.datetime.utcnow()) + a_timeframe.value

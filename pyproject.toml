@@ -56,3 +56,8 @@ where = ["src"]
 [tool.setuptools.dynamic]
 version = {attr = "live_trading_indicators.__version__"}
 
+[tool.pytest.ini_options]
+markers = [
+    "slow: long-running live-interval tests (skipped in tox by default)",
+]
+

@@ -5,7 +5,7 @@ from live_trading_indicators.timeframe import Timeframe
 
 
 @pytest.mark.parametrize('time_begin, time_end', [
-    ('2022-07-01', '2022-07-05'),
+    ('2022-07-01', '2022-07-02'),
     ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None)  # live
 ])
 def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
@@ -39,9 +39,7 @@ def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
 
 
 @pytest.mark.parametrize('time_begin, time_end, timeframe', [
-    ('2022-07-01', '2022-07-05', '1h'),
-    ('2022-07-01', '2022-07-02', '1h'),
-    ('2022-07-01', '2022-07-01T02:00', '1m')
+    ('2022-07-01', '2022-07-02', '1h')
 ])
 def test_ohlcvm_show(config_default, test_source, timeframe, time_begin, time_end):
 

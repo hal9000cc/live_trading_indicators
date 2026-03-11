@@ -34,7 +34,7 @@ def test_zig_zag(config_default, test_source, a_symbol, time_begin, time_end, ti
 
 
 @pytest.mark.parametrize('source, symbol, time_begin, time_end, timeframe, delta', [
-    ('ccxt.binanceusdm', 'BTCUSDT', '2019-09-08', '2023-05-08', '1d', 0.5)
+    ('ccxt.binanceusdm', 'BTC/USDT:USDT', '2019-09-08', '2023-05-08', '1d', 0.5)
 ])
 def test_zig_zag1(config_default, source, symbol, time_begin, time_end, timeframe, delta):
 

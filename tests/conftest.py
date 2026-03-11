@@ -42,7 +42,7 @@ def test_symbols():
     for symbol in ('btcusd', 'ethusd', 'etcusd'):
         symbols += [f'{symbol}t', f'um/{symbol}t', f'cm/{symbol}_perp']
 
-    symbols.append('um/stmxusdt')
+    symbols.append('um/xrpusdt')
     return symbols
 
 

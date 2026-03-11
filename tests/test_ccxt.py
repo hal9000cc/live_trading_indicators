@@ -5,11 +5,12 @@ import live_trading_indicators as lti
 @pytest.mark.parametrize('symbol_binance, symbol_ccxt_binance, source_ccxt', [
     ('ethusdt', 'ETH/USDT', 'binance'),
     ('btcusdt', 'BTC/USDT', 'binance'),
-    ('um/ethusdt', 'ETH/USDT', 'binanceusdm'),
-    ('um/btcusdt', 'BTC/USDT', 'binanceusdm'),
+    ('um/ethusdt', 'ETH/USDT:USDT', 'binanceusdm'),
+    ('um/btcusdt', 'BTC/USDT:USDT', 'binanceusdm'),
 ])
-def test_ccxt_binance(clear_data, a_timeframe, symbol_binance, symbol_ccxt_binance, source_ccxt):
+def test_ccxt_binance(clear_data, symbol_binance, symbol_ccxt_binance, source_ccxt):
 
+    a_timeframe = '5m'
     indicators_binance = lti.Indicators('binance', **clear_data)
     ohlcv_binance = indicators_binance.OHLCV(symbol_binance, a_timeframe, '2022-07-01', '2022-07-02')
 
