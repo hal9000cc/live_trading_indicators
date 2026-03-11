@@ -1,6 +1,7 @@
 import pytest
 from common_test import *
 import live_trading_indicators as lti
+from live_trading_indicators.indicators_set.ZigZag import add_last_point
 
 
 @pytest.mark.parametrize('time_begin, time_end, timeframe, delta', [
@@ -77,6 +78,44 @@ def test_zig_zag_paint(config_default, test_source, symbol, time_begin, time_end
 
     zig_zag = indicators.ZigZag(symbol, timeframe, delta=delta, depth=depth, end_points=True)
     zig_zag.show()
+
+
+def test_add_last_point_after_high_uses_max_and_depth_offset():
+
+    high = np.array([10.0, 11.0, 12.0, 10.0, 9.0, 13.0, 15.0], dtype=float)
+    low = np.array([9.0, 10.0, 11.0, 8.0, 7.0, 12.0, 14.0], dtype=float)
+    close = np.array([9.5, 10.5, 11.5, 8.5, 7.5, 12.5, 14.5], dtype=float)
+    pivots = np.full(len(high), np.nan, dtype=float)
+    pivot_types = np.zeros(len(high), dtype=np.int8)
+
+    pivot_types[2] = 1
+    pivots[2] = high[2]
+
+    add_last_point(pivot_types, pivots, high, low, close, delta=0.2, depth=1)
+
+    assert pivot_types[4] == -1
+    assert pivots[4] == low[4]
+    assert pivot_types[6] == 1
+    assert pivots[6] == high[6]
+
+
+def test_add_last_point_after_low_uses_depth_offset_for_min():
+
+    high = np.array([11.0, 10.0, 9.0, 13.0, 14.0, 12.0, 11.0], dtype=float)
+    low = np.array([10.0, 9.0, 8.0, 12.0, 13.0, 7.0, 6.0], dtype=float)
+    close = np.array([10.5, 9.5, 8.5, 12.5, 13.5, 7.5, 6.5], dtype=float)
+    pivots = np.full(len(high), np.nan, dtype=float)
+    pivot_types = np.zeros(len(high), dtype=np.int8)
+
+    pivot_types[2] = -1
+    pivots[2] = low[2]
+
+    add_last_point(pivot_types, pivots, high, low, close, delta=0.2, depth=1)
+
+    assert pivot_types[4] == 1
+    assert pivots[4] == high[4]
+    assert pivot_types[6] == -1
+    assert pivots[6] == low[6]
 
 
 # import matplotlib.pyplot as plt

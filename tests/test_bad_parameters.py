@@ -11,7 +11,7 @@ def test_bad_source(config_default):
 def test_symbol_not_found(config_default, test_source):
     with pytest.raises(LTIExceptionSymbolNotFound):
         indicators = lti.Indicators(test_source, 20220702, 20220705)
-        ohlcv = indicators.OHLCV('ethusd', '1h')
+        ohlcv = indicators.OHLCV('eth1usd', '1h')
 
 
 def test_symbol_not_found_part(config_default, test_source):

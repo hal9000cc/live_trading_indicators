@@ -126,7 +126,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
         if i_min + depth >= n_bars:
             return
 
-        i_current_max = i_min + np.argmin(high[i_min + depth:])
+        i_current_max = i_min + depth + np.argmax(high[i_min + depth:])
         pivot_types[i_current_max] = 1
         pivots[i_current_max] = high[i_current_max]
 
@@ -145,7 +145,7 @@ def add_last_point(pivot_types, pivots, high, low, close, delta, depth):
         if i_max + depth >= n_bars:
             return
 
-        i_current_min = i_max + np.argmin(low[i_max + depth:])
+        i_current_min = i_max + depth + np.argmin(low[i_max + depth:])
         pivot_types[i_current_min] = -1
         pivots[i_current_min] = low[i_current_min]
 
