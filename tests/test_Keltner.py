@@ -18,6 +18,7 @@ def test_keltner(config_default, test_source, test_symbol, time_begin, time_end,
     keltner = indicators.Keltner(test_symbol, timeframe, period=period, multiplier=multiplier, period_atr=period_atr)
 
     ref_values = get_ref_values('get_keltner', ohlcv, 'center_line, upper_band, lower_band, width', period, multiplier, period_atr)
+    keltner = keltner[:len(ohlcv)]
 
     assert compare_with_nan(keltner.mid_line, ref_values.center_line)
     assert compare_with_nan(keltner.up_line[400:], ref_values.upper_band[400:])

@@ -22,6 +22,7 @@ def test_parabolic_SAR(config_default, test_source, test_symbol, time_begin, tim
 
     ref_values = get_ref_values('get_parabolic_sar', ohlcv, 'sar, is_reversal', increment, maximum, start)
 
+    sar = sar[:len(ohlcv)]
     ref_values.is_reversal[np.isnan(ref_values.is_reversal)] = 0
     assert (abs(sar.signal) == ref_values.is_reversal).all()
     assert compare_with_nan(sar.sar, ref_values.sar)

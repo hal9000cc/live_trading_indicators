@@ -36,5 +36,6 @@ def test_WilliamsR1(config_default, test_source, test_symbol, time_begin, time_e
     williams_r = indicators.WilliamsR(test_symbol, timeframe, time_begin, time_end, period=period)
 
     ref_values = get_ref_values('get_williams_r', ohlcv, 'williams_r', period)
+    williams_r = williams_r[:len(ohlcv)]
 
     assert compare_with_nan(williams_r.williams_r, ref_values.williams_r)

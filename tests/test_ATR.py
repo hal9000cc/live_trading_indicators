@@ -17,6 +17,7 @@ def test_atr(config_default, test_source, test_symbol, time_begin, time_end, smo
     atr = indicators.ATR(test_symbol, timeframe, smooth=smooth)
 
     ref_values = get_ref_values('get_atr', ohlcv, 'atr, tr, atrp', smooth)
+    atr = atr[:len(ohlcv)]
 
     assert compare_with_nan(atr.tr[1:], ref_values.tr[1:])
     assert compare_with_nan(atr.atr[300:], ref_values.atr[300:])

@@ -18,6 +18,7 @@ def test_mfi(config_default, test_source, test_symbol, time_begin, time_end, per
     mfi = indicators.MFI(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_mfi', ohlcv, 'mfi', period)
+    mfi = mfi[:len(ohlcv)]
 
     assert compare_with_nan(mfi.mfi, ref_values.mfi)
 

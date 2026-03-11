@@ -46,6 +46,7 @@ def test_sma1(config_default, test_source, time_begin, time_end, period, a_big_t
     indicators = lti.Indicators(test_source, time_begin, time_end)
     out = indicators.OHLCV(test_symbol, a_big_timeframe)
     sma = indicators.SMA(test_symbol, a_big_timeframe, period=period)
+    sma = sma[:len(out)]
 
     values = out.close
     values_sma = sma.sma

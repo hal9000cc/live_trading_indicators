@@ -19,5 +19,6 @@ def test_tema(config_default, test_source, test_symbol, time_begin, time_end, pe
     tema = indicators.TEMA(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_tema', ohlcv, 'tema', period)
+    tema = tema[:len(ohlcv)]
 
     assert compare_with_nan(tema.tema, ref_values.tema)

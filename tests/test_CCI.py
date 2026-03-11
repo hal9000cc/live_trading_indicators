@@ -18,6 +18,7 @@ def test_cci(config_default, test_source, test_symbol, time_begin, time_end, per
 
     ref_values = get_ref_values('get_cci', ohlcv, 'cci', period)
 
+    cci = cci[:len(ohlcv)]
     ref_values.cci[np.isnan(ref_values.cci)] = 0
     assert compare_with_nan(cci.cci, ref_values.cci, 1e-9)
 

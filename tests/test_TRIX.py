@@ -19,5 +19,6 @@ def test_trix(config_default, test_source, test_symbol, time_begin, time_end, pe
     trix = indicators.TRIX(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_trix', ohlcv, 'trix', period)
+    trix = trix[:len(ohlcv)]
 
     assert compare_with_nan(trix.trix, ref_values.trix)

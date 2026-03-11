@@ -16,6 +16,7 @@ def test_mma(config_default, test_source, test_symbol, timeframe, time_begin, ti
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     ema = indicators.MA(test_symbol, timeframe, period=period, ma_type='mma0')
+    ema = ema[:len(ohlcv)]
 
     source_values = ohlcv.close
     values_ema = ema.move_average
@@ -45,6 +46,7 @@ def test_ema(config_default, test_source, test_symbol, time_begin, time_end, per
     ima = indicators.MA(test_symbol, timeframe, period=period, ma_type='ema')
 
     ref_values = get_ref_values('get_ema', ohlcv, 'ema', period)
+    ima = ima[:len(ohlcv)]
     assert compare_with_nan(ima.move_average, ref_values.ema)
 
 

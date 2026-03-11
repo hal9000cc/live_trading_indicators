@@ -13,10 +13,10 @@ def test_vwap1(config_default, test_source, a_symbol, time_begin, time_end, sma_
     timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
-    vwap = indicators.VWAP(a_symbol, timeframe, time_begin, time_end)
-
     ohlcv = indicators.OHLCV(a_symbol, timeframe)
+    vwap = indicators.VWAP(a_symbol, timeframe, time_begin, time_end)
     ref_values = get_ref_values('get_vwap', ohlcv, 'vwap')
+    vwap = vwap[:len(ohlcv)]
 
     assert compare_with_nan(vwap.vwap, ref_values.vwap, 1e-6)
 

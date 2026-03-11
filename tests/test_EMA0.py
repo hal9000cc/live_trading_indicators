@@ -17,6 +17,7 @@ def test_ema0(config_default, test_source, test_symbol, time_begin, time_end, pe
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     ema0 = indicators.MA(test_symbol, timeframe, period=period, ma_type='ema0')
+    ema0 = ema0[:len(ohlcv)]
 
     source_values = ohlcv.close
     values_ema1 = ema0.move_average

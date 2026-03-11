@@ -30,8 +30,8 @@ def test_timeframe(date, week_start):
     ('2025-01-01', '2025-02-08'),
     ('2025-01-06', '2025-02-08'),
     ('2025-02-02', '2025-02-02'),
-    ('2025-01-26', '2025-02-02')
-    #    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14)  # live
+    ('2025-01-26', '2025-02-02'),
+    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None)  # live
 ])
 def test_1w(config_default, test_source, test_symbol, time_begin, time_end):
 
@@ -39,6 +39,9 @@ def test_1w(config_default, test_source, test_symbol, time_begin, time_end):
 
     np_time_begin = cast_time(time_begin)
     np_time_end = cast_time(time_end)
+    if np_time_end is None:
+        np_time_end = cast_time(dt.datetime.utcnow())
+
     if np_time_end - np_time_begin <= TIME_UNITS_IN_ONE_DAY * 6:
         if np_time_end - np_time_begin < TIME_UNITS_IN_ONE_DAY * 6 or np_time_begin != Timeframe.t1w.begin_of_tf(np_time_begin):
             with pytest.raises(LTIExceptionTooLittleData):

@@ -22,6 +22,7 @@ def test_macd(config_default, test_source, test_symbol, time_begin, time_end,
                            period_signal=period_signal, ma_type_signal='ema')
 
     ref_values = get_ref_values('get_macd', ohlcv, 'macd, histogram, signal', period_short, period_long, period_signal)
+    macd = macd[:len(ohlcv)]
 
     assert compare_with_nan(macd.macd, ref_values.macd)
     assert compare_with_nan(macd.signal, ref_values.signal)

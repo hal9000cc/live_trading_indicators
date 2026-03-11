@@ -18,6 +18,7 @@ def test_aroon(config_default, test_source, a_symbol, time_begin, time_end, peri
     aroon = indicators.Aroon(a_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_aroon', ohlcv, 'aroon_up, aroon_down, oscillator', period)
+    aroon = aroon[:len(ohlcv)]
 
     assert compare_with_nan(aroon.up, ref_values.aroon_up)
     assert compare_with_nan(aroon.down, ref_values.aroon_down)

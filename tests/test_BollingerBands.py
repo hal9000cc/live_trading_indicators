@@ -20,6 +20,7 @@ def test_bollinger_bands(config_default, test_source, test_symbol, time_begin, t
 
     ref_values = get_ref_values('get_bollinger_bands', ohlcv, 'sma, upper_band, lower_band, z_score', period, deviation)
     ref_values.z_score[np.isnan(ref_values.z_score)] = 0
+    bollinger_bands = bollinger_bands[:len(ohlcv)]
     bollinger_bands.z_score[np.isnan(bollinger_bands.z_score)] = 0
 
     assert compare_with_nan(bollinger_bands.mid_line, ref_values.sma)

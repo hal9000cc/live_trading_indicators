@@ -40,5 +40,6 @@ def test_rsi1(config_default, test_source, test_symbol, time_begin, time_end, pe
     rsi = indicators.RSI(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_rsi', ohlcv, 'rsi', period)
+    rsi = rsi[:len(ohlcv)]
 
     assert compare_with_nan(rsi.rsi, ref_values.rsi)

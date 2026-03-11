@@ -18,8 +18,9 @@ def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
     ohlcv_low = indicators.OHLCV(a_symbol, '1m')
 
     multiplier = int(Timeframe.cast(timeframe).value // Timeframe.cast('1m'))
+    bars_count = min(len(ohlcvm), len(clusters), len(ohlcv_low) // multiplier)
 
-    for i in range(len(ohlcvm)):
+    for i in range(bars_count):
 
         bars_low = ohlcv_low[i * multiplier: i * multiplier + multiplier]
 

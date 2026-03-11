@@ -16,6 +16,7 @@ def test_obv(config_default, test_source, test_symbol, time_begin, time_end):
     obv = indicators.OBV(test_symbol, timeframe)
 
     ref_values = get_ref_values('get_obv', ohlcv, 'obv')
+    obv = obv[:len(ohlcv)]
 
     assert compare_with_nan(obv.OBV, ref_values.obv)
 

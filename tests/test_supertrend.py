@@ -18,6 +18,7 @@ def test_supertrend(config_default, test_source, test_symbol, time_begin, time_e
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     supertrend = indicators.Supertrend(test_symbol, timeframe, period=period)
     ref_values = get_ref_values('get_super_trend', ohlcv, 'super_trend', period)
+    supertrend = supertrend[:len(ohlcv)]
 
     assert compare_with_nan(supertrend.supertrend[500:], ref_values.super_trend[500:])
 

@@ -17,6 +17,7 @@ def test_roc(config_default, test_source, test_symbol, time_begin, time_end, per
     roc = indicators.ROC(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_roc', ohlcv, 'roc, roc_sma', period, 14)
+    roc = roc[:len(ohlcv)]
 
     assert compare_with_nan(roc.roc * 100, ref_values.roc)
     assert compare_with_nan(roc.smooth_roc * 100, ref_values.roc_sma)

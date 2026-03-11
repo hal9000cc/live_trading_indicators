@@ -18,6 +18,7 @@ def test_chandelier(config_default, test_source, test_symbol, time_begin, time_e
 
     ref_values_short = get_ref_values('get_chandelier', ohlcv, 'chandelier_exit', period, multiplier, 'SHORT')
     ref_values_long = get_ref_values('get_chandelier', ohlcv, 'chandelier_exit', period, multiplier, 'LONG')
+    chandelier = chandelier[:len(ohlcv)]
 
     assert compare_with_nan(chandelier.exit_short[500:], ref_values_short.chandelier_exit[500:])
     assert compare_with_nan(chandelier.exit_long[500:], ref_values_long.chandelier_exit[500:])

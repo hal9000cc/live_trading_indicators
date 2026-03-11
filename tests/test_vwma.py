@@ -17,5 +17,6 @@ def test_vwma(config_default, test_source, test_symbol, time_begin, time_end, pe
     vwma = indicators.VWMA(test_symbol, timeframe, period=period)
 
     ref_values = get_ref_values('get_vwma', ohlcv, 'vwma', period)
+    vwma = vwma[:len(ohlcv)]
 
     assert compare_with_nan(vwma.vwma, ref_values.vwma, 1e-9)

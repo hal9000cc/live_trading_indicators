@@ -28,6 +28,7 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
     stochastic = indicators.Stochastic(test_symbol, a_big_timeframe, time_begin, time_end, period=period, period_d=period_d, smooth=smooth)
 
     ref_values = get_ref_values('get_stoch', ohlcv, 'd, k, oscillator', period, period_d, smooth)
+    stochastic = stochastic[:len(ohlcv)]
 
     if smooth == 1:
         assert compare_with_nan(stochastic.oscillator, ref_values.oscillator)

@@ -15,10 +15,11 @@ def test_awesome(config_default, test_source, test_symbol, time_begin, time_end,
     timeframe = '5m'
 
     indicators = lti.Indicators(test_source, time_begin, time_end)
+    ohlcv = indicators.OHLCV(test_symbol, timeframe)
     awesome = indicators.Awesome(test_symbol, timeframe, period_fast=period_fast, period_slow=period_slow)
 
-    ohlcv = indicators.OHLCV(test_symbol, timeframe)
     ref_values = get_ref_values('get_awesome', ohlcv, 'oscillator', period_fast, period_slow)
+    awesome = awesome[:len(ohlcv)]
 
     assert compare_with_nan(awesome.awesome, ref_values.oscillator)
 
