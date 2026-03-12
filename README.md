@@ -18,6 +18,18 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
+## Version 1.0.0
+### what's new
+#### 1.0.0
+- New timeframes: 1w, 1M, 3M, 1Y
+- New indicator: VolumeOsc (Volume Oscillator)
+- Dropped Python 3.7, 3.8 support; added Python 3.11, 3.12, 3.13
+- Migration to pyproject.toml
+- Fixed ZigZag indicator last points generation
+- Fixed bugs in some indicators in live mode
+- Improved network retries for exchanges, added request_retry_delay parameter
+- Various other bug fixes
+
 ## Version 0.7.5
 ### what's new
 #### 0.7.5
