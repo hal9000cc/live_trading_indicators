@@ -19,7 +19,7 @@ The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
 ## What's new
-### 1.0.0
+### 1.0.1
 - New timeframes: 1w, 1M, 3M, 1Y
 - New indicator: VolumeOsc (Volume Oscillator)
 - Dropped Python 3.7, 3.8 support; added Python 3.11, 3.12, 3.13, 3.14
