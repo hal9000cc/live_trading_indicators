@@ -18,9 +18,8 @@ The current version allows you to receive exchange data from:
 The data can be obtained in *numpy ndarray* and *Dataframe Pandas*..
 
 Package data from online sources is stored by default in the *.lti* folder of the user's home directory. A significant amount of data can be created in this folder, depending on the number of instruments and their timeframes. Only data received from online sources is saved.
-## Version 1.0.0
-### what's new
-#### 1.0.0
+## What's new
+### 1.0.0
 - New timeframes: 1w, 1M, 3M, 1Y
 - New indicator: VolumeOsc (Volume Oscillator)
 - Dropped Python 3.7, 3.8 support; added Python 3.11, 3.12, 3.13, 3.14
@@ -30,26 +29,17 @@ Package data from online sources is stored by default in the *.lti* folder of th
 - Improved network retries for exchanges, added request_retry_delay parameter
 - Various other bug fixes
 
-## Version 0.7.5
-### what's new
-#### 0.7.5
+### 0.7.5
 - New indicator - Chandelier
 - Fix some bugs
-#### 0.7.4
+### 0.7.4
 - New indicator - MFI
 - Fix some bugs
 - Change some default [settings](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#live_trading_indicators-library-settings) during a new installation
-#### 0.7.3
+### 0.7.3
 - The quotation database has been optimized (the conversion may take some time at the first launch)
 - Fix some bugs (when ccxt is used for multiple exchanges at the same time)
 - New indicator - Williams %R
-#### 0.7.2
-- The quotation database has been optimized (the conversion may take some time at the first launch)
-- New indicator - Ichimoku
-#### 0.7.1
-- Migration of quote storage to sqlite3
-- Added support for three compression algorithms: gzip, bz2 and lz4 ([see](https://github.com/hal9000cc/live_trading_indicators/blob/stable/README.md#compression_type))
-- Add the depth parameter for ZigZag indicator
 
 [previous releases...](https://github.com/hal9000cc/live_trading_indicators/releases)
 ## Installing
