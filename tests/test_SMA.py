@@ -38,7 +38,7 @@ def test_sma(config_default, test_source, time_begin, time_end, period, a_big_ti
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22),
-    ((dt.datetime.utcnow() - dt.timedelta(days=5)).date(), None, 5)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=5)).date(), None, 5, marks=pytest.mark.live)  # live
 ])
 def test_sma1(config_default, test_source, time_begin, time_end, period, a_big_timeframe):
 

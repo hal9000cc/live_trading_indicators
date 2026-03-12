@@ -19,7 +19,7 @@ import live_trading_indicators as lti
     ('2022-07-01', '2022-07-22', 14, 5, 3),
     ('2022-07-01', '2022-07-22', 13, 5, 3),
     ('2022-07-01', '2022-07-22', 12, 5, 3),
-    ((dt.datetime.utcnow() - dt.timedelta(days=5)).date(), None, 2, 5, 3)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=5)).date(), None, 2, 5, 3, marks=pytest.mark.live)  # live
 ])
 def test_stohastic(config_default, test_source, test_symbol, time_begin, time_end, period, period_d, smooth, a_big_timeframe):
 
@@ -38,7 +38,7 @@ def test_stohastic(config_default, test_source, test_symbol, time_begin, time_en
 
 @pytest.mark.parametrize('time_begin, time_end', [
     ('2022-07-01', '2022-07-05'),
-    ((dt.datetime.utcnow() - dt.timedelta(days=4)).date(), None)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=4)).date(), None, marks=pytest.mark.live)  # live
 ])
 def test_stockhastic_plot(config_default, test_source, test_symbol, time_begin, time_end):
 

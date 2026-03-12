@@ -6,7 +6,7 @@ from live_trading_indicators.timeframe import Timeframe
 
 @pytest.mark.parametrize('time_begin, time_end', [
     ('2022-07-01', '2022-07-02'),
-    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, marks=pytest.mark.live)  # live
 ])
 def test_clusters(config_default, test_source, a_symbol, time_begin, time_end):
 

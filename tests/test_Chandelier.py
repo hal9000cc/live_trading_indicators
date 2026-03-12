@@ -6,7 +6,7 @@ import live_trading_indicators as lti
 @pytest.mark.parametrize('time_begin, time_end, period, multiplier', [
     ('2022-07-01', '2022-07-10', 2, 3),
     ('2022-07-01', '2022-07-10', 20, 2.5),
-    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 20, 2.5)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 20, 2.5, marks=pytest.mark.live)  # live
 ])
 def test_chandelier(config_default, test_source, test_symbol, time_begin, time_end, period, multiplier):
 

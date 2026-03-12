@@ -7,7 +7,7 @@ import live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 2),
     ('2022-07-01', '2022-07-10', 3),
     ('2022-07-01', '2022-07-10', 20),
-    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 5)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 5, marks=pytest.mark.live)  # live
 ])
 def test_mfi(config_default, test_source, test_symbol, time_begin, time_end, period):
 

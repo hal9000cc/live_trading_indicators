@@ -29,7 +29,7 @@ def test_rsi(config_default, test_source, test_symbol, time_begin, time_end, per
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-31', 22),
     ('2022-07-01', '2022-07-22', 22),
-    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 12)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 12, marks=pytest.mark.live)  # live
 ])
 def test_rsi1(config_default, test_source, test_symbol, time_begin, time_end, period):
 

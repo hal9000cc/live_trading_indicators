@@ -6,7 +6,7 @@ import live_trading_indicators as lti
 @pytest.mark.parametrize('time_begin, time_end, smooth', [
     ('2022-07-01', '2022-07-10', 2),
     ('2022-07-01', '2022-07-10', 14),
-    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14, marks=pytest.mark.live)  # live
 ])
 def test_atr(config_default, test_source, test_symbol, time_begin, time_end, smooth):
 

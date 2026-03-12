@@ -2,6 +2,7 @@ import datetime as dt
 import numpy as np
 import os
 import pickle
+import pytest
 
 TESTS_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -49,7 +50,10 @@ def get_ref_values(name, ohlcv, series, *args):
             ref_values = pickle.load(file)
     else:
 
-        from stock_indicators import Quote, EndType, ChandelierType, indicators as si
+        try:
+            from stock_indicators import Quote, EndType, ChandelierType, indicators as si
+        except Exception as exc:
+            pytest.skip(f"stock_indicators unavailable for reference calculation: {exc}")
 
         def ohlcv2quote(ohlcv):
             time = ohlcv.time.astype(dt.datetime)

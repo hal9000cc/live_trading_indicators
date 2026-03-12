@@ -31,7 +31,7 @@ def test_timeframe(date, week_start):
     ('2025-01-06', '2025-02-08'),
     ('2025-02-02', '2025-02-02'),
     ('2025-01-26', '2025-02-02'),
-    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, marks=pytest.mark.live)  # live
 ])
 def test_1w(config_default, test_source, test_symbol, time_begin, time_end):
 

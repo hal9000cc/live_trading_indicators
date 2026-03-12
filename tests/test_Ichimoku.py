@@ -9,7 +9,8 @@ now = dt.datetime.utcnow()
 @pytest.mark.parametrize('time_begin, time_end, timeframe, period_short, period_mid, period_long, offset_senkou, offset_chikou', [
     ('2022-07-01', '2023-01-13', Timeframe.t1d, 9, 26, 52, 26, 26),
     ('2022-07-01', '2023-01-13', Timeframe.t1d, 9, 26, 52, 25, 27),
-    (now - dt.timedelta(days=100), now - dt.timedelta(days=1), Timeframe.t1d, 9, 26, 52, 25, 27)
+    pytest.param(now - dt.timedelta(days=100), now - dt.timedelta(days=1), Timeframe.t1d, 9, 26, 52, 25, 27,
+                 marks=pytest.mark.live)
 ])
 def test_ichimoku(config_default, test_source, test_symbol, timeframe, time_begin, time_end,
                   period_short, period_mid, period_long, offset_senkou, offset_chikou):

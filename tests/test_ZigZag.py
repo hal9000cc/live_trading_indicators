@@ -13,7 +13,7 @@ from live_trading_indicators.indicators_set.ZigZag import add_last_point
     ('2022-07-05', '2022-07-07', '1h', 0.01),
     ('2022-07-06', '2022-07-07', '1h', 0.01),
     ('2022-07-07', '2022-07-07', '1h', 0.01),
-    ((dt.datetime.utcnow() - dt.timedelta(days=10)).date(), None, '1h', 0.01)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=10)).date(), None, '1h', 0.01, marks=pytest.mark.live)  # live
 ])
 def test_zig_zag(config_default, test_source, a_symbol, time_begin, time_end, timeframe, delta):
 

@@ -8,7 +8,7 @@ import live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 3, 7),
     ('2022-07-01', '2022-07-10', 15, 20),
     ('2022-07-01', '2022-07-10', 12, 20),
-    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14, 20)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 14, 20, marks=pytest.mark.live)  # live
 ])
 def test_awesome(config_default, test_source, test_symbol, time_begin, time_end, period_fast, period_slow):
 

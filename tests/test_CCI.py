@@ -6,7 +6,7 @@ import live_trading_indicators as lti
 @pytest.mark.parametrize('time_begin, time_end, period', [
     ('2022-07-01', '2022-07-10', 2),
     ('2022-07-01', '2022-07-10', 20),
-    ((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 20)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=2)).date(), None, 20, marks=pytest.mark.live)  # live
 ])
 def test_cci(config_default, test_source, test_symbol, time_begin, time_end, period):
 

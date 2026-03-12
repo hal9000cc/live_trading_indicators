@@ -8,7 +8,7 @@ import live_trading_indicators as lti
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-10', 22),
     ('2022-07-01', '2022-07-10', 14),
-    ((dt.datetime.utcnow() - dt.timedelta(days=4)).date(), None, 14)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=4)).date(), None, 14, marks=pytest.mark.live)  # live
 ])
 def test_trix(config_default, test_source, test_symbol, time_begin, time_end, period):
 

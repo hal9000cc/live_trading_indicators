@@ -25,7 +25,7 @@ def test_WilliamsR(config_default, test_source, test_symbol, time_begin, time_en
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
     ('2022-07-01', '2022-07-22', 22),
-    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 22)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 22, marks=pytest.mark.live)  # live
 ])
 def test_WilliamsR1(config_default, test_source, test_symbol, time_begin, time_end, period):
 

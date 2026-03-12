@@ -9,7 +9,7 @@ import live_trading_indicators as lti
     ('5m', '2022-07-01', '2022-07-10', 5),
     ('5m', '2022-07-01', '2022-07-31', 22),
     ('5m', '2022-07-01', '2022-07-22', 22),
-    ('5m', (dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 22)  # realtime
+    pytest.param('5m', (dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 22, marks=pytest.mark.live)  # realtime
 ])
 def test_mma(config_default, test_source, test_symbol, timeframe, time_begin, time_end, period):
 
@@ -37,7 +37,7 @@ def test_mma(config_default, test_source, test_symbol, timeframe, time_begin, ti
     ('2022-07-01', '2022-07-10', 5),
     ('2022-07-01', '2022-07-31', 8),
     ('2022-07-01', '2022-07-22', 10),
-    ((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 10)  # live
+    pytest.param((dt.datetime.utcnow() - dt.timedelta(days=1)).date(), None, 10, marks=pytest.mark.live)  # live
 ])
 def test_ema(config_default, test_source, test_symbol, time_begin, time_end, period):
 
