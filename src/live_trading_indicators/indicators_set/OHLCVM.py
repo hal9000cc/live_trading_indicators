@@ -25,6 +25,18 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     ohlcv_low = indicators.OHLCV.full_data(symbol, timeframe_low_enum)
 
+    n_bars = len(ohlcv.time)
+    n_low_bars_needed = n_bars * timeframe_multiple
+
+    if len(ohlcv_low.time) > n_low_bars_needed:
+        ohlcv_low = ohlcv_low[:n_low_bars_needed]
+    elif len(ohlcv_low.time) < n_low_bars_needed:
+        n_bars = len(ohlcv_low.time) // timeframe_multiple
+        if n_bars == 0:
+            raise LTIExceptionTooLittleData(f'timeframe {timeframe_low_enum} is too short for {timeframe!s}.')
+        ohlcv = ohlcv[:n_bars]
+        ohlcv_low = ohlcv_low[:n_bars * timeframe_multiple]
+
     hist_volumes, hist_prices = volume_hist(ohlcv_low.low, ohlcv_low.high, ohlcv_low.close, ohlcv_low.volume, n_bins, timeframe_multiple)
 
     ix_max_volumes = hist_volumes.argmax(1)
