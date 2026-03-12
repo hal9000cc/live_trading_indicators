@@ -30,6 +30,10 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=22, mu
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     atr = indicators.ATR.full_data(symbol, timeframe, smooth=period)
 
+    bars_count = min(len(ohlcv), len(atr))
+    ohlcv = ohlcv[:bars_count]
+    atr = atr[:bars_count]
+
     if use_close:
         high = ohlcv.close
         low = high

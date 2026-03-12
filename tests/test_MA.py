@@ -16,7 +16,9 @@ def test_mma(config_default, test_source, test_symbol, timeframe, time_begin, ti
     indicators = lti.Indicators(test_source, time_begin, time_end)
     ohlcv = indicators.OHLCV(test_symbol, timeframe)
     ema = indicators.MA(test_symbol, timeframe, period=period, ma_type='mma0')
-    ema = ema[:len(ohlcv)]
+    bars_count = min(len(ohlcv), len(ema))
+    ohlcv = ohlcv[:bars_count]
+    ema = ema[:bars_count]
 
     source_values = ohlcv.close
     values_ema = ema.move_average

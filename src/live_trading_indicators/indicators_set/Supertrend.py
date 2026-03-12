@@ -49,6 +49,10 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=10, mu
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     atr = indicators.ATR.full_data(symbol, timeframe, smooth=period, ma_type=ma_type)
 
+    bars_count = min(len(ohlcv), len(atr))
+    ohlcv = ohlcv[:bars_count]
+    atr = atr[:bars_count]
+
     supertrend, supertrend_mid = calc_supertrend(ohlcv.close, ohlcv.high, ohlcv.low, atr.atr, multipler, period)
 
     return IndicatorData({

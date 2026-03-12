@@ -10,6 +10,10 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
     atr = indicators.ATR.full_data(symbol, timeframe, smooth=period_atr, ma_type=ma_type_atr)
 
+    bars_count = min(len(ohlcv), len(atr))
+    ohlcv = ohlcv[:bars_count]
+    atr = atr[:bars_count]
+
     mid_line = ma_calculate(ohlcv.close, period, MA_Type.cast(ma_type))
     up_line = mid_line + atr.atr * multiplier
     down_line = mid_line - atr.atr * multiplier
