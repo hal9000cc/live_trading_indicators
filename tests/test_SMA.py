@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import live_trading_indicators as lti
 from live_trading_indicators.exceptions import *
+from live_trading_indicators.constants import TIME_TYPE_UNIT
 
 
 @pytest.mark.parametrize('time_begin, time_end, period', [
@@ -70,4 +71,24 @@ def test_sma_value_error(config_default, test_source, test_symbol, time_begin, t
     out = indicators.OHLCV(test_symbol, timeframe, time_begin, time_end)
     with pytest.raises(LTIExceptionTooLittleData):
         sma = indicators.SMA(test_symbol, timeframe, time_begin, time_end, period=period)
+
+
+@pytest.mark.slow
+def test_sma_after_ohlcv_live_with_incomplete_bar(config_default, test_source):
+
+    timeframe = lti.Timeframe.t1h
+    symbol = 'btcusdt'
+    period = 10
+    time_begin = 20230701
+
+    indicators = lti.Indicators(test_source, time_begin, with_incomplete_bar=True, **config_default)
+
+    ohlcv = indicators.OHLCV(symbol, timeframe)
+    assert len(ohlcv.time) >= period
+
+    sma = indicators.SMA(symbol, timeframe, period=period)
+
+    assert len(sma.time) == len(ohlcv.time)
+    assert np.array_equal(sma.time, ohlcv.time)
+    assert np.isfinite(sma.sma[-1])
 

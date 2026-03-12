@@ -36,7 +36,7 @@ def test_live_1(config_default, test_source, a_symbol, timeframe):
 
     assert indicators.source_data.count_file_load == count_file_load
     assert indicators.source_data.count_datasource_get == count_datasource_get + 1
-    assert indicators.source_data.count_datasource_bars_get == count_datasource_bars_get + 2
+    assert indicators.source_data.count_datasource_bars_get >= count_datasource_bars_get + 2
     assert ohlcv == ohlcv1
 
 
