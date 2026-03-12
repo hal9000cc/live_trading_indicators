@@ -147,11 +147,13 @@ class TimeframeData:
 
     def index_from_time(self, time):
         if time is None: return None
-        return int((time - self.first_bar_time).total_seconds() / self.timeframe.value)
+        return self.index_from_time64(np.datetime64(time, TIME_TYPE_UNIT).astype(TIME_TYPE))
 
     def index_from_time64(self, time):
         assert type(time) == np.datetime64 and time.dtype.name == TIME_TYPE
         if time is None: return None
+        if self.timeframe.is_calendar:
+            return int(np.searchsorted(self.time, self.timeframe.begin_of_tf(time), side='left'))
         return int((time - self.first_bar_time).astype(np.int64) // self.timeframe.value)
 
     def slice_by_datetime(self, time_start, time_stop):

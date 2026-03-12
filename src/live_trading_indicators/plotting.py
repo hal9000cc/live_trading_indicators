@@ -203,16 +203,16 @@ def plot_indicator(axis, timeframe, time, name, values, chart_type=None):
         axis.plot(time, values, label=name)
 
     elif chart_type == 'bar_level':
-        bar_marker_width = np.timedelta64(int(timeframe.value * 1.0), TIME_TYPE_UNIT)
+        bar_marker_width = np.timedelta64(int(timeframe.approx_value * 1.0), TIME_TYPE_UNIT)
         axis.bar(time, 0, bottom=values, width=bar_marker_width, linewidth=1, edgecolor=COLOR_MV, label=name)
 
     elif chart_type == 'hist':
-        bar_width = np.timedelta64(timeframe.value // 3, TIME_TYPE_UNIT)
+        bar_width = np.timedelta64(timeframe.approx_value // 3, TIME_TYPE_UNIT)
         axis.bar(time, values, width=bar_width, label=name)
 
     elif chart_type == 'histdiff':
 
-        bar_width = np.timedelta64(int(timeframe.value * 0.6), TIME_TYPE_UNIT)
+        bar_width = np.timedelta64(int(timeframe.approx_value * 0.6), TIME_TYPE_UNIT)
 
         diff = np.hstack([0.0, np.diff(values)])
         diff_0 = diff == 0
@@ -248,8 +248,8 @@ def plot_ohlcv(axis, timeframe, time, open, high, low, close):
     ranges_body = abs(close - open)
     bottoms = np.vstack((close, open)).min(0)
 
-    width_bar = np.timedelta64(int(timeframe.value * 0.8), TIME_TYPE_UNIT)
-    width_tail = np.timedelta64(int(timeframe.value * 0.2), TIME_TYPE_UNIT)
+    width_bar = np.timedelta64(int(timeframe.approx_value * 0.8), TIME_TYPE_UNIT)
+    width_tail = np.timedelta64(int(timeframe.approx_value * 0.2), TIME_TYPE_UNIT)
     axis.bar(time[ix_up_candles], ranges_body[ix_up_candles], bottom=bottoms[ix_up_candles], color=COLOR_UP, width=width_bar)
     axis.bar(time[ix_down_candles], ranges_body[ix_down_candles], bottom=bottoms[ix_down_candles], color=COLOR_DOWN, width=width_bar)
 
@@ -260,7 +260,7 @@ def plot_ohlcv(axis, timeframe, time, open, high, low, close):
 
 def plot_volumes(axis, timeframe, time, open, close, volume):
 
-    width_bar = np.timedelta64(int(timeframe.value * 0.8), TIME_TYPE_UNIT)
+    width_bar = np.timedelta64(int(timeframe.approx_value * 0.8), TIME_TYPE_UNIT)
 
     ix_up_candles = close > open
     ix_down_candles = ~ix_up_candles

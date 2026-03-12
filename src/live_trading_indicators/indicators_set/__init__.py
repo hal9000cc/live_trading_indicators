@@ -264,7 +264,7 @@ class Indicators:
         if out.first_bar_time > timeframe.begin_of_tf(self.time_begin):
             return None, None
 
-        if out.end_bar_time + timeframe.value <= time_end:
+        if timeframe.next_bar_time(out.end_bar_time) <= time_end:
             return None, out
 
         return out, None
@@ -281,23 +281,23 @@ class Indicators:
         time_begin_slice = time_begin
         if self.indicators_mode != IndicatorsMode.live and self.indicators_mode != IndicatorsMode.offline:
 
-            if out_valid.time[-1] + timeframe.value < time_end:
-                if timeframe.value <= TIME_UNITS_IN_ONE_DAY:
+            if timeframe.next_bar_time(out_valid.time[-1]) < time_end:
+                if not timeframe.is_calendar and timeframe.value <= TIME_UNITS_IN_ONE_DAY:
                     raise LTIExceptionOutOfThePeriod()
                 else:
-                    if out_valid.time[-1] < timeframe.begin_of_tf(time_end) - timeframe.value:
+                    if out_valid.time[-1] < timeframe.prev_bar_time(time_end):
                         raise LTIExceptionOutOfThePeriod()
 
             if time_begin < out_valid.time[0]:
-                if timeframe.value <= TIME_UNITS_IN_ONE_DAY:
+                if not timeframe.is_calendar and timeframe.value <= TIME_UNITS_IN_ONE_DAY:
                     raise LTIExceptionOutOfThePeriod()
                 else:
-                    if timeframe.begin_of_tf(time_begin) + timeframe.value < out_valid.time[0]:
+                    if timeframe.next_bar_time(time_begin) < out_valid.time[0]:
                         raise LTIExceptionOutOfThePeriod()
                     else:
-                        time_begin_slice = timeframe.begin_of_tf(time_begin) + timeframe.value
+                        time_begin_slice = timeframe.next_bar_time(time_begin)
 
-        return out_valid[time_begin_slice: time_end + timeframe.value]
+        return out_valid[time_begin_slice: timeframe.next_bar_time(time_end)]
 
     def get_indicator_out(self, indicator_name, indicator_module, symbols, timeframe, indicator_kwargs, time_begin,
                           time_end):
