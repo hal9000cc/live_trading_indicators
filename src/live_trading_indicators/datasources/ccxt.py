@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import time
 from packaging import version
 import ccxt
 from ..exceptions import *
@@ -40,6 +41,7 @@ class CCXTSource(OnlineSource):
         self.exchange = getattr(ccxt, self.exchange_name)()
         self.history_start = np.datetime64(HISTORY_START)
         self.request_trys = int(config['request_trys'])
+        self.request_retry_delay = float(config['request_retry_delay'])
 
         self.limit_max = MAX_LIMITS.get(self.exchange_name, 500)
         if extra_exchange_params:
@@ -89,11 +91,12 @@ class CCXTSource(OnlineSource):
                 try:
                     downloaded_ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe_ccxt, since, limit, params=self.exchange_params)
                     break
-                except TimeoutError as error:
+                except (TimeoutError, ccxt.NetworkError, ConnectionError, OSError) as error:
                     logging.error(error)
                     if i_try >= self.request_trys - 1:
                         raise
-                    logging.info('Repeat request...')
+                    logging.info(f'Repeat request after {self.request_retry_delay} sec...')
+                    time.sleep(self.request_retry_delay)
 
             n_bars = len(downloaded_ohlcv)
             if n_bars == 0:

@@ -311,7 +311,7 @@ print(lti.config())
 ```
 Result:
 ```
-{'cache_folder': '/home/user/.lti/data/timeframe_data', 'sources_folder': '/home/user/.lti/data/sources', 'log_folder': '/home/hal/.lti/logs', 'endpoints_required': True, 'max_empty_bars_fraction': 0.0, 'max_empty_bars_consecutive': 0, 'restore_empty_bars': True, 'print_log': True, 'log_level': 'INFO', 'request_timeout': 10, 'request_trys': 3}
+{'cache_folder': '/home/user/.lti/data/timeframe_data', 'sources_folder': '/home/user/.lti/data/sources', 'log_folder': '/home/hal/.lti/logs', 'endpoints_required': True, 'max_empty_bars_fraction': 0.0, 'max_empty_bars_consecutive': 0, 'restore_empty_bars': True, 'print_log': True, 'log_level': 'INFO', 'request_timeout': 10, 'request_trys': 3, 'request_retry_delay': 1}
 ```
 *config()* is also used to change the settings:
 ```python
@@ -343,6 +343,8 @@ Log registration level. Default: INFO.
 Timeout of requests to download quotes, seconds. Default: 30.
 #### request_trys
 The number of attempts to download quotes. Default: 3.
+#### request_retry_delay
+Delay between repeated attempts to download quotes, seconds. Default: 1.
 #### quotation_database
 Path to the sqlite3 database for storing quotes.
 #### compression_type

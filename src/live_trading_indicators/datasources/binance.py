@@ -3,6 +3,7 @@ import urllib.request
 import json
 import numpy as np
 import logging
+import time as time_module
 from .online_source import OnlineSource
 from ..constants import TIME_TYPE, TIME_TYPE_UNIT, PRICE_TYPE, VOLUME_TYPE, TIME_UNITS_IN_ONE_DAY, TIME_UNITS_IN_ONE_SECOND
 from ..exceptions import *
@@ -30,12 +31,15 @@ def get_source(config, datasource_id, exchange_params):
 
 class BinanceSource(OnlineSource):
 
+    RETRYABLE_HTTP_CODES = {408, 429, 500, 502, 503, 504}
+
     def __init__(self, config, datasource_full_name, exchange_params):
         self.config = config
         self.exchange_info_data = {}
         self.request_cache = {}
         self.history_start = np.datetime64(HISTORY_START)
         self.request_trys = int(config['request_trys'])
+        self.request_retry_delay = float(config['request_retry_delay'])
         self.logger = logging.getLogger(__name__.split('.')[-1])
 
     @staticmethod
@@ -167,11 +171,18 @@ class BinanceSource(OnlineSource):
                 try:
                     raw_bars_data = self.online_request(api_url, symbol, timeframe, query_time_start, query_time_end)
                     break
-                except TimeoutError as error:
-                    logging.error(error)
+                except urllib.error.HTTPError as error:
+                    if not self.is_retryable_http_error(error) or i_try >= self.request_trys - 1:
+                        raise
+                    self.logger.error(error)
+                    self.logger.info(f'Repeat request after {self.request_retry_delay} sec...')
+                    time_module.sleep(self.request_retry_delay)
+                except (TimeoutError, urllib.error.URLError, ConnectionError, OSError) as error:
+                    self.logger.error(error)
                     if i_try >= self.request_trys - 1:
                         raise
-                    logging.info('Repeat request...')
+                    self.logger.info(f'Repeat request after {self.request_retry_delay} sec...')
+                    time_module.sleep(self.request_retry_delay)
 
             online_bars_data = json.loads(raw_bars_data)
 
@@ -200,4 +211,8 @@ class BinanceSource(OnlineSource):
                np.hstack(low),\
                np.hstack(close),\
                np.hstack(volume)
+
+    @classmethod
+    def is_retryable_http_error(cls, error):
+        return error.code in cls.RETRYABLE_HTTP_CODES
 
