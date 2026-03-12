@@ -23,7 +23,7 @@ Package data from online sources is stored by default in the *.lti* folder of th
 #### 1.0.0
 - New timeframes: 1w, 1M, 3M, 1Y
 - New indicator: VolumeOsc (Volume Oscillator)
-- Dropped Python 3.7, 3.8 support; added Python 3.11, 3.12, 3.13
+- Dropped Python 3.7, 3.8 support; added Python 3.11, 3.12, 3.13, 3.14
 - Migration to pyproject.toml
 - Fixed ZigZag indicator last points generation
 - Fixed bugs in some indicators in live mode

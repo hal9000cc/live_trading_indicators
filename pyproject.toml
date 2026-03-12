@@ -20,8 +20,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Topic :: Office/Business :: Financial :: Investment",
 ]
 keywords = ["trading", "indicators", "technical-analysis", "crypto", "binance", "ccxt"]
@@ -59,5 +60,6 @@ version = {attr = "live_trading_indicators.__version__"}
 [tool.pytest.ini_options]
 markers = [
     "slow: long-running live-interval tests (skipped in tox by default)",
+    "live: tests that require live market data (use -m 'not live' to skip)",
 ]
 
