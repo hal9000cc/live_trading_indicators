@@ -7,6 +7,11 @@ from ..move_average import *
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, smooth=14, ma_type='mma'):
 
     ohlcv = indicators.OHLCV.full_data(symbol, timeframe)
+    atr = indicators.ATR.full_data(symbol, timeframe, smooth=period)
+
+    bars_count = min(len(ohlcv), len(atr))
+    ohlcv = ohlcv[:bars_count]
+    atr = atr[:bars_count]
 
     data_len = len(ohlcv)
     if data_len < period:
@@ -24,8 +29,6 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
     bx_zero_m_dm = (m_dm <= p_dm) | (m_dm < 0)
     p_dm[bx_zero_p_dm] = 0
     m_dm[bx_zero_m_dm] = 0
-
-    atr = indicators.ATR.full_data(symbol, timeframe, smooth=period)
 
     p_di = 100 * ma_calculate(p_dm, period, ma_type_enum) / atr.atr
     m_di = 100 * ma_calculate(m_dm, period, ma_type_enum) / atr.atr
