@@ -5,6 +5,12 @@ from numba import njit
 from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'oscillator', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'value_k', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'value_d', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+)
+
 
 @njit(cache=True)
 def calc_k(high, low, close, period):
@@ -34,6 +40,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=5, per
         'indicators': indicators,
         'parameters': {'period': period, 'period_d': period_d, 'smooth': smooth, 'ma_type': ma_type},
         'name': 'Stochastic',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

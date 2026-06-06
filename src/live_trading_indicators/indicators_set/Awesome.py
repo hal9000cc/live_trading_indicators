@@ -3,6 +3,10 @@ Awesome oscillator."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'awesome', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
                       period_fast=5, period_slow=34, ma_type_fast='sma', ma_type_slow='sma', normalized=False):
@@ -22,6 +26,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         'parameters': { 'period_fast': period_fast, 'period_slow': period_slow,
                         'ma_type_fast': ma_type_fast, 'ma_type_slow': ma_type_slow, 'normalized': normalized},
         'name': 'awesome',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

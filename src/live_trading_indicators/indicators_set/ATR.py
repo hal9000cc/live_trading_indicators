@@ -5,6 +5,12 @@ from ..constants import PRICE_TYPE
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'tr', 'type': 'none', 'range': None},
+    {'name': 'atr', 'type': 'none', 'range': None},
+    {'name': 'atrp', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma_type='mma'):
 
@@ -22,6 +28,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, smooth=14, ma
         'indicators': indicators,
         'parameters': {'smooth': smooth, 'ma_type': ma_type},
         'name': 'ATR',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

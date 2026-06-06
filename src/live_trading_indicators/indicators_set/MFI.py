@@ -3,6 +3,10 @@ Money flow index."""
 import numpy as np
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'mfi', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
 
@@ -33,6 +37,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'indicators': indicators,
         'parameters': {'period': period},
         'name': 'MFI',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

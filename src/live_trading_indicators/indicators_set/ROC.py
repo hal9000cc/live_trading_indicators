@@ -5,6 +5,11 @@ from ..constants import PRICE_TYPE
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'roc', 'type': 'none', 'range': None},
+    {'name': 'smooth_roc', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, ma_period=14, ma_type='sma', value='close'):
 
@@ -20,6 +25,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, ma
         'indicators': indicators,
         'parameters': {'period': period, 'ma_period': ma_period, 'ma_type': ma_type, 'value': value},
         'name': 'ROC',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

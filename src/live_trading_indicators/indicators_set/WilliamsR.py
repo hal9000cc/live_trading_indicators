@@ -5,6 +5,10 @@ from numba import njit
 from ..indicator_data import IndicatorData
 from ..exceptions import *
 
+OUTPUT_SERIES = (
+    {'name': 'williams_r', 'type': 'none', 'range': {'min': -100, 'max': 0}},
+)
+
 
 @njit
 def calc_williams(high, low, close, period):
@@ -36,6 +40,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'indicators': indicators,
         'parameters': {'period': period},
         'name': 'WilliamsR',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

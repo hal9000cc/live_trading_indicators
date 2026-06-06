@@ -7,6 +7,11 @@ from ..indicator_data import IndicatorData
 from ..exceptions import *
 from ..constants import PRICE_TYPE
 
+OUTPUT_SERIES = (
+    {'name': 'sar', 'type': 'price', 'range': None},
+    {'name': 'signal', 'type': 'none', 'range': {'min': -1, 'max': 1}},
+)
+
 
 @njit(cache=True)
 def calc_paraboic(highs, lows, start, maximum, increment):
@@ -82,6 +87,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, start=0.02, m
         'indicators': indicators,
         'parameters': {'start': start, 'maximum': maximum, 'increment': increment},
         'name': 'ParabolicSAR',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

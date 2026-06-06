@@ -3,6 +3,10 @@ Volume oscillator."""
 from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'osc', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short=5, period_long=10, ma_type='ema'):
 
@@ -18,6 +22,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short=
         'indicators': indicators,
         'parameters': {'period_short': period_short, 'period_long': period_long, 'ma_type': ma_type},
         'name': 'VolumeOsc',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

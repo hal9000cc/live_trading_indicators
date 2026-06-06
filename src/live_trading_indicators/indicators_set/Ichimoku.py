@@ -5,6 +5,14 @@ import numpy as np
 from ..indicator_data import IndicatorData
 from ..constants import PRICE_TYPE
 
+OUTPUT_SERIES = (
+    {'name': 'tenkan', 'type': 'price', 'range': None},
+    {'name': 'kijun', 'type': 'price', 'range': None},
+    {'name': 'senkou_a', 'type': 'price', 'range': None},
+    {'name': 'senkou_b', 'type': 'price', 'range': None},
+    {'name': 'chikou', 'type': 'price', 'range': None},
+)
+
 
 @njit(cache=True)
 def calc_av_min_max(high, low, period):
@@ -50,6 +58,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         'parameters': {'period_short': period_short, 'period_mid': period_mid,
                        'period_long': period_long, 'offset_senkou': offset_senkou, 'offset_chikou': offset_chikou},
         'name': 'Ichimoku',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

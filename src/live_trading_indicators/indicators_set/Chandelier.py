@@ -8,6 +8,11 @@ import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'exit_short', 'type': 'price', 'range': None},
+    {'name': 'exit_long', 'type': 'price', 'range': None},
+)
+
 
 @njit(cache=True)
 def calc_chandelier(high, low, atr, period, multiplier):
@@ -47,6 +52,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=22, mu
         'indicators': indicators,
         'parameters': {'period': period, 'multiplier': multiplier, 'use_close': use_close},
         'name': 'Chandelier',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

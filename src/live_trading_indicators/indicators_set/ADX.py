@@ -3,6 +3,12 @@ Average directional movement index."""
 from ..indicator_data import IndicatorData
 from ..move_average import *
 
+OUTPUT_SERIES = (
+    {'name': 'adx', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'p_di', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'm_di', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, smooth=14, ma_type='mma'):
 
@@ -42,6 +48,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14, sm
         'indicators': indicators,
         'parameters': {'period': period, 'smooth': smooth, 'ma_type': ma_type},
         'name': 'ADX',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

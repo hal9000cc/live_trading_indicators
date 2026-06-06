@@ -3,6 +3,10 @@ Simple moving average."""
 from ..move_average import ma_calculate, MA_Type
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'sma', 'type': 'as_source', 'range': 'as_source'},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value='close'):
 
@@ -15,6 +19,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
         'indicators': indicators,
         'parameters': {'period': period, 'value': value},
         'name': 'SMA',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

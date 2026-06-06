@@ -5,6 +5,10 @@ from ..indicator_data import IndicatorData
 from ..constants import PRICE_TYPE
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'rsi', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+)
+
 
 def rsi_calculate(source_values, period, ma_type):
 
@@ -38,6 +42,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, ma_ty
         'indicators': indicators,
         'parameters': {'period': period, 'ma_type': ma_type, 'value': value},
         'name': 'RSI',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

@@ -4,6 +4,12 @@ import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'up', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'down', 'type': 'none', 'range': {'min': 0, 'max': 100}},
+    {'name': 'oscillator', 'type': 'none', 'range': {'min': -100, 'max': 100}},
+)
+
 
 @njit(cache=True)
 def calc_aroon(high, low, period):
@@ -36,6 +42,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=14):
         'indicators': indicators,
         'parameters': {'period': period},
         'name': 'Aroon',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

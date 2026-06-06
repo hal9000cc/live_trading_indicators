@@ -3,6 +3,12 @@ Moving Average Convergence/Divergence."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'macd', 'type': 'none', 'range': None},
+    {'name': 'signal', 'type': 'none', 'range': None},
+    {'name': 'hist', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short, period_long, period_signal,
                       ma_type='ema', ma_type_signal='sma',
@@ -27,6 +33,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period_short,
                       'ma_type': ma_type, 'ma_type_signal': ma_type_signal,
                       'value': value},
         'name': 'MACD',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

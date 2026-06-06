@@ -5,6 +5,13 @@ import numba as nb
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'mid_line', 'type': 'price', 'range': None},
+    {'name': 'up_line', 'type': 'price', 'range': None},
+    {'name': 'down_line', 'type': 'price', 'range': None},
+    {'name': 'z_score', 'type': 'none', 'range': None},
+)
+
 
 @nb.njit(cache=True)
 def calc_std_deviations(values, period):
@@ -43,6 +50,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=20, de
         'indicators': indicators,
         'parameters': {'period': period, 'deviation': deviation, 'ma_type': ma_type, 'value': value},
         'name': 'BollingerBands',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

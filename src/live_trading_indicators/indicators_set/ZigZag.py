@@ -15,6 +15,11 @@ from ..constants import PRICE_TYPE
 
 no_cached = True
 
+OUTPUT_SERIES = (
+    {'name': 'pivots', 'type': 'price', 'range': None},
+    {'name': 'pivot_types', 'type': 'none', 'range': {'min': -1, 'max': 1}},
+)
+
 
 @njit(cache=True)
 def find_up_corner(i_point, high, low, delta, depth):
@@ -190,6 +195,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, delta
         'indicators': indicators,
         'parameters': {'delta': delta, 'depth': depth, 'end_points': end_points},
         'name': 'ZigZag',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

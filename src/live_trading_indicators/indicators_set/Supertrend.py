@@ -4,6 +4,11 @@ import numpy as np
 from numba import njit
 from ..indicator_data import IndicatorData
 
+OUTPUT_SERIES = (
+    {'name': 'supertrend', 'type': 'price', 'range': None},
+    {'name': 'sumpertrend_mid', 'type': 'price', 'range': None},
+)
+
 
 @njit(cache=True)
 def calc_supertrend(close, high, low, atr, multiplier, period):
@@ -59,6 +64,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period=10, mu
         'indicators': indicators,
         'parameters': {'period': period, 'multipler': multipler, 'ma_type': ma_type},
         'name': 'Supertrend',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

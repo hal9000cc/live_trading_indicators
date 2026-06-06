@@ -8,6 +8,15 @@ from ..exceptions import *
 from ..constants import VOLUME_TYPE
 from ..volume_clusters import volume_hist, calendar_volume_hist
 
+OUTPUT_SERIES = (
+    {'name': 'open', 'type': 'price', 'range': None},
+    {'name': 'high', 'type': 'price', 'range': None},
+    {'name': 'low', 'type': 'price', 'range': None},
+    {'name': 'close', 'type': 'price', 'range': None},
+    {'name': 'volume', 'type': 'none', 'range': None},
+    {'name': 'mv_price', 'type': 'price', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low='1m', bars_on_bins=5):
 
@@ -55,6 +64,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, timeframe_low
         'indicators': indicators,
         'parameters': {'timeframe_low': timeframe_low, 'bars_on_bins': bars_on_bins},
         'name': 'OHLCVM',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,
@@ -84,6 +94,7 @@ def get_calendar_indicator_out(indicators, symbol, timeframe, timeframe_low, tim
         'indicators': indicators,
         'parameters': {'timeframe_low': timeframe_low, 'bars_on_bins': bars_on_bins},
         'name': 'OHLCVM',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time[ix_ohlcv],

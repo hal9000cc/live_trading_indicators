@@ -5,6 +5,10 @@ from numba import njit
 from ..indicator_data import IndicatorData
 from ..exceptions import *
 
+OUTPUT_SERIES = (
+    {'name': 'vwma', 'type': 'price', 'range': None},
+)
+
 
 @njit(cache=True)
 def vwma_calculate(values, volume, period):
@@ -41,6 +45,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
         'indicators': indicators,
         'parameters': {'period': period, 'value': value},
         'name': 'VWMA',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

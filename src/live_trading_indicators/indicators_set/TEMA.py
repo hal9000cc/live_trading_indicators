@@ -3,6 +3,10 @@ Triple exponential moving average."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'tema', 'type': 'price', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value='close'):
 
@@ -19,6 +23,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period, value
         'indicators': indicators,
         'parameters': {'period': period, 'value': value},
         'name': 'TEMA',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

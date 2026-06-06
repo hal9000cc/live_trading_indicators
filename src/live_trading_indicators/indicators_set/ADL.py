@@ -9,6 +9,11 @@ from ..move_average import *
 
 no_cached = True
 
+OUTPUT_SERIES = (
+    {'name': 'adl', 'type': 'none', 'range': None},
+    {'name': 'adl_smooth', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_period=None, ma_type='sma'):
 
@@ -25,6 +30,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end, ma_pe
         'indicators': indicators,
         'parameters': {'ma_period': ma_period, 'ma_type': ma_type},
         'name': 'ADL',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

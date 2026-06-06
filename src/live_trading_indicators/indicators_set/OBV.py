@@ -7,6 +7,10 @@ from ..move_average import ma_calculate, MA_Type
 
 no_cached = True
 
+OUTPUT_SERIES = (
+    {'name': 'OBV', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
 
@@ -20,6 +24,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
         'indicators': indicators,
         'parameters': {},
         'name': 'OBV',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

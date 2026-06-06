@@ -5,6 +5,10 @@ from ..indicator_data import IndicatorData
 
 no_cached = True
 
+OUTPUT_SERIES = (
+    {'name': 'vwap', 'type': 'price', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
 
@@ -18,6 +22,7 @@ def get_indicator_out(indicators, symbol, timeframe, time_begin, time_end):
         'indicators': indicators,
         'parameters': {},
         'name': 'VWAP',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

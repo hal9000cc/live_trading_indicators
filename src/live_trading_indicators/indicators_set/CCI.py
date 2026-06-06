@@ -5,6 +5,10 @@ from numba import njit
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'cci', 'type': 'none', 'range': None},
+)
+
 
 @njit(cache=True)
 def calc_mad(typical_price, sma_typical_price, period):
@@ -35,6 +39,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow, period):
         'indicators': indicators,
         'parameters': {'period': period},
         'name': 'CCI',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

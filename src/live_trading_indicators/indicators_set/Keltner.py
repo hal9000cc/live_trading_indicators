@@ -3,6 +3,13 @@ Keltner channel."""
 from ..indicator_data import IndicatorData
 from ..move_average import ma_calculate, MA_Type
 
+OUTPUT_SERIES = (
+    {'name': 'mid_line', 'type': 'price', 'range': None},
+    {'name': 'up_line', 'type': 'price', 'range': None},
+    {'name': 'down_line', 'type': 'price', 'range': None},
+    {'name': 'width', 'type': 'none', 'range': None},
+)
+
 
 def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
                       period=10, multiplier=1, period_atr=10, ma_type='ema', ma_type_atr='mma'):
@@ -22,6 +29,7 @@ def get_indicator_out(indicators, symbol, timeframe, out_for_grow,
         'indicators': indicators,
         'parameters': {'period': period, 'multiplier': multiplier, 'period_atr': period_atr, 'ma_type': ma_type, 'ma_type_atr': ma_type_atr},
         'name': 'Keltner',
+        'output_series': OUTPUT_SERIES,
         'symbol': symbol,
         'timeframe': timeframe,
         'time': ohlcv.time,

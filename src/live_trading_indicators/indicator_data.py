@@ -533,7 +533,7 @@ class IndicatorData(TimeframeData):
 
     @staticmethod
     def get_copied_keys():
-        return {'symbol', 'timeframe', 'name', 'allowed_nan', 'source', 'indicators', 'charts', 'parameters'}
+        return {'symbol', 'timeframe', 'name', 'allowed_nan', 'source', 'indicators', 'charts', 'parameters', 'output_series'}
 
     def __str__(self):
 
